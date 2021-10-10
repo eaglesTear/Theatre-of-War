@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en-GB" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A global strategy game using SweetAlert">
+    <meta name="keywords" content="JavaScript, war, game, strategy">
+    <meta name="author" content="Ryan Hadley">
+    <title>Theatre of War</title>
+    <link href="jqvmap-master/dist/jqvmap.css" media="screen" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="jqvmap-master/dist/jquery.vmap.js"></script>
+    <script src="jqvmap-master/dist/maps/jquery.vmap.world.js" charset="utf-8"></script>
+    <!-- This program utilises SweetAlert, and JS alert library -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Renders the JQV world map object in the browser with this div element -->
+    <div id="vmap"></div>
+
+    <h2 class="country-select-message" id="scroll-target-1"></h2>
+    <p id="ru">The Russian Federation</p>
+    <p id="us">The United States of America</p>
+
+    <div id="text-output"></div>
+
+    <div class="nation-info-tooltip">Hover
+        <span class="nation-info-tooltip-text">hello</span>
+    </div>
+
+    <!-- Overlay UI -->
+    <div class="overlay">
+        <div class="overlay-text">
+            <div class="title-screen">
+                <h1>Welcome to Theatre of War</h1>
+                <button type="button" id="start-game-btn">Start Game</button>
+                <button type="button" id="options-btn">Options</button>
+            </div>
+            <div class="report-section">
+                <h5>Overview</h5>
+                <ul id="overview"></ul>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="overlay-btn">Overlay</button>
+
+    <!-- Sidebar UI -->
+    <div class="sidebar">
+
+        <a href="javascript:void(0)" class="sidebar-close-btn">X</a>
+
+        <h5>Assign GDP Percentage to Defence</h5>
+        <input type="number" id="percentage" min="0" max="100" step="1" value="1">
+        <button type="button" id="assign-GDP-btn">Assign</button>
+
+        <!-- Functions that require a target nation to be selected -->
+        <button type="button" id="deploy-assetts">Send Forces</button>
+        <button type="button" id="attack-btn">Attack</button>
+        <button type="button" id="deploy-btn">Deploy Forces</button>
+        <button type="button" id="intel-btn">Gather Intel</button>
+        <button type="button" id="sabotage-btn">Sabotage</button>
+        <button type="button" id="incite-btn">Incite Rebellion</button>
+        <button type="button" id="conscription-btn">Mandate Conscription</button>
+        <button type="button" id="diplomacy-btn">Diplomatic Mission</button>
+        <button type="button" id="spying-btn">Spy Satellite Surveillance</button>
+        <button type="button" id="nuclear-btn">Launch Nuclear Strike</button>
+        <button type="button" id="p-cannon-btn">Particle Cannon Strike</button>
+        <button type="button" id="reinforcement-btn">Request Alliance Reinforcements</button>
+        <button type="button" id="hack-btn">Perform Cyberattack</button>
+
+        <!-- Unit building & training options -->
+
+        <!-- Armour -->
+        <label for="number of tanks">Armour Quantity</label>
+        <input type="number" id="tanks" min="0" max="1000" step="10" value="50">
+        <button type="button" id="purchase-tanks">Build Tanks</button>
+        <div id="test"></div>
+        <!-- Infantry -->
+        <label for="number of infantry">Infantry Quantity</label>
+        <input type="number" id="infantry" min="0" max="10000" step="1000" value="0">
+        <button type="button" id="purchase-infantry">Train Infantry</button>
+        <!-- Airpower -->
+        <label for="number of aircraft">Aircraft Quantity</label>
+        <input type="number" id="aircraft" min="0" max="500" step="10" value="0">
+        <button type="button" id="purchase-aircraft">Build Aircraft</button>
+        <!-- Navy -->
+        <label for="number of warships">Warship Quantity</label>
+        <input type="number" id="warships" min="0" max="50" step="1" value="0">
+        <button type="button" id="purchase-warships">Build Warships</button>
+        <!-- Satellite construction and launch -->
+        <label for="number of satellites">Satellite Quantity</label>
+        <input type="number" id="satellites" min="0" max="5" step="1" value="0">
+        <button type="button" id="launch-satellite">Build &amp; Launch Satellite(s)</button>
+        <!-- Nuclear weapons -->
+        <label for="number of nukes">Warhead Quantity</label>
+        <input type="number" id="warheads" min="0" max="10" step="1" value="0">
+        <button type="button" id="build-nukes">Develop Nuclear Weapons</button>
+
+        <!-- Base Construction -->
+        <button type="button" id="intel-ops">Intelligence Operations Centre (IntelOps)</button>
+        <button type="button" id="airbase">Airbase</button>
+        <button type="button" id="barracks">Barracks</button>
+        <button type="button" id="naval-yard">Naval Yard</button>
+        <button type="button" id="war-factory">War Factory</button>
+        <button type="button" id="launch-pad">Launch Pad</button>
+        <button type="button" id="research-centre">Research Centre</button>
+        <button type="button" id="missile-silo">Missile Silo</button>
+
+        <!-- Employ Spec-Ops to rescue any captured agents -->
+        <button type="button" id="rescue">Mount Rescue</button>
+
+        <!-- Recruit and / or train specialised units -->
+        <section id="unit-training">
+            <!-- Field Agents -->
+            <div>
+                <input type="number" id="field-agents" min="1" max="5" step="1" value="1">
+                <button type="button" id="train-agents">Train Agents</button>
+            </div>
+            <!-- Researchers -->
+            <div>
+                <input type="number" id="researchers" min="10" max="100" step="5" value="1">
+                <button type="button" id="hire-researchers">Hire Researchers</button>
+            </div>
+        </section>
+
+        <!-- Upgrades: already researched, player just needs to pay for these -->
+        <section class="upgrades">
+            <h5>Aircraft</h5>
+            <button type="button" id="upgrade-aircraft">Ceramic Armour</button>
+            <h5>Navy</h5>
+            <button type="button" id="upgrade-navy">Type IV Destroyers</button>
+            <h5>Infantry</h5>
+            <button type="button" id="upgrade-infantry">NeuroStims</button>
+            <h5>Armour</h5>
+            <button type="button" id="upgrade-armour">Depleted Uranium Projectiles</button>
+        </section>
+
+        <!-- Research: requires researchers, time & money -->
+        <section>
+           <h4>Research Projects</h4>
+            <form action="">
+                <select name="" id="research-options">
+                    <option value="asatMissile">ASAT Missile: $1000</option>
+                    <option value="cyreAssaultRifle">Cyre Assault Rifle: $2000</option>
+                    <option value="railguns">Rail Guns: $3000</option>
+                    <option value="kineticArmour">Kinetic Armour: $3000</option>
+                    <option value="particleCannon">Particle Cannon: $10000</option>
+                    <option value="missileDefenceShield">Missile Defence Shield: $100000</option>
+                </select>
+                <h5>Researcher Allocation</h5>
+                <h6>Researchers Employed: <span id="researchers-employed"></span></h6>
+                <h6>Researchers Available: <span id="researchers-available"></span></h6>
+                <input type="number" id="researcher-allocation" min="10" max="1000" step="5" value="10">
+                <button type="button" id="submit">Submit</button>
+            </form>
+        </section>
+
+        <!-- Manufacturing options -->
+        <section>
+            <h3>Weapons Manufacturing</h3>
+            <h4>Develop Weapons for Sale to Friendly Nations</h4>
+            <label for="weapon manufacture">Small Arms</label>
+            <input type="number" id="weapons-to-build" min="50" max="100000" step="50" value="50">
+            <button id="make-small-arms" type="button">Manufacture Small Arms</button>
+        </section>
+
+        <!-- Sell surplus oil or weapon reserves -->
+        <section>
+            <h3>Sell Surplus Assets for Currency</h3>
+
+            <label for="selling oil">Oil</label>
+            <input type="number" id="oil" min="10000" max="1000000" step="10000" value="10000">
+            <button id="sell-oil" type="button">Sell Oil</button>
+
+            <label for="selling weapons">Weapons</label>
+            <input type="number" id="weapons-to-sell" min="50" max="10000" step="50" value="100">
+            <button id="sell-weapons" type="button">Sell Weapons</button>
+        </section>
+
+    </div>
+
+    <!-- Allow user agent to select the game's winning condition -->
+    <p>Commander, what is your ambition?</p>
+    <div class="radio-options">
+        <input type="radio" name="options" value="option1" checked>
+        <label for="option1">Take over 25% of the world</label>
+        <input type="radio" name="options" value="option2">
+        <label for="option2">Become the most popular leader of all time</label>
+        <button type="submit" id="accept-option">Accept</button>
+    </div>
+    
+    <button type="button" id="sidebar-btn">Sidebar Menu</button>
+    <button type="button" id="fast-fwd-btn">Jump Forward</button>
+
+    <div class="container">
+        <h1 id="name"></h1>
+    </div>
+
+    <!-- Calendar / time displays -->
+    <h3 id="day">DAY: 0</h3>
+    <h3 id="week">WEEK: 1</h3>
+    <h3 id="month">MONTH: 1</h3>
+    <h3 id="year">YEAR: 2021</h3>
+
+    <!-- Visual inventory and indicator depicting player purchases & overall power -->
+    <div class="inventory"></div>
+    <p id="show-infantry"></p>
+    <ul id="conquered-nations"></ul>
+
+    <!-- Scripts to enable the game to run -->
+    <script src="global_regions.js"></script>
+    <script src="classes.js"></script>
+    <script src="script.js"></script>
+    <script src="ui.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,164 @@
+/* General styles */
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#vmap {
+    /*    display: none;*/
+    width: 100%;
+    height: 100vh;
+}
+
+/* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
+.jqvmap-label
+{
+    position: absolute;
+    display: none;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    background: #292929;
+    color: dodgerblue;
+    font-family: sans-serif, Verdana;
+    font-size: smaller;
+    padding: 3px;
+    pointer-events:none;
+}
+
+/* Overlay with game display info, hud and options */
+.overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+/* Text and content inside / on top of the overlay */
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: dodgerblue;
+    transform: translate(-50%, -50%);
+}
+
+/* Section displayed for the player to allow them to see the overall status of their nation */
+.report-section {
+    font-size: 1rem;
+}
+
+/* UI sidebar menu where the player makes choices on purchases and such */
+.sidebar {
+    background-color: #f3f3f3;
+    width: 200px;
+    height: 100%;
+    margin-left: -200px;
+    transition: 1s;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+}
+
+.sidebar-close-btn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* Class applied with jQuery script to open and close the sidebar UI when 's' is pushed */
+.sidebar-toggle {
+    margin-left: 0;
+}
+
+.nation-info-tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.nation-info-tooltip .nation-info-tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 150%;
+    left: 50%;
+    margin-left: -60px;
+}
+
+.nation-info-tooltip .nation-info-tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+
+.nation-info-tooltip:hover .nation-info-tooltip-text {
+    visibility: visible;
+}
+
+/* Animation for the country name that runs when that nation is selected by user */
+.test-country-animation {
+    animation: go 1s both 2;
+}
+
+@keyframes go {
+    0% {
+        background-color: #fff;
+    }
+
+    75% {
+        background-color: #aa0000;
+    }
+
+    100% {
+        background-color: #fff;
+    }
+}
+
+#ru:hover {
+    background-color: #AA0000;
+}
+
+#cn:hover {
+    background-color: gold;
+}
+
+#us:hover {
+    background-color: dodgerblue;
+}
+
+button {
+    display: block;
+}
+
+.radio-options {
+    background-color: #f3f3f3;
+}
+
+.radio-options input {
+    display: block;
+}
