@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-GB" dir="ltr">
+<html lang="en-GB" dir="ltr" class="lock-display">
 
 <head>
     <meta charset="utf-8">
@@ -8,213 +8,408 @@
     <meta name="keywords" content="JavaScript, war, game, strategy">
     <meta name="author" content="Ryan Hadley">
     <title>Theatre of War</title>
+    <link rel="icon" type="image/jpg" sizes="32x32" href="images/blast.png">
     <link href="jqvmap-master/dist/jqvmap.css" media="screen" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin&display=swap" rel="stylesheet">
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="jqvmap-master/dist/jquery.vmap.js"></script>
     <script src="jqvmap-master/dist/maps/jquery.vmap.world.js" charset="utf-8"></script>
-    <!-- This program utilises SweetAlert, and JS alert library -->
+    <!-- This program utilises SweetAlert JS alert library -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
+<body class="lock-display">
 
-    <!-- Renders the JQV world map object in the browser with this div element -->
-    <div id="vmap"></div>
+    <!-- Calendar / time passing displays & game option buttons -->
 
-    <h2 class="country-select-message" id="scroll-target-1"></h2>
-    <p id="ru">The Russian Federation</p>
-    <p id="us">The United States of America</p>
+    <div class="game-calendar">
 
-    <div id="text-output"></div>
+        <h3 id="day">DAY: 0</h3>
+        <h3 id="week">WEEK: 1</h3>
+        <h3 id="month">MONTH: 1</h3>
+        <h3 id="year">YEAR: 2022</h3>
 
-    <div class="nation-info-tooltip">Hover
-        <span class="nation-info-tooltip-text">hello</span>
+        <button type="button" id="fast-fwd-btn">Fast FWD</button>
+        <button type="button" id="status-overlay-btn">Status</button>
+        <button type="button" id="sidebar-btn">Commands</button>
+
+        <!-- After nation is selected, its logo will appear here -->
+        <div id="logo-section"></div>
+
     </div>
 
-    <!-- Overlay UI -->
-    <div class="overlay">
-        <div class="overlay-text">
+    <!-- Renders the JQV world map object in the browser with this div element -->
+
+    <div id="vmap" class="scroll-target-map"></div>
+
+    <!-- Radar with sweep animation -->
+
+    <div class="radar">
+        <div class="sweep"></div>
+    </div>
+
+    <!-- <img class="bg-intro-img" src="images/theater-of-war.jpg" alt="theatre of war main image" /> -->
+
+    <!-- Title overlay displaying game's story and title screen via css animations -->
+
+    <div class="title-overlay darken-overlay">
+        <button id="skip-intro-btn">Quick Start</button>
+        <div class="title-overlay-text">
             <div class="title-screen">
-                <h1>Welcome to Theatre of War</h1>
-                <button type="button" id="start-game-btn">Start Game</button>
-                <button type="button" id="options-btn">Options</button>
+                <div id="story-scroll-text">
+                    In 2022, the world teeters on the brink of destruction.<br>
+                    An unexpected and violent coup has taken place in China.<br>
+                    Their nuclear stockpile is distributed globally.<br>
+                    Nuclear weapons are now widely available.<br>
+                    Many nations have armed to unprecedented levels.<br>
+                    Only two nations stand ready to restore order.<br>
+                    Restore order as the United States.<br>
+                    <img src="images/armageddon.jpg" alt="image of destroyed city" class="intro-img" /><br>
+                    Or bring the world to heel as the resurgent Russian Federation.<br>
+                    The United States, and Russia. Who will you lead?<br>
+                    Whichever country rises up, the same reality exists...
+                </div>
+                <div class="main-titles">
+                    <!-- <img src="images/theater-of-war.jpg" class="title-animation-4 intro-img" alt="warfare image with soldiers" /> -->
+                    <h2 class="title-animation-1">In the 21st century</h2>
+                    <h2 class="title-animation-1-5">There is only the...</h2>
+                    <h1 class="wargate">
+                        <span class="title-animation-2">Theatre</span>
+                        <span class="title-animation-3">of</span>
+                        <span class="title-animation-4">War</span>
+                    </h1>
+                    <button type="button" id="start-game-btn">Wage War</button>
+                </div>
+
+                <div id="end-titles-usa">
+
+                    Congratulations, commander.<br>
+                    The United States of America has achieved peace through power.<br>
+                    All the world's nations are considering dismantling their arsenals.<br>
+                    A new age of peace has begun.<br><br>
+
+                    <!-- Credits -->
+
+                    <h2>Music</h2>
+                    <p>
+                        <i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and <i>Conflict</i> byAlexandr Zhelanov
+                    </p>
+                    <p><i>Dark</i> by Pheonton</p>
+                    <p><i>Laments Of The War</i> by Cethiel</p>
+                    <p><i>Snow-Covered-Banner</i> by İlker Yalçıner 2018</p>
+                    <p><i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021</p>
+                    <p><i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia)</p>
+                    <p>
+                        <i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020
+                    </p>
+                    <p>Licensed under CC BY 3.0 Creative Commons</p>
+
+                    <h2>Fonts</h2>
+                    <p><i>Wargate</i> by Arterfak Project</p>
+                    <p>Hosted on Open Game Art</p>
+                    <p>full credits also found on the readme here: link</p>
+
+                </div>
+
+                <div id="end-titles-russia">
+
+                    Congratulations, commander.<br>
+                    The Russian Federation has gone from resurgent to almighty.<br>
+                    All the world's nations are falling into line through fear and respect.<br>
+                    A new age of power has begun.<br><br>
+
+                    <!-- Credits -->
+
+                    <h2>Music</h2>
+                    <p>
+                        <i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and <i>Conflict</i> byAlexandr Zhelanov
+                    </p>
+                    <p><i>Dark</i> by Pheonton</p>
+                    <p><i>Laments Of The War</i> by Cethiel</p>
+                    <p><i>Snow-Covered-Banner</i> by İlker Yalçıner 2018</p>
+                    <p><i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021</p>
+                    <p><i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia)</p>
+                    <p>
+                        <i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020
+                    </p>
+                    <p>Licensed under CC BY 3.0 Creative Commons</p>
+
+                    <h2>Fonts</h2>
+                    <p><i>Wargate</i> by Arterfak Project</p>
+                    <p>Hosted on Open Game Art</p>
+                    <p>full credits also found on the readme here: link</p>
+
+                </div>
+
+                <div id="victory-img-section">
+                    <h3 class="victory-heading">Thank you for playing</h3>
+                    <h2 class="wargate">
+                        <span class="end-text-1">Theatre</span>
+                        <span class="end-text-2">of</span>
+                        <span class="end-text-3">War</span>
+                    </h2>
+                    <h3>A
+                        <a href="https://github.com/eaglesTear" class="authour-credit">
+                            Ryan Hadley
+                        </a> game
+                    </h3>
+                    <button type="button" id="reload-btn">RELOAD GAME</button>
+                </div>
+
             </div>
-            <div class="report-section">
-                <h5>Overview</h5>
+        </div>
+    </div>
+
+    <!-- Status overlay that displays various current data about the player's nation -->
+
+    <div class="status-overlay">
+        <a class="status-closebtn">&times;</a>
+        <div class="status-overlay-content">
+            <div id="removable-status-content">
+                <img src="images/report.png" class="status-img" alt="report icon" />
+                <h2 id="nation-name"></h2>
                 <ul id="overview"></ul>
             </div>
         </div>
     </div>
 
-    <button type="button" id="overlay-btn">Overlay</button>
+    <!-- Sidebar action UI: functions that require a target nation to be selected -->
 
-    <!-- Sidebar UI -->
     <div class="sidebar">
+        <a href="javascript:void(0)" class="sidebar-close-btn">&times;</a>
+        <div>
+            <img src="images/soldiers.png" class="cp-image" alt="soldiers">
+            <button type="button" id="deploy-btn">Deploy Military</button>
+            <button type="button" id="attack-btn">Attack</button>
+            <select class="agents-imprisoned hidden"></select>
+            <button type="button" id="rescue-btn">Rescue</button>
+            <button type="button" id="conscription-btn">Conscription</button>
+        </div>
+        <div>
+            <img src="images/agent.png" class="cp-image" alt="agent">
+            <button type="button" id="intel-btn">Gather Intel</button>
+            <button type="button" id="sabotage-btn">Sabotage</button>
+            <button type="button" id="incite-btn">Incite Rebellion</button>
+            <button type="button" id="spying-btn">Satellite Surveillance</button>
+            <button type="button" id="hack-btn">Cyberattack</button>
+        </div>
+        <div>
+            <img src="images/govt.png" class="cp-image" alt="parliament icon">
+            <button type="button" id="diplomacy-btn">Diplomacy</button>
+            <button type="button" id="reinforcement-btn">Request Alliance Reinforcements</button>
+            <button type="button" id="ransom-btn">Pay Hostage Ransom</button>
+        </div>
+        <div>
+            <img src="images/danger.png" class="cp-image" alt="danger icon">
+            <button type="button" id="nuclear-btn">Launch Nuclear Strike</button>
+            <button type="button" class="hidden" id="p-cannon-btn">Particle Cannon Strike</button>
+        </div>
+    </div>
 
-        <a href="javascript:void(0)" class="sidebar-close-btn">X</a>
+    <!-- Options slider or carousel: Minimises scrolling and UI clutter -->
 
-        <h5>Assign GDP Percentage to Defence</h5>
-        <input type="number" id="percentage" min="0" max="100" step="1" value="1">
-        <button type="button" id="assign-GDP-btn">Assign</button>
+    <section class="options-container" id="scroll-target-cpanel">
 
-        <!-- Functions that require a target nation to be selected -->
-        <button type="button" id="deploy-assetts">Send Forces</button>
-        <button type="button" id="attack-btn">Attack</button>
-        <button type="button" id="deploy-btn">Deploy Forces</button>
-        <button type="button" id="intel-btn">Gather Intel</button>
-        <button type="button" id="sabotage-btn">Sabotage</button>
-        <button type="button" id="incite-btn">Incite Rebellion</button>
-        <button type="button" id="conscription-btn">Mandate Conscription</button>
-        <button type="button" id="diplomacy-btn">Diplomatic Mission</button>
-        <button type="button" id="spying-btn">Spy Satellite Surveillance</button>
-        <button type="button" id="nuclear-btn">Launch Nuclear Strike</button>
-        <button type="button" id="p-cannon-btn">Particle Cannon Strike</button>
-        <button type="button" id="reinforcement-btn">Request Alliance Reinforcements</button>
-        <button type="button" id="hack-btn">Perform Cyberattack</button>
+        <div class="slider">
 
-        <!-- Unit building & training options -->
+            <input type="radio" name="slider" title="Facilities" checked="checked" class="slider__nav" />
+            <input type="radio" name="slider" title="Units" class="slider__nav" />
+            <input type="radio" name="slider" title="Tactical" class="slider__nav" />
+            <input type="radio" name="slider" title="Manufacturing" class="slider__nav" />
+            <input type="radio" name="slider" title="Research" class="slider__nav" />
+            <input type="radio" name="slider" title="Upgrades" class="slider__nav" />
 
-        <!-- Armour -->
-        <label for="number of tanks">Armour Quantity</label>
-        <input type="number" id="tanks" min="0" max="1000" step="10" value="50">
-        <button type="button" id="purchase-tanks">Build Tanks</button>
-        <div id="test"></div>
-        <!-- Infantry -->
-        <label for="number of infantry">Infantry Quantity</label>
-        <input type="number" id="infantry" min="0" max="10000" step="1000" value="0">
-        <button type="button" id="purchase-infantry">Train Infantry</button>
-        <!-- Airpower -->
-        <label for="number of aircraft">Aircraft Quantity</label>
-        <input type="number" id="aircraft" min="0" max="500" step="10" value="0">
-        <button type="button" id="purchase-aircraft">Build Aircraft</button>
-        <!-- Navy -->
-        <label for="number of warships">Warship Quantity</label>
-        <input type="number" id="warships" min="0" max="50" step="1" value="0">
-        <button type="button" id="purchase-warships">Build Warships</button>
-        <!-- Satellite construction and launch -->
-        <label for="number of satellites">Satellite Quantity</label>
-        <input type="number" id="satellites" min="0" max="5" step="1" value="0">
-        <button type="button" id="launch-satellite">Build &amp; Launch Satellite(s)</button>
-        <!-- Nuclear weapons -->
-        <label for="number of nukes">Warhead Quantity</label>
-        <input type="number" id="warheads" min="0" max="10" step="1" value="0">
-        <button type="button" id="build-nukes">Develop Nuclear Weapons</button>
+            <div class="slider__inner">
 
-        <!-- Base Construction -->
-        <button type="button" id="intel-ops">Intelligence Operations Centre (IntelOps)</button>
-        <button type="button" id="airbase">Airbase</button>
-        <button type="button" id="barracks">Barracks</button>
-        <button type="button" id="naval-yard">Naval Yard</button>
-        <button type="button" id="war-factory">War Factory</button>
-        <button type="button" id="launch-pad">Launch Pad</button>
-        <button type="button" id="research-centre">Research Centre</button>
-        <button type="button" id="missile-silo">Missile Silo</button>
+                <!-- Base Construction -->
 
-        <!-- Employ Spec-Ops to rescue any captured agents -->
-        <button type="button" id="rescue">Mount Rescue</button>
+                <div class="slider__contents">
+                    <div>
+                        <div class="flex-column">
+                            <img src="images/intel.svg" class="cp-image" title="$280000000" alt="intel building">
+                            <button type="button" id="intel-ops">IntelOps</button>
+                            <img src="images/runway.png" class="cp-image" title="$5470000000" alt="runway">
+                            <button type="button" id="airbase">Airbase</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/barracks.svg" class="cp-image" title="$2000000" alt="barracks">
+                            <button type="button" id="barracks">Barracks</button>
+                            <img src="images/gold-anchor.svg" class="cp-image" title="$2600000000" alt="gold anchor">
+                            <button type="button" id="naval-yard">Naval Yard</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/factory.png" class="cp-image" title="$11300000000" alt="factory building">
+                            <button type="button" id="war-factory">War Factory</button>
+                            <img src="images/launch.svg" class="cp-image" title="$444000000" alt="rocket launch image">
+                            <button type="button" id="launch-pad">Launch Pad</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/centre.svg" class="cp-image" title="$48859900" alt="research centre">
+                            <button type="button" id="research-centre">Research Centre</button>
+                            <img src="images/missile.png" class="cp-image" title="$120000000" alt="missile launching">
+                            <button type="button" id="missile-silo">Missile Silo</button>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Recruit and / or train specialised units -->
-        <section id="unit-training">
-            <!-- Field Agents -->
-            <div>
-                <input type="number" id="field-agents" min="1" max="5" step="1" value="1">
-                <button type="button" id="train-agents">Train Agents</button>
+                <!-- Unit training & construction -->
+
+                <div class="slider__contents">
+                    <div>
+                        <div class="flex-column">
+                            <img src="images/tank.png" class="cp-image" title="$5000000" alt="tank">
+                            <input type="number" id="tanks" min="0" max="1000" step="10" value="50">
+                            <button type="button" id="purchase-tanks">Build Tanks</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/soldier.png" class="cp-image" title="$80000" alt="soldier with rifle">
+                            <input type="number" id="infantry" min="0" max="10000" step="1000" value="0">
+                            <button type="button" id="purchase-infantry">Train Infantry</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/jet.png" class="cp-image" title="$64000000" alt="fighter jet">
+                            <input type="number" id="aircraft" min="0" max="500" step="10" value="0">
+                            <button type="button" id="purchase-aircraft">Build Aircraft</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/warship.png" class="cp-image" title="$100000000" alt="warship">
+                            <input type="number" id="warships" min="0" max="50" step="1" value="0">
+                            <button type="button" id="purchase-warships">Build Warships</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/spy.png" class="cp-image" title="$100000" alt="spy">
+                            <input type="number" id="field-agents" min="1" max="5" step="1" value="1">
+                            <button type="button" id="train-agents">Train Agents</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tactical: satellite & nuclear weapon construction -->
+
+                <div class="slider__contents">
+                    <div>
+                        <div class="flex-column">
+                            <img src="images/satellite.png" class="cp-image" title="$470000000" alt="satellite">
+                            <input type="number" id="satellites" min="0" max="5" step="1" value="0">
+                            <button type="button" id="launch-satellite">Build &amp; Launch Satellites</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/nuclear.svg" class="cp-image" title="$28000000" alt="nuclear bomb">
+                            <input type="number" id="warheads" min="0" max="10" step="1" value="0">
+                            <button type="button" id="build-nukes">Develop Nuclear Weapons</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manufacturing options & sell surplus oil or weapon reserves -->
+
+                <div class="slider__contents">
+                    <div>
+                        <div>
+                            <div class="flex-column">
+                                <img src="images/oil.png" class="cp-image" alt="oil derrick">
+                                <input type="number" id="oil" min="10000" max="1000000" step="10000" value="10000">
+                                <button id="sell-oil" type="button">Sell Oil</button>
+                            </div>
+                            <div class="flex-column">
+                                <img src="images/rifle.png" class="cp-image-rifle" title="$700" alt="rifle">
+                                <input type="number" id="weapons-to-sell" min="50" max="10000" step="50" value="100">
+                                <button id="sell-weapons" type="button">Sell Weapons</button>
+                            </div>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/machine.png" class="cp-image" alt="industrial machine">
+                            <input type="number" id="weapons-to-build" min="50" max="100000" step="50" value="50">
+                            <button id="make-small-arms" type="button">Manufacture Arms</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research & hiring research personnel -->
+
+                <div class="slider__contents">
+                    <div>
+                        <span class="research-span">Researchers Employed:<span id="researchers-employed"></span></span>
+                        <span class="research-span">Researchers Available:<span id="researchers-available"></span></span>
+                    </div>
+                    <div class="research">
+                        <img src="images/atom.png" class="cp-image" alt="atom nucleus">
+                        <select id="research-options">
+                            <option value="hypersonicMissiles">Hypersonic Missiles: $100000000</option>
+                            <option value="cyreAssaultRifle">Cyre Assault Rifle: $250000000</option>
+                            <option value="railguns">Rail Guns: $550000000</option>
+                            <option value="kineticArmour">Kinetic Armour: $750000000</option>
+                            <option value="particleCannon">Particle Cannon: $800000000</option>
+                        </select>
+                        <div class="flex-column">
+                            <input type="number" id="researchers" min="10" max="100" step="5" value="1">
+                            <button type="button" id="hire-researchers">Hire Researchers</button>
+                        </div>
+
+                        <div class="flex-column">
+                            <input type="number" id="researcher-allocation" min="10" max="1000" step="5" value="10">
+                            <button type="button" id="submit">Assign Researchers</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrades -->
+
+                <div class="slider__contents">
+                    <div>
+                        <div class="flex-column">
+                            <img src="images/shield.png" class="cp-image" title="$10000000" alt="up arrow">
+                            <button type="button" id="upgrade-aircraft">Ceramic Armour</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/carrier.png" class="cp-image" title="$20000000" alt="up arrow">
+                            <button type="button" id="upgrade-navy">Aircraft Carrier</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/syringe.svg" class="cp-image" title="$2000 per soldier" alt="up arrow">
+                            <button type="button" id="upgrade-infantry">NeuroStims</button>
+                        </div>
+                        <div class="flex-column">
+                            <img src="images/shell.png" class="cp-image" title="$40000000" alt="up arrow">
+                            <button type="button" id="upgrade-armour">Depleted Uranium Projectiles</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- Researchers -->
-            <div>
-                <input type="number" id="researchers" min="10" max="100" step="5" value="1">
-                <button type="button" id="hire-researchers">Hire Researchers</button>
-            </div>
-        </section>
 
-        <!-- Upgrades: already researched, player just needs to pay for these -->
-        <section class="upgrades">
-            <h5>Aircraft</h5>
-            <button type="button" id="upgrade-aircraft">Ceramic Armour</button>
-            <h5>Navy</h5>
-            <button type="button" id="upgrade-navy">Type IV Destroyers</button>
-            <h5>Infantry</h5>
-            <button type="button" id="upgrade-infantry">NeuroStims</button>
-            <h5>Armour</h5>
-            <button type="button" id="upgrade-armour">Depleted Uranium Projectiles</button>
-        </section>
+        </div>
 
-        <!-- Research: requires researchers, time & money -->
-        <section>
-           <h4>Research Projects</h4>
-            <form action="">
-                <select name="" id="research-options">
-                    <option value="asatMissile">ASAT Missile: $1000</option>
-                    <option value="cyreAssaultRifle">Cyre Assault Rifle: $2000</option>
-                    <option value="railguns">Rail Guns: $3000</option>
-                    <option value="kineticArmour">Kinetic Armour: $3000</option>
-                    <option value="particleCannon">Particle Cannon: $10000</option>
-                    <option value="missileDefenceShield">Missile Defence Shield: $100000</option>
-                </select>
-                <h5>Researcher Allocation</h5>
-                <h6>Researchers Employed: <span id="researchers-employed"></span></h6>
-                <h6>Researchers Available: <span id="researchers-available"></span></h6>
-                <input type="number" id="researcher-allocation" min="10" max="1000" step="5" value="10">
-                <button type="button" id="submit">Submit</button>
-            </form>
-        </section>
+    </section>
 
-        <!-- Manufacturing options -->
-        <section>
-            <h3>Weapons Manufacturing</h3>
-            <h4>Develop Weapons for Sale to Friendly Nations</h4>
-            <label for="weapon manufacture">Small Arms</label>
-            <input type="number" id="weapons-to-build" min="50" max="100000" step="50" value="50">
-            <button id="make-small-arms" type="button">Manufacture Small Arms</button>
-        </section>
+    <!-- Footer with links to GitHub and LinkedIn pages -->
 
-        <!-- Sell surplus oil or weapon reserves -->
-        <section>
-            <h3>Sell Surplus Assets for Currency</h3>
+    <footer>
+        <div>
+            Copyright &copy;
+            <script>
+                document.write(new Date().getFullYear());
+            </script>
+            Ryan Hadley (eaglesTear)
+            <a href="https://www.linkedin.com/in/ryan-had">
+                <img src="images/linkedin.png" alt="LinkedIn logo" />
+            </a>
+            <a href="https://github.com/eaglesTear">
+                <img src="images/github.png" alt="GitHub logo" />
+            </a>
+        </div>
+    </footer>
 
-            <label for="selling oil">Oil</label>
-            <input type="number" id="oil" min="10000" max="1000000" step="10000" value="10000">
-            <button id="sell-oil" type="button">Sell Oil</button>
+    <!-- Game scripts -->
 
-            <label for="selling weapons">Weapons</label>
-            <input type="number" id="weapons-to-sell" min="50" max="10000" step="50" value="100">
-            <button id="sell-weapons" type="button">Sell Weapons</button>
-        </section>
-
-    </div>
-
-    <!-- Allow user agent to select the game's winning condition -->
-    <p>Commander, what is your ambition?</p>
-    <div class="radio-options">
-        <input type="radio" name="options" value="option1" checked>
-        <label for="option1">Take over 25% of the world</label>
-        <input type="radio" name="options" value="option2">
-        <label for="option2">Become the most popular leader of all time</label>
-        <button type="submit" id="accept-option">Accept</button>
-    </div>
-    
-    <button type="button" id="sidebar-btn">Sidebar Menu</button>
-    <button type="button" id="fast-fwd-btn">Jump Forward</button>
-
-    <div class="container">
-        <h1 id="name"></h1>
-    </div>
-
-    <!-- Calendar / time displays -->
-    <h3 id="day">DAY: 0</h3>
-    <h3 id="week">WEEK: 1</h3>
-    <h3 id="month">MONTH: 1</h3>
-    <h3 id="year">YEAR: 2021</h3>
-
-    <!-- Visual inventory and indicator depicting player purchases & overall power -->
-    <div class="inventory"></div>
-    <p id="show-infantry"></p>
-    <ul id="conquered-nations"></ul>
-
-    <!-- Scripts to enable the game to run -->
+    <script src="globals.js"></script>
+    <script src="functions.js"></script>
+    <script src="objects.js"></script>
     <script src="global_regions.js"></script>
     <script src="classes.js"></script>
+    <script src="audio.js"></script>
     <script src="script.js"></script>
     <script src="ui.js"></script>
 

@@ -1,67 +1,40 @@
 // Globals
-const l = console.log;
-// Parsing as float allows the most accurate measurement of an average calendar month later on
-let day = parseFloat(1);
+
 // Player's selection will decide the value of this variable - undefine when ready to deploy
 let playerNation = Russia;
-// Define the newly created country (object) for use in the battle function 
-let targetNation;
-// Set a binary that disables the initial alert info window after first use of 'espionage' ability
-let firstTimeEspionageUse = true;
+
+playerNation.specialWeapons.nuclearWeapons = 10; // DELETE WHEN FINISHED
+playerNation.specialWeapons.missileShield = 1; // DELETE WHEN FINISHED
 
 /* Keep track of the original value for player's oil production as we need to increment it by itself later on */
 let dailyOilProduction = playerNation.resources.oilProduction;
 let originalDailyOilProduction = dailyOilProduction;
 
-// Define an array to hold all the nations that are defeated by the player
-const territoriesConqueredByCode = [];
-// By region is to allow the player to see the actual country names rather than the codes
-const territoriesConqueredByRegion = [];
-// Set array ready to receive all the generated nation objects
-const allNationsAsObjects = [];
-// Set array ready to receive all nation / country codes in the JQVMap object (182 total)
-const allNationsCodeArray = [];
 // Ensure the yearly defence budget / GDP allocation remains unchanged for awarding each year
 const yearlyDefenceBudget = playerNation.resources.defenceBudget;
 const yearlyGDP = playerNation.gdp;
 
-// Option / nation ability bools
-const options = {
-    attack: false,
-    deploy: false,
-    recon: false,
-    sabotage: false,
-    incite: false,
-    conscription: false,
-    diplomacy: false,
-    spying: false,
-    fireParticleCannon: false,
-    allianceReinforcement: false,
-    hacking: false,
-    unitsOnCampaign: false,
-    targetNationSelected: false
-}
+// Call main time object
 
-let agentsCaptured = false;
-let rescue = false;
+gameState.time;
 
 //// Execute monthly actions here, ie expenditures
 //monthlyActions = () => {
-//    //expenditure();
+//    //monthlyBaseExpenditure();
 //    militaryUnitMaintenanceMonthly();
 //    //resourceIncomeMonthly();
 //awardAgriculturalDealBonus();
+//lowerApprovalRatingIfAgentsAreHostages();
+//monthlyExpenditureReport();
 //}
 //// Execute daily actions here, ie expenditures
 //dailyActions = () => {
 //    militaryOilExpenditureDaily();
 //    generalResourceExpenditureDaily();
-//    defineNationStance();
 //}
 //
 //yearlyActions = () => {
 //    annualDefenceBudgetAndGDP();
-//    $("#assign-GDP-btn").prop("disabled", false);
 //}
 
 /*
@@ -76,57 +49,20 @@ let rescue = false;
 */
 
 
-passageOfTime = () => {
+/*
+    This function handles the darkening of the screen via an overlay with diminishing opacity. The overlay is displayed and a css class handles the animation / effect. Following this, the story text will scroll and the intro track will play.
+*/
 
-    let monthlyInterval = day + 30.41;
-    let yearlyInterval = day + 365;
-    let currentYear = 2021;
-
-    setInterval(() => {
-
-        let week = Math.ceil(day / 7);
-        let month = Math.ceil(week / 4);
-
-        $("#day").text("DAY: " + parseInt(day++));
-        $("#week").text("WEEK: " + week);
-        $("#month").text("MONTH: " + month);
-
-        if (day >= monthlyInterval) {
-            //            monthlyActions();
-            monthlyInterval = day + 30.41;
-        }
-        if (day >= yearlyInterval) {
-            currentYear++;
-            $("#year").text("YEAR: " + currentYear);
-            //yearlyActions();
-            yearlyInterval = day + 365;
-        }
-
-        if (options.conscription === true) {
-            conscriptTroopsRussia(monthlyInterval);
-        }
-        //dailyActions();
-
-    }, 2000);
+// CAN SWITCH OFF CSS DISPLAY NONE & REMOVE DISPLAY BLOCK??
+intro = () => {
+    $(".title-overlay").css("display", "block");
+    introTrack.play();
 }
 
+//intro();
+
+// Show initial status
 displayMainStatus();
-// Skip forward in time via ui click (1 day per click)
-fastForward = (monthlyInterval) => {
-    $("#day").text("DAY: " + parseInt(day++));
-    $("#week").text("WEEK: " + Math.ceil(day / 7));
-
-    if (options.conscription === true) {
-        conscriptTroopsRussia(monthlyInterval);
-    }
-}
-
-// Dynamic function to display colours for each nation when corresponding text is hovered    
-ui_mouseover_mouseout = (countryID, color, [country]) => {
-    $("#vmap").vectorMap("set", "colors", {
-        [country]: color
-    });
-}
 
 // Control what happens when a battle is concluded - 'armiesDefeated' MUST BE RESET!!!
 // If even one army is not defeated, player is deemed to lose or draw
@@ -136,24 +72,74 @@ trackDefeatedNations = (region, code) => {
     if (armiesDefeated >= 4) {
         territoriesConqueredByCode.push(code);
         territoriesConqueredByRegion.push(region);
-        warConsequencesIfWin();
+        warConsequencesIfWin(region);
     } else {
         warConsequencesIfLose();
     }
     armiesDefeated = 0;
-    options.unitsOnCampaign = false;
+    gameState.unitsOnCampaign = false;
 }
 
-warConsequencesIfWin = () => {
-    swal("player wins");
+warConsequencesIfWin = (region) => {
+    militaryVictory(region);
     $("#conquered-nations").append(`<li>${territoriesConqueredByRegion[territoriesConqueredByRegion.length - 1]}</li>`);
     awardResources();
     militaryUnitsGainExp();
-    targetNation = null;
+    releaseAgentHostagesAfterSuccessfulWar();
+    removeNationFromPlay(region);
+}
+
+militaryVictory = (region) => {
+
+    enemyEliminated.play();
+
+    swal("Victory",
+            `${targetNation.name} has been defeated in battle and is now under your control. 
+            
+            ${playerNation.name} units: 
+            Infantry: ${playerNation.militaryUnits.infantry} 
+            Tanks: ${playerNation.militaryUnits.tanks} 
+            Aircraft: ${playerNation.militaryUnits.air} 
+            Navy: ${playerNation.militaryUnits.naval}`, {
+                button: "Bonuses"
+            })
+        .then((value) => {
+            swal(`Resources: + 1% of the total GDP of ${region} ($${targetNation.gdp / 100 * 1}) - awarded monthly
+            Military Units Exp: + 12.5 
+            Any agents held in ${targetNation.name} will be released`);
+        });
+}
+
+// Remove nation from play. Runs when nation is defeated or turns on itself 
+removeNationFromPlay = (region) => {
+
+    allNationsAsObjects.forEach(nation => {
+        if (nation.name === region) {
+            const indexOfNation = allNationsAsObjects.indexOf(nation);
+            allNationsAsObjects.splice(indexOfNation, 1);
+        }
+    });
+}
+
+militaryDefeat = () => {
+
+    swal("Defeat",
+            `${targetNation.name} has held your forces
+
+            ${playerNation.name} units: 
+            Infantry: ${playerNation.militaryUnits.infantry}
+            Tanks: ${playerNation.militaryUnits.tanks}
+            Aircraft: ${playerNation.militaryUnits.air}
+            Navy: ${playerNation.militaryUnits.naval}`, {
+                button: "Bonuses"
+            })
+        .then((value) => {
+            swal("XP Up", `Military Units Exp: + 3`);
+        });
 }
 
 warConsequencesIfLose = () => {
-    swal("player has lost the war. game over");
+    militaryDefeat();
     playerNation.status.govtApprovalRating -= 5;
     monitorNationGovtApproval();
 }
@@ -164,10 +150,8 @@ militaryUnitsGainExp = () => {
     for (rating in playerNation.unitTechAndSkillRating) {
 
         if (rating === "infiltration") continue;
-        //l("rating before: " + playerNation.unitTechAndSkillRating[rating]);
         playerNation.unitTechAndSkillRating[rating] += 12.5;
         unitRatingCap();
-        //l("rating after capping: " + playerNation.unitTechAndSkillRating[rating]);
     }
 }
 
@@ -175,7 +159,6 @@ militaryUnitsGainExp = () => {
 unitRatingCap = () => {
 
     for (rating in playerNation.unitTechAndSkillRating) {
-
         if (playerNation.unitTechAndSkillRating[rating] > 100) {
             playerNation.unitTechAndSkillRating[rating] = 100;
         }
@@ -186,140 +169,161 @@ unitRatingCap = () => {
 monitorNationResistance = (region, code) => {
 
     if (playerNation.status.resistance <= 10) {
-        console.log("GG");
+        swal("DEFEAT", "You have failed in your mission, commander. \nYour people's resistance is now so low that there is no more desire for the struggle for supremacy. \nChaos reigns in the streets, and you have no option now but to step down before you are overthrown.");
+        gameoverDefeated();
     } else if (targetNation.status.resistance <= 10) {
         territoriesConqueredByCode.push(code);
         colourDefeatedNations(code, "#AA0000");
-        targetNation = null;
+        removeNationFromPlay(region);
     }
 }
 
 monitorNationGovtApproval = () => {
 
     if (playerNation.status.govtApprovalRating <= 10) {
-        console.log("GG");
+        swal("DEFEAT", "You have failed in your mission, commander. \nYour approval rating is too low and after a no-confidence vote, you have been removed from power.");
+        gameoverDefeated();
     }
 }
-
-//l(playerNation.unitTechAndSkillRating.airTech) // DELETE WHEN FINISHED
-//l(playerNation.unitTechAndSkillRating.infantrySkill) // DELETE WHEN FINISHED
-//militaryUnitsGainExp(); // DELETE WHEN FINISHED
-//l(playerNation.unitTechAndSkillRating.airTech) // DELETE WHEN FINISHED
-//l(playerNation.unitTechAndSkillRating.infantrySkill) // DELETE WHEN FINISHED
 
 // Commander will be asked to confirm each option, whether attack, commit sabotage etc
+// CURRENTLY UNUSED - DELETE IF NOT UTILISED
 executiveDecision = (region) => {
 
-    const confirmAttack = confirm("Military in position. Attack " + region + " ?");
+    swal("Confirm Attack",
+            `Military in position. 
 
-    if (confirmAttack) {
-        swal("You have given your forces permission to engage. Select " + region + " to attack");
+        Attack ${region}?`, {
+                buttons: ["Cancel", "Confirm"]
+            })
+        .then((value) => {
+            if (value) {
+                swal("Permission to Engage", `Select ${region} to attack it.`);
+            }
+        });
+}
+
+// add other functions to the below block???
+checkForGameWin = () => {
+    if (territoriesConqueredByCode.length === 1) {
+        //suggestPlayOtherNation();
     }
 }
 
-// Get user-selected option that determines game winning conditions
-$("#accept-option").click(() => {
-    const userSelectedCondition = $("input[name=options]:checked").val();
-    checkWinConditions(userSelectedCondition);
-});
+// Only one of each function needed here outside of 'if' block?
+suggestPlayOtherNation = () => {
 
-checkWinConditions = (userSelectedCondition) => {
+    const playerCurrentNation = playerNation.name;
 
-    const winningConditionSetByPlayer = userSelectedCondition;
-
-    if (winningConditionSetByPlayer === "option1") {
-        swal("1");
+    if (playerCurrentNation === "Russian Federation") {
+        swal("You Did It, Commander!", `You have conqured 10 of the world's nations. 
+        The game will reload, so try playing as the ${USA.name}. `);
+        gameover();
+        setEndTitles();
     } else {
-        swal("2");
+        swal("You Did It, Commander!", `You have conqured 10 of the world's nations. 
+        The game will reload, so try playing as the ${Russia.name}. `);
+        gameover();
+        setEndTitles();
     }
 }
-//checkWinConditions(userSelectedCondition);
 
+// Refresh button
+reloadGame = () => {
+    gameOverTrack.pause();
+    attemptingReboot.play();
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+}
+
+gameover = () => {
+    $(".sidebar button").attr("disabled", true);
+    $(".radar").removeClass("slow-reveal");
+    gameState.gameStarted = false;
+    inGameTrack.pause();
+}
+
+// Main game over function - gamestarted = false also prevents sidebar opening
+gameoverDefeated = (playerIsNuked) => {
+
+    gameover();
+
+    gameOverTrack.play();
+    gameOverTrack.loop = true;
+
+    $("#removable-status-content").remove();
+    $(".status-closebtn").remove();
+    $(".status-overlay").css("width", "100%");
+    $(".status-overlay").css("transition", "5s")
+        .append(`<h2 class="end-header">GAME OVER</h2>`)
+        .append(`<button type="button" class="reload-btn" onclick="reloadGame()">Reload</button>`);
+    if (gameState.playerNuked) {
+        $(".status-overlay").append(`<img src="images/nuked-city.png" alt="city destroyed by nuclear blast" class="game-over-img" />`);
+    } else {
+        $(".status-overlay").append(`<img src="images/grief.jpg" alt="woman in despair on ground" class="game-over-img" />`);
+    }
+}
+
+// These commands MUST have a desired map target
 
 playerActions = (region, code) => {
 
-    options.targetNationSelected = true;
+    // Prevent commands being used on player's own nation
+    if (playerNation.name === region) return;
 
     switch (true) {
 
-        case options.attack:
-            playerNation.attack(region, code);
-            options.attack = false;
+        case commands.attack:
+            playerNation.attackNation(region, code);
             break;
 
-        case options.deploy:
+        case commands.deploy:
             playerNation.deployForces(region, code);
-            options.deploy = false;
             break;
 
-        case options.recon:
+        case commands.recon:
             playerNation.deployAgents(region, code);
-            options.recon = false;
             break;
 
-        case options.rescue:
-            playerNation.launchHostageRescue(region, code);
-            options.rescue = false;
-            break;
-
-        case options.sabotage:
+        case commands.sabotage:
             playerNation.undertakeSabotage(region, code);
-            options.sabotage = false;
             break;
 
-        case options.incite:
+        case commands.incite:
             playerNation.inciteRebellion(region, code);
-            options.incite = false;
             break;
 
-        case options.diplomacy:
+        case commands.diplomacy:
             playerNation.negotiation(region, code);
-            options.diplomacy = false;
             break;
 
-        case options.spying:
+        case commands.spying:
             playerNation.spySatellite(region, code);
-            options.spying = false;
             break;
 
-        case options.launchNuclearMissile:
+        case commands.launchNuclearMissile:
             playerNation.nuclearStrike(region, code);
-            options.launchNuclearMissile = false;
             break;
 
-        case options.fireParticleCannon:
+        case commands.fireParticleCannon:
             playerNation.particleCannonStrike(region, code);
-            options.fireParticleCannon = false;
             break;
 
-        case options.allianceReinforcement:
+        case commands.allianceReinforcement:
             playerNation.requestAllianceReinforcement(region, code);
-            options.allianceReinforcement = false;
             break;
 
-        case options.hacking:
+        case commands.hacking:
             playerNation.hackFunds(region, code);
-            options.hacking = false;
             break;
 
-            // Log if no cases match 
         default:
             console.log("No player actions selected.");
     }
-    options.targetNationSelected = false;
 }
-
-// Function Probability
-function probability(n) {
-    return Math.random() < n;
-}
-
-//console.log(`${x} of 10000000 given results by "Math.random()" were under ${prob}`);
-//console.log(`Hence so, a probability of ${x / 100000} %`);
 
 $(document).ready(() => {
-
-    passageOfTime();
 
     const worldNationsObjectLength = Object.keys(worldNations).length;
 
@@ -330,60 +334,59 @@ $(document).ready(() => {
             // Leave the country 'name' parameter as undefined - will be defined later
             this.name = "",
             // Define random nation GDP between $50 billion & $3 trillion
-            nationStats(3000000000000, 50000000000),
+            RNG(3000000000000, 50000000000),
             // Define a random govt type
             randomGovt,
             // Define a random population between 3 million and 1.5 billion people
-            nationStats(1500000000, 3000000),
+            RNG(1500000000, 3000000),
             // Assign a random diplomacy rating between 0 and 100
-            nationStats(100, 0),
+            RNG(100, 0),
             // Trade deals, alliances, oil export deals & intel collaboration deals
             [],
             [],
             [],
             [],
             // Set a random amount of researchers between 0 and 1000
-            nationStats(1000, 0),
+            RNG(1000, 0),
             // Define a random amount of oil production
-            nationStats(80000000, 20000000),
+            RNG(80000000, 20000000),
             // Set a random amount of oil consumption
-            nationStats(50000000, 100000),
+            RNG(50000000, 100000),
             // Set a random starting defence budget
-            nationStats(500000000, 50000000),
+            RNG(500000000, 50000000),
             // Set weapon stocks to 0, as this is only important to the player
             0,
             // Set a random amount of air, tank and naval units
-            nationStats(5000, 250),
-            nationStats(5000, 250),
-            nationStats(210, 160),
+            RNG(5000, 250),
+            RNG(5000, 250),
+            RNG(210, 160),
             // Set a random amount of infantry units
-            nationStats(1000000, 20000),
+            RNG(1000000, 20000),
             // Set a random amount of field agents
-            nationStats(5, 0),
+            RNG(5, 0),
             // Set a random amount of satellites
-            nationStats(50, 0),
+            RNG(50, 0),
             // Air tech
-            nationStats(100, 10),
+            RNG(100, 10),
             // Armour tech
-            nationStats(100, 10),
+            RNG(100, 10),
             // Infantry tech
-            nationStats(100, 10),
+            RNG(100, 10),
             // Naval tech
-            nationStats(100, 10),
+            RNG(100, 10),
             // Agent infiltration
-            nationStats(100, 10),
-            // Nuclear weapons & special weapons
-            nationStats(5, 0),
-            nationStats(3, 0),
-            nationStats(1, 0),
+            RNG(100, 10),
+            // Nuclear weapons & missile shield
+            RNG(5, 0),
+            RNG(3, 0),
             // Aggression Level
-            nationStats(100, 5),
+            RNG(100, 5),
             // Stance / attitude = defined by function 'defineNationStance' below
             "",
             // Resistance - how much fight a country has left to wage war / resist submission
-            nationStats(100, 1),
+            RNG(100, 1),
             // Approval rating for a nation's govt: if this becomes low, game over
-            nationStats(100, 1)
+            RNG(100, 1)
         );
 
         allNationsAsObjects.push(allNations);
@@ -402,6 +405,7 @@ $(document).ready(() => {
             }
         }
     }
+
     // Set once on game start, then recalled daily to dynamically adapt nation behaviour
     defineNationStance();
 
@@ -413,7 +417,8 @@ $(document).ready(() => {
             let previousNationStances = [];
             previousNationStances.push(allNationsAsObjects[i].status.stance);
 
-            allNationsAsObjects[i].status.aggressionLevel += 10;
+            // DELETE AGGRESSION INCREASE BELOW WHEN FINISHED
+            // allNationsAsObjects[i].status.aggressionLevel += 10;
             defineNationStance();
 
             for (let j = 0; j < previousNationStances.length; j++) {
@@ -426,6 +431,8 @@ $(document).ready(() => {
                 }
             }
         }
+        // Hostile nations are removed from treaties / deals on both sides
+        hostileNationsTreatyWithdrawal();
     }
 
     for (let i = 0; i < allNationsAsObjects.length; i++) {
@@ -437,35 +444,49 @@ $(document).ready(() => {
 
     hostileNationsTreatyWithdrawal = () => {
 
-        playerNation.internationalRelations.tradeDeals.push("Australia");
-        playerNation.internationalRelations.intelCollaborationDeals.push("Australia");
-
         allNationsAsObjects.forEach(nation => {
-
-            if (nation.name === "Australia") {
-                nation.internationalRelations.tradeDeals.push(playerNation.name, "UK", "USA");
-                nation.internationalRelations.intelCollaborationDeals.push(playerNation.name);
-            }
-
-            for (relationship in nation.internationalRelations) {
-
-                if (nation.internationalRelations[relationship].length !== 0 && nation.status.stance === "hostile") {
-                    
-                    // AGAIN, USE NORMAL ALERT AS SWAL DOES NOT CYCLE ALL ITERATIONS!!!
-                    alert(`${nation.name} is withdrawing from the ${relationship}`);
-
-                    // Remove playernation from nation's treaty arrays
-                    const playerNationIndex = nation.internationalRelations[relationship].indexOf(playerNation.name);
-                    
-                    nation.internationalRelations[relationship].splice(playerNationIndex, 1);
-                }
-            }
+            removePlayerNationFromPartnerArray(nation);
+            removePartnerNationFromPlayerArray(nation);
         });
     }
-    hostileNationsTreatyWithdrawal();
 
-    // Important that this is declared after the name
-    //informPlayerOfNationStanceChange();
+    removePlayerNationFromPartnerArray = (nation) => {
+
+        // Remove playernation from nation's treaty arrays
+        for (relationship in nation.internationalRelations) {
+
+            if (nation.internationalRelations[relationship].length !== 0 && nation.status.stance === "hostile") {
+
+                // AGAIN, USE NORMAL ALERT AS SWAL DOES NOT CYCLE ALL ITERATIONS!!!
+                alert(`${nation.name} is withdrawing from the ${relationship}`);
+
+                const playerNationIndex = nation.internationalRelations[relationship].indexOf(playerNation.name);
+
+                nation.internationalRelations[relationship].splice(playerNationIndex, 1);
+            }
+        }
+    }
+
+    removePartnerNationFromPlayerArray = (nation) => {
+
+        // Remove enemy nation from player's treaty arrays
+        for (relationship in playerNation.internationalRelations) {
+
+            if (playerNation.internationalRelations[relationship].length !== 0 && nation.status.stance === "hostile") {
+
+                const enemyNationIndex = playerNation.internationalRelations[relationship].indexOf(nation.name);
+
+                playerNation.internationalRelations[relationship].splice(enemyNationIndex, 1);
+            }
+        }
+    }
+
+    // Track all all changes of status every second, to inform the player and enable actions
+    // HOW OFTEN TO RUN BELOW FUNCTION? DAILY IN TIME OBJECT? OR SET INTERVAL
+    // Important that this is declared after the name of nation is set
+    //    setInterval(() => {
+    //        informPlayerOfNationStanceChange();
+    //    }, 1000);
 
     // Nations attacking player: pseudo-random hostile nation attacks
     function nationAttacksPlayerAfterRandomTime() {
@@ -477,32 +498,42 @@ $(document).ready(() => {
 
                 // If any hostile nation is not defeated or already engaged, that is the target
                 if (!territoriesConqueredByRegion.includes(allNationsAsObjects[i].name) &&
-                    !options.targetNationSelected) {
+                    !gameState.targetNationSelected) {
                     targetNation = allNationsAsObjects[i];
-                    determineAttackTypeOnPlayer();
+                    determineAttackTypeOnPlayer(targetNation);
                     break;
                 } else return;
             }
         }
     }
 
-    // Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
-    determineAttackTypeOnPlayer = () => {
 
+    // Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
+    
+    /* 
+        All 5 params are ESSENTIAL for nuclear function to run as they are passed between multiple functions to achieve the desired result.
+        Currently set to:
+            40% chance of military attack
+            50% chance of cyber attack
+            10% chance of nuclear attack
+    */
+    
+    determineAttackTypeOnPlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
+        
         if (probability(0.40)) {
-            swal(`${targetNation.name} is attacking you!`);
+            swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
             nationsAtWar();
             if (armiesDefeated >= 4) {
-                swal(`${playerNation.name} has fought off ${targetNation.name}!`);
+                swal(`${playerNation.name} has fought off ${targetNation.name}`);
             } else {
-                swal(`${playerNation.name} has been obliterated by ${targetNation.name}!\n Game Over.`);
+                swal(`${playerNation.name} has been obliterated by ${targetNation.name} 
+                Game Over.`);
             }
             armiesDefeated = 0;
         } else if (probability(0.50)) {
             cyberAttack();
         } else {
-            swal("no nukes");
-            enemyNuclearRetaliation(targetNation.name);
+            enemyNuclearRetaliation(enemyIsNuked, playerIsNuked, code, region, targetNation);
         }
     }
 
@@ -510,39 +541,169 @@ $(document).ready(() => {
 
         const playerGDPBeforeHack = playerNation.gdp;
 
-        swal(`You've been hacked by ${targetNation.name}!`);
-        playerNation.gdp -= nationStats(100000, 5000000000);
-        swal(`${targetNation.name} stole $${playerGDPBeforeHack - playerNation.gdp}!`);
+        playerNation.gdp -= RNG(100000, 5000000000);
+        swal(`Hacked by ${targetNation.name}`, `$${playerGDPBeforeHack - playerNation.gdp} has been stolen.`);
     }
 
     //After a certain random time: one week & one month (ms) 604800000, 2629800000
-    //setInterval(nationAttacksPlayerAfterRandomTime, nationStats(5000, 4000));
+    
+    // setInterval(nationAttacksPlayerAfterRandomTime, RNG(5000, 4000));
 
-    preventPlayerNationFromBeingSelected = (region) => {
+    // Don't need definenationstance if being called every second above??
+    // Nation begins military build up
+    
+    const militaryCoup = () => {
 
-        if (playerNation === Russia && region === "Russian Federation" ||
-            playerNation === USA && region === "United States of America") {
-            swal(`Cannot select your own nation: ${region}.`);
-            return;
+        const randomNation = Math.floor(Math.random() * allNationsAsObjects.length);
+
+        for (let i = 0; i < allNationsAsObjects.length; i++) {
+
+            if (allNationsAsObjects[i] === allNationsAsObjects[randomNation]) {
+                allNationsAsObjects[i].status.aggressionLevel = 100;
+
+                // 50% chance of nuclear armament
+                if (probability(0.50)) {
+                    allNationsAsObjects[i].specialWeapons.nuclearWeapons += 1;
+                }
+
+                for (units in allNationsAsObjects[i].militaryUnits) {
+                    allNationsAsObjects[i].militaryUnits[units] += RNG(5000, 10000);
+                }
+
+                swal(`${allNationsAsObjects[i].name} is experiencing a coup d'état!`, `Aggression Level: 100 
+                Stance: Hostile, 
+
+                Nation's Military Power Increased`);
+            }
         }
     }
 
+    const naturalDisaster = () => {
+
+        const disasters = ["forest fires", "flooding", "volcanoes", "earthquakes"];
+        const randomDisaster = Math.floor(Math.random() * disasters.length);
+        const previousPlayerGDP = playerNation.gdp;
+
+        playerNation.gdp -= RNG(100000, 1000000);
+        swal("Natural Disaster", `Your nation has been hit by ${disasters[randomDisaster]}! Reparations are necessary. 
+
+        GDP: - $${previousPlayerGDP - playerNation.gdp}`);
+        playerNation.resources.defenceBudget -= RNG(50000, 100000);
+    }
+
+    // Terror attack on player's nation
+    const terroristStrike = () => {
+
+        const terrorTargets = ["city", "vital oil refinery"];
+        const randomTarget = Math.floor(Math.random() * terrorTargets.length);
+
+        if (terrorTargets[randomTarget] === terrorTargets[0]) {
+            playerNation.status.govtApprovalRating -= 5;
+            playerNation.resources.defenceBudget -= 100000;
+            swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Civilian casualties are reported and a clean-up bill is required. 
+
+            Approval Rating: -5 
+            Defence Budget: - $100000`);
+        } else {
+            const previousOilProduction = playerNation.resources.oilProduction;
+            playerNation.resources.oilProduction -= RNG(50000, 100000);
+            swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Reparations are necessary. 
+
+            Oil Production: - ${previousOilProduction - playerNation.resources.oilProduction}`);
+        }
+    }
+
+    const internationalAid = () => {
+
+        if (playerNation.gdp >= 5200000) {
+            swal("International Aid", "You nation is donating capital to several impoverished nations. \n\n Approval Rating: +2 \nAll Nations Aggression Level: -2 \nGDP: - $5200000");
+
+            playerNation.gdp -= 5200000;
+            playerNation.status.govtApprovalRating + 2;
+
+            allNationsAsObjects.forEach(nation => {
+                nation.status.aggressionLevel -= 2;
+            });
+
+        } else {
+            swal("Insufficient GDP For International Aid Provision", "Many impoverished nations in the world were relying on you to provide support. \nApproval Rating: -2 \nAll Nations Aggression Level: +2");
+
+            playerNation.status.govtApprovalRating - 2;
+
+            allNationsAsObjects.forEach(nation => {
+                nation.status.aggressionLevel + 2;
+            });
+        }
+    }
+
+    const globalTreaty = () => {
+
+        if (playerNation.diplomacy >= 50) {
+            swal("International Treaty", "Your nation has signed a treaty that benefits many of the world's nations, including yours. Congratulations. \n\n All Nations Aggression Level: -5 \nAll Nations Resistance: -2 \nAll Nations GDP: + $1000000000 \nAll Nations Diplomacy: +5");
+
+            allNationsAsObjects.forEach(nation => {
+                nation.status.aggressionLevel - 5;
+                nation.status.resistance - 2;
+                nation.gdp + 1000000000;
+                nation.diplomacy + 5;
+            });
+
+        } else {
+            swal("Treaty Diplomacy Failed", "Your nation attempted to sign a global treaty. Alas, negotiations broke down and it will need to wait for another day. \nAll Nations Diplomacy: +3");
+
+            allNationsAsObjects.forEach(nation => {
+                nation.diplomacy + 3;
+            });
+        }
+    }
+
+    // Set an array of events that can be randomised to produce game-changing dynamics
+    const worldEvents = [
+            militaryCoup,
+            naturalDisaster,
+            terroristStrike,
+            internationalAid,
+            globalTreaty
+    ];
+
+    // COMPLETE EVENT WHEN FINISHED
+    
+    runRandomWorldEvent = () => {
+
+        const randomFunction = Math.floor(Math.random() * worldEvents.length);
+
+        for (let i = 0; i < worldEvents.length; i++) {
+            console.log(worldEvents[randomFunction]());
+        }
+    }
+
+    showStatusOnPlayerNationSelect = (region) => {
+        if (playerNation === Russia && region === "Russian Federation" ||
+            playerNation === USA && region === "United States of America") {
+            $(".status-overlay").addClass("status-open");
+        }
+    }
+
+    // Call after nation select is completed
+    displayNationNameOnStatus = () => {
+        $("#nation-name").text(playerNation.name);
+    }
+    displayNationNameOnStatus();
+
     $('#vmap').vectorMap({
-        map: 'world_en',
-        backgroundColor: '#000',
-        borderColor: '#818181',
+        backgroundColor: '#151515',
+        borderColor: '#12CEFC',
         borderOpacity: 0.25,
-        borderWidth: 1,
-        color: '#f4f3f0',
-        enableZoom: true,
-        hoverColor: 'grey',
+        borderWidth: 0.6,
+        color: '#000',
+        // #01826d, #12cefc, #5b565e #9575ad - lilac
+        enableZoom: false,
+        hoverColor: '#9575AD',
         hoverOpacity: null,
         normalizeFunction: 'linear',
-        scaleColors: ['#b6d6ff', '#005ace'],
+        scaleColors: ['#B6D6FF', '#005ACE'],
         // Undefine 'selectedColor' to prevent interference with color change onclick
         selectedColor: '',
-        selectedRegions: null,
-        showTooltip: true,
 
         // Tap into 'onLabelShow' to show nation info on tooltip hover
         onLabelShow: (event, label, code) => {
@@ -554,30 +715,36 @@ $(document).ready(() => {
             }
 
             label[0].innerHTML = label[0].innerHTML +
-                `<br> Stance: ${targetNation.status.stance} <br> 
+                `<br> Stance: <span id="stance">${targetNation.status.stance}</span> <br> 
                 GDP: ${targetNation.gdp} <br> 
-                Population: ${targetNation.population} <br> 
-                Government: ${targetNation.govt} <br> 
                 Resistance: ${targetNation.status.resistance}`;
         },
 
         onRegionClick: (element, code, region) => {
 
-            preventPlayerNationFromBeingSelected(region);
+            nationSelect.play();
+            showStatusOnPlayerNationSelect(region);
 
-            // Nation's name method is defined only on-click as needed!
+            // If name in object matches region, show it's data in a swal
             for (let i = 0; i < allNationsAsObjects.length; i++) {
 
                 if (allNationsAsObjects[i].name === region) {
                     targetNation = allNationsAsObjects[i];
-                    const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
-                    swal(stringifiedNationInfo);
+
+                    // Data for nation is displayed only if nation has been infiltrated
+                    infiltratedNations.forEach(nation => {
+                        if (targetNation.name === nation) {
+                            const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
+                            swal(stringifiedNationInfo);
+                        }
+                    });
 
                     // User-enabled options
                     playerActions(region, code);
                 }
             }
 
+            // MAY NOT BE NECESSARY
             // Prevent attack upon nations that are already conquered
             for (let i = 0; i < territoriesConqueredByCode.length; i++) {
                 if (territoriesConqueredByCode[i] === code) return;
@@ -585,3 +752,5 @@ $(document).ready(() => {
         }
     });
 });
+
+playerNation.resources.defenceBudget = 1000000000000;

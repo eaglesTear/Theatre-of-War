@@ -1,164 +1,751 @@
-/* General styles */
-body {
+@font-face {
+    font-family: "Wargate Normal";
+    src: url("fonts/Wargate-Normal.ttf");
+}
+
+/* This snippet prevents scrolling at the start of the game so that intro can play out */
+
+.lock-display,
+.reload-btn,
+.end-header {
+    margin: 0;
+}
+
+.lock-display {
+    /* overflow: hidden;  */
+}
+
+/* Universal styles, including fonts */
+
+html,
+body,
+.status-overlay,
+.sidebar {
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Fonts used in the game - 'wargate' is a military font class used for certain headers */
+
+body:not(.wargate),
+select {
+    font-family: "Libre Franklin", sans-serif;
+    letter-spacing: 1.5px;
+}
+
+.wargate {
+    color: #FF0000;
+    font-family: "Wargate Normal", "Libre Franklin", sans-serif;
+}
+
+/* Radar with sweep animation on tactical map - credit to Ana Tudor */
+
+.radar,
+.sweep,
+.slider__nav {
+    z-index: 10;
+}
+
+.radar {
+    border-radius: 50%;
+    height: 180px;
+    left: 12%;
+    margin: -117px;
+    top: 88vh;
+    transition: 8s;
+    width: 180px;
+    box-shadow: 0 0 0 1px hsla(0, 0%, 0%, 0.5),
+        inset 0 0 0 1px hsla(0, 0%, 100%, 0.15);
+    background:
+        repeating-radial-gradient(transparent, transparent 23px, #287A33 25px, #287A33 27px),
+        linear-gradient(transparent 49.75%, #0E4C42 49.75%, #0E4C42 50.25%, transparent 50.25%) 50% no-repeat,
+        linear-gradient(90deg, transparent 49.75%, #0E4C42 49.75%, #0E4C42 50.25%, transparent 50.25%) 50% no-repeat,
+        linear-gradient(#333, #111);
+    background-size: 100%, 218px 218px, 218px 218px, 100%;
+}
+
+.sweep {
+    animation: sweep 15s infinite linear;
+    background: linear-gradient(50deg, rgba(34, 34, 34, 0) 56%, hsla(145, 50%, 40%, 1));
+    border-radius: 100% 0 0 0;
+    border-right: solid 1px hsla(145, 50%, 40%, .3);
+    box-sizing: border-box;
+    height: 78px;
+    left: 3px;
+    top: 12px;
+    transform-origin: 100% 100%;
+    width: 88px;
+}
+
+@keyframes sweep {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Map object */
+
+#vmap,
+.bg-intro-img {
+    height: 100vh;
+}
+
+#vmap,
+.options-container,
+intro-img,
+.title-overlay,
+.status-overlay-content {
+    width: 100%;
+}
+
+/* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
+
+.jqvmap-label {
+    background: #292929;
+    color: #6FD25A;
+    font-family: "Libre Franklin", sans-serif;
+}
+
+/* HUD - main control panels, buttons & passage of time */
+
+.game-calendar,
+#nation-select,
+.options-container div,
+.status-overlay,
+.status-overlay-content,
+footer div {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-#vmap {
-    /*    display: none;*/
-    width: 100%;
-    height: 100vh;
+/* Game over img (non-existent by default) */
+
+.game-over-img {
+    height: 80vh;
 }
 
-/* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
-.jqvmap-label
-{
-    position: absolute;
-    display: none;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    background: #292929;
-    color: dodgerblue;
-    font-family: sans-serif, Verdana;
-    font-size: smaller;
-    padding: 3px;
-    pointer-events:none;
+.flex-column,
+.status-overlay {
+    flex-direction: column;
 }
 
-/* Overlay with game display info, hud and options */
-.overlay {
-    position: fixed;
-    display: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    cursor: pointer;
+.game-calendar,
+.status-overlay-content,
+button,
+a:hover,
+a:focus {
+    color: #00D7C3;
 }
 
-/* Text and content inside / on top of the overlay */
-.overlay-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 50px;
-    color: dodgerblue;
-    transform: translate(-50%, -50%);
+#day,
+#week,
+#month,
+#year {
+    padding: 0.8rem;
+    letter-spacing: 1.3px;
 }
 
-/* Section displayed for the player to allow them to see the overall status of their nation */
-.report-section {
+#year {
+    border-right: 5px dotted #00D7C3;
+}
+
+#status-overlay-btn {
+    margin-left: 1.5rem;
+}
+
+.options-container div {
+    padding-left: 2rem;
+}
+
+.research-span,
+label {
+    margin: 20px 20px 15px 0;
+}
+
+/* Overview: overlay allowing player to see the overall status of their nation */
+
+#overview,
+.options-container,
+select,
+input[type=number],
+footer {
     font-size: 1rem;
 }
 
-/* UI sidebar menu where the player makes choices on purchases and such */
-.sidebar {
-    background-color: #f3f3f3;
-    width: 200px;
-    height: 100%;
-    margin-left: -200px;
-    transition: 1s;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    overflow-x: hidden;
+#nation-name,
+.options-container,
+.sidebar-close-btn,
+a {
+    color: #FF3131;
 }
 
-.sidebar-close-btn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
+#research-options {
+    margin-left: 15px;
 }
 
-/* Class applied with jQuery script to open and close the sidebar UI when 's' is pushed */
-.sidebar-toggle {
-    margin-left: 0;
+button,
+.jqvmap-label,
+input[type=number],
+select,
+footer {
+    font-weight: 600;
 }
 
-.nation-info-tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
+#day,
+#week,
+#month,
+#year {
+    font-weight: 900;
 }
 
-.nation-info-tooltip .nation-info-tooltip-text {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: #fff;
+#day,
+#week,
+#month,
+#year,
+.end-header,
+input[type=number],
+.authour-credit,
+select,
+footer {
+    color: #FFF;
+}
+
+select {
+    border-radius: 5px;
+    padding: 10px;
+}
+
+input[type=number] {
+    border: none;
+    border-bottom: 2px solid #FF3131;
+    line-height: 2;
+    margin: auto;
+}
+
+.options-container .cp-image {
+    height: 90px;
+    width: 70px;
+}
+
+.cp-image-rifle {
+    height: 90px;
+    width: 170px;
+}
+
+.agents-imprisoned,
+input[type=number],
+.sidebar .cp-image,
+button,
+footer {
+    display: block;
+}
+
+.hidden,
+.title-overlay,
+#game-over-titles,
+#end-titles-usa,
+#end-titles-russia,
+#victory-img-section {
+    display: none;
+}
+
+.sidebar .cp-image {
+    height: 60px;
+    width: 25%;
+}
+
+#story-scroll-text,
+#end-titles-usa,
+#end-titles-russia,
+#victory-img-section,
+.options-container div,
+.nation-select-title,
+.status-overlay-content {
     text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-    bottom: 150%;
+}
+
+/* Title overlay where game intro takes place: story scrolling text and animations */
+
+.title-overlay {
+    background-color: rgba(0, 0, 0, 0.1);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+.title-overlay,
+.status-overlay,
+.sidebar {
+    position: fixed;
+}
+
+.sidebar,
+.title-overlay,
+.status-overlay,
+.slider__inner {
+    height: 100%;
+}
+
+/* Darken the title overlay on load to show the story text in greater clarity. Adds mood also */
+
+.darken-overlay {
+    animation: darken-overlay 4s linear forwards;
+}
+
+/* Text and content inside / on top of the title overlay */
+
+.title-overlay-text {
+    color: #1E90FF;
+    font-size: 26px;
     left: 50%;
-    margin-left: -60px;
+    top: 40%;
+    transform: translate(-50%, -50%);
 }
 
-.nation-info-tooltip .nation-info-tooltip-text::after {
-    content: "";
+/* New class applied to the above to ensure victory screens have sufficient top margin */
+
+.new-top-setting {
+    top: 50%;
+}
+
+.radar,
+.sweep,
+.title-overlay-text,
+.status-overlay .status-closebtn,
+.sidebar-close-btn,
+.slider__inner {
     position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: black transparent transparent transparent;
 }
 
-.nation-info-tooltip:hover .nation-info-tooltip-text {
-    visibility: visible;
+/* Title screen & story text with animations to run */
+
+#story-scroll-text {
+    animation: story-scroll-text 50s linear forwards 5s;
+    height: calc(100vh + 550px);
 }
 
-/* Animation for the country name that runs when that nation is selected by user */
-.test-country-animation {
-    animation: go 1s both 2;
+#story-scroll-text,
+#end-titles-usa,
+#end-titles-russia {
+    line-height: 1.8;
+    transform: translateY(100%);
 }
 
-@keyframes go {
-    0% {
-        background-color: #fff;
+.title-overlay h2,
+.title-overlay h3,
+.options-container .cp-image .cp-image-rifle {
+    margin: 10px;
+}
+
+.intro-img {
+    height: 380px;
+}
+
+.bg-intro-img,
+.game-over-img {
+    width: 100vw;
+}
+
+/* Nation flags for country select and top right corner */
+
+.logo-usa,
+.logo-russia {
+    height: 80px;
+    width: 120px;
+}
+
+.status-overlay,
+.sidebar {
+    z-index: 1000;
+}
+
+.nation-img-usa,
+.nation-img-russia {
+    height: 320px;
+    width: 500px;
+}
+
+button,
+.status-closebtn,
+.nation-img-usa,
+.nation-img-russia,
+.slider__nav {
+    cursor: pointer;
+}
+
+.img-fade-out {
+    transition: 3s;
+}
+
+.nation-select-title {
+    color: #A80000;
+}
+
+@keyframes darken-overlay {
+    100% {
+        background-color: rgba(0, 0, 0, 0.88);
+    }
+}
+
+@keyframes story-scroll-text {
+    from {
+        transform: translateY(100%);
     }
 
-    75% {
-        background-color: #aa0000;
+    to {
+        transform: translateY(-100%);
+    }
+}
+
+@keyframes fade-in {
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-out {
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-color {
+    0% {
+        color: #1E90FF;
     }
 
     100% {
-        background-color: #fff;
+        opacity: 1;
+        color: #FF0000;
     }
 }
 
-#ru:hover {
-    background-color: #AA0000;
+.radar,
+.title-animation-1,
+.title-animation-1-5,
+.title-animation-2,
+.title-animation-3,
+.title-animation-4,
+.end-text-1,
+.end-text-2,
+.end-text-3,
+.authour-credit,
+#start-game-btn,
+#reload-btn,
+.img-fade-out,
+.victory-heading,
+.victory-img {
+    opacity: 0;
 }
 
-#cn:hover {
-    background-color: gold;
+.slow-reveal {
+    opacity: 0.8;
 }
 
-#us:hover {
-    background-color: dodgerblue;
+.title-animation-1,
+.title-animation-1-5 {
+    animation: fade-in-out 4s ease-in-out both;
 }
 
-button {
-    display: block;
+#start-game-btn {
+    animation: fade-in 4s ease-in-out both 4s;
 }
 
-.radio-options {
-    background-color: #f3f3f3;
+.title-animation-2,
+.title-animation-3,
+.title-animation-4 {
+    animation: fade-in-color 2s ease-in-out both;
 }
 
-.radio-options input {
-    display: block;
+.title-animation-1 {
+    animation-delay: 55s;
+}
+
+.title-animation-1-5 {
+    /* animation-delay: 3s; */
+    animation-delay: 58s;
+}
+
+.title-animation-2 {
+    /* animation-delay: 7s; */
+    animation-delay: 62s;
+}
+
+.title-animation-3 {
+    /* animation-delay: 9s; */
+    animation-delay: 64s;
+}
+
+.title-animation-4 {
+    /* animation-delay: 11s; */
+    animation-delay: 66s;
+}
+
+#start-game-btn {
+    /* animation-delay: 13s; */
+    animation-delay: 68s;
+}
+
+/* Sliding overlay used for displaying status report */
+
+.status-overlay {
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.9);
+    left: 0;
+    top: 0;
+    transition: 0.5s;
+    width: 0;
+}
+
+.status-overlay-content {
+    margin-top: 20px;
+}
+
+.status-img {
+    width: 110px;
+}
+
+.status-overlay .status-closebtn {
+    font-size: 60px;
+    right: 45px;
+    top: 20px;
+}
+
+/* UI action sidebar menu where the player takes action towards nations */
+
+.sidebar {
+    left: 0;
+    opacity: 0.9;
+    margin-left: -300px;
+    top: 0;
+    transition: 1s;
+    width: 300px;
+}
+
+body,
+select,
+.sidebar,
+input[type=number] {
+    background-color: #151515;
+}
+
+.sidebar-close-btn {
+    font-size: 48px;
+    margin-left: 50px;
+    right: 25px;
+    top: 0;
+}
+
+/* Class applied with jQuery script to open and close the sidebar UI when 's' is pushed */
+
+.open {
+    margin-left: 0;
+}
+
+/* Button styling: neon technological theme */
+
+#start-game-btn,
+#skip-intro-btn,
+#reload-btn,
+.reload-btn,
+.sidebar button,
+.game-calendar button,
+.options-container button {
+    background-color: transparent;
+    border-radius: 50px;
+    border: 3px solid #00D7C3;
+    margin: 15px;
+    padding: 8px;
+    text-transform: uppercase;
+    transition: all .15s ease-in-out;
+    width: 170px;
+}
+
+#skip-intro-btn {
+    margin: 4rem;
+}
+
+#start-game-btn,
+#reload-btn,
+.reload-btn,
+.sidebar button,
+.sidebar .cp-image {
+    margin: 30px auto;
+}
+
+.agents-imprisoned,
+.sidebar button {
+    margin: 18px auto;
+}
+
+#skip-intro-btn:hover,
+#start-game-btn:hover,
+#reload-btn:hover,
+.reload-btn:hover,
+.sidebar button:hover,
+.game-calendar button:hover,
+.options-container button:hover {
+    box-shadow: 0 0 10px 0 #00D7C3 inset, 0 0 20px 2px #00D7C3;
+}
+
+/* Sweetalert.js button styling for in-game alerts */
+
+.swal-button {}
+
+/* Ending titles: Not shown at start due to intro sequence running instead */
+
+@keyframes end-scroll-text {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(-100%);
+    }
+}
+
+#end-titles-usa,
+#end-titles-russia {
+    animation: end-scroll-text 5s linear forwards 5s;
+}
+
+.reveal {
+    animation: fade-in 4s ease-in-out both;
+}
+
+/* 
+    Setting the victory image to have a width set in percentages prevents cut off of any text at the top of the screen, caused by other content pushing the fixed container upwards. Targeting the image size - the largest element - offsets that element's impact on pushing the content upward. It prevents the image from being so large that it breaks out of the fixed height of its container.
+*/
+
+.victory-img {
+    transition: 3s;
+    width: 50%;
+}
+
+/* Game Over (defeated) screen */
+
+.end-header,
+.authour-credit {
+    font-size: 2.5rem;
+    text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.7);
+}
+
+/* Option menu elements - runs as a slider / carousel to prevent UI cluttering */
+
+.slider {
+    position: relative;
+}
+
+.slider__nav {
+    appearance: none;
+    backface-visibility: hidden;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 #333, 0 0 0 0 rgba(51, 51, 51, 0);
+    height: 12px;
+    margin: 1rem 12px 10% 12px;
+    outline-offset: -6px;
+    outline: 6px solid #CCC;
+    width: 12px;
+}
+
+.slider__nav:checked {
+    animation: check 0.4s linear forwards;
+}
+
+.slider__nav:checked:nth-of-type(1) ~ .slider__inner {
+    left: -2%;
+}
+
+.slider__nav:checked:nth-of-type(2) ~ .slider__inner {
+    left: -102%;
+}
+
+.slider__nav:checked:nth-of-type(3) ~ .slider__inner {
+    left: -204%;
+}
+
+.slider__nav:checked:nth-of-type(4) ~ .slider__inner {
+    left: -302%;
+}
+
+.slider__nav:checked:nth-of-type(5) ~ .slider__inner {
+    left: -402%;
+}
+
+.slider__nav:checked:nth-of-type(6) ~ .slider__inner {
+    left: -502%;
+}
+
+.slider__inner {
+    left: 0;
+    top: 85%;
+    transition: left 0.5s;
+    width: 600%;
+}
+
+.slider__contents {
+    flex-flow: column nowrap;
+    flex: 1;
+    padding: 3rem;
+}
+
+/* Animation that plays when radio slider is checked (clicked) */
+
+@keyframes check {
+    50% {
+        box-shadow: 0 0 0 12px #333, 0 0 0 36px rgba(51, 51, 51, 0.2);
+        outline-color: #333;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 #333, 0 0 0 0 rgba(51, 51, 51, 0);
+        outline-color: #333;
+    }
+}
+
+/* Animations governing the end titles screen & headings */
+
+.end-text-1 {
+    animation-delay: 5s;
+}
+
+.end-text-2 {
+    animation-delay: 7s;
+}
+
+.end-text-3 {
+    animation-delay: 9s;
+}
+
+.authour-credit {
+    animation-delay: 13s;
+}
+
+#reload-btn,
+.victory-img {
+    animation-delay: 16s;
+}
+
+/* Footer & copyright element */
+
+footer {
+    margin-top: 18.5%;
+    padding-bottom: 15px;
+}
+
+footer img {
+    height: 30px;
+    padding: 0 5px;
+    width: 30px;
+}
+
+/* Status open and close functionality */
+
+.status-open {
+    width: 100%;
 }

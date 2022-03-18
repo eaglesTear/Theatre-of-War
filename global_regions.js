@@ -5,7 +5,6 @@
 */
 
 const worldNations = [
-	"United Arab Emirates",
 	"Afghanistan",
 	"Antigua and Barbuda",
 	"Albania",
@@ -147,7 +146,7 @@ const worldNations = [
 	"Reunion",
 	"Romania",
 	"Serbia",
-	"Russian Federationß",
+	"Russian Federation",
 	"Rwanda",
 	"Saudi Arabia",
 	"Solomon Islands",
@@ -177,6 +176,7 @@ const worldNations = [
 	"Tanzania",
 	"Ukraine",
 	"Uganda",
+    "United Arab Emirates",
 	"United States of America",
 	"Uruguay",
 	"Uzbekistan",
