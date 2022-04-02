@@ -16,8 +16,6 @@ const territoriesConqueredByRegion = [];
 const allNationsAsObjects = [];
 // Set array ready to receive all nation / country codes in the JQVMap object (182 total)
 const allNationsCodeArray = [];
-// Set array containing all nations infiltrated by agents so data can be viewed onclick
-const infiltratedNations = [];
 
 // This variable stores the location (nation) of any captured agents
 let captureRegion;

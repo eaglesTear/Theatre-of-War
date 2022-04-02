@@ -123,7 +123,11 @@ nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
         playerNation.status.govtApprovalRating -= 10;
         const gdpBeforeStrike = playerNation.gdp;
         playerNation.gdp -= RNG(10000000000, 30000000000);
-        swal("Rebuilding Costs Allocated", `GDP: -$${gdpBeforeStrike - playerNation.gdp}`);
+        swal({
+            title: "You Suffered a Nuclear Strike",
+            text: `Rebuilding Costs Allocated: GDP -$${gdpBeforeStrike - playerNation.gdp}`,
+            icon: "warning",
+        });
         //monitorNationGovtApproval();
     } else if (enemyIsNuked) {
         territoriesConqueredByCode.push(code);
@@ -166,7 +170,6 @@ particleCannonStrike = (region, code) => {
 
 /* 
     Determine when the player's forces arrive at a global destination. A new variable sets the time of arrival to be in a week's time, using whatever day the game is currently on and then tacking on + 7 days. A function is then run constantly, checking whether this new 'military arrival day' matches with the current day. In short, if the current day is equal to the future day, the troops are determined to arrive. The player is then able to attack now that the troops are in theatre.
-
     This script determines the travel time to all destinations for various forces. It takes 4 parameters: 
     
     'region' determines the destination country of the sent units, which is itself defined via JQVMaps objects. 
@@ -319,7 +322,7 @@ espionageSuccessful = (region) => {
         }
     }
     playerNation.unitTechAndSkillRating.infiltration += 3;
-    infiltratedNations.push(region);
+    playerNation.surveillance.infiltratedNations.push(region);
 }
 
 setProbabilityOfAgentCapture = () => {
@@ -495,7 +498,6 @@ ransomSuccessful = (ransom, nationChosenForRansomPayment) => {
     swal({
         title: "Ransom Paid",
         text: `Your agent has been released from ${nationChosenForRansomPayment}. 
-
                 Field Agents: +1 
                 GDP: - $${ransom}`,
         icon: "success",
@@ -513,7 +515,6 @@ ransomDenied = (ransom, nationChosenForRansomPayment) => {
     swal({
         title: "Ransom Request Denied",
         text: `You have refused to pay $${ransom} to ${nationChosenForRansomPayment}. 
-
                 Your agent will continue to be held until you order a spec-ops team to release them, negotiate a release, or invade this nation.`,
         icon: "error",
     });
@@ -1088,7 +1089,7 @@ awardResources = () => {
 // Initialise nations as objects 
 class Nation {
 
-    constructor(name, gdp, govt, population, diplomacy, tradeDeals, alliances, oilExportDeals, intelCollaborationDeals, researchers, oilProduction, oilConsumption, defenceBudget, weaponStocks, air, tanks, naval, infantry, fieldAgents, satellites, airTech, armourTech, infantrySkill, navalTech, infiltration, nuclearWeapons, missileShield, aggressionLevel, stance, resistance, govtApprovalRating) {
+    constructor(name, gdp, govt, population, diplomacy, tradeDeals, alliances, oilExportDeals, intelCollaborationDeals, researchers, oilProduction, oilConsumption, defenceBudget, weaponStocks, air, tanks, naval, infantry, fieldAgents, satellites, infiltratedNations, airTech, armourTech, infantrySkill, navalTech, infiltration, nuclearWeapons, missileShield, aggressionLevel, stance, resistance, govtApprovalRating) {
 
         this.name = name;
         this.gdp = gdp - defenceBudget;
@@ -1116,7 +1117,8 @@ class Nation {
         };
         this.surveillance = {
             fieldAgents: fieldAgents,
-            satellites: satellites
+            satellites: satellites,
+            infiltratedNations: []
         };
         this.unitTechAndSkillRating = {
             airTech: airTech,
@@ -1179,6 +1181,7 @@ const USA = new Nation(
     2245500, // Infantry
     0, // Field agents
     0, // Satellites
+    [], // Infiltrated Nations
     80.2, // Air tech
     92.7, // Armour tech
     85, // Infantry skill
@@ -1213,6 +1216,7 @@ const Russia = new Nation(
     1350000, // Infantry
     0, // Field agents
     0, // Satellites
+    [], // Infiltrated Nations
     20, // Air tech
     30.5, // Armour tech
     15.2, // Infantry skill

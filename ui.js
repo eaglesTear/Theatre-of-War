@@ -163,21 +163,23 @@ $(document).ready(() => {
     });
 
 
-    /* Country selection animations with a conditional statement to check whether the player's selected country has been chosen. If the var 'playerSelectedNation' is defined, then the nation has already been selected; thus the player will no longer be able to select another nation and the rest of the code is not executed. */
+/* 
+    Country selection animations with a conditional statement to check whether the player's selected country has been chosen. If the var 'playerSelectedNation' is defined, then the nation has already been selected; thus the player will no longer be able to select another nation and the rest of the code is not executed. 
+*/
 
     // UI
 
     renderNationSelectScreen = () => {
         $("html, body").toggleClass("lock-display");
         $("#skip-intro-btn, #story-scroll-text, .main-titles").remove();
-        $(".title-overlay").css("display", "none");
+        $(".title-overlay").removeClass("displayBlock");
         renderNationSelectImages();
         $(".title-screen").append("<h1 class='nation-select-title wargate'>Select Your Nation</h1>");
     }
 
     renderNationSelectImages = () => {
 
-        $(".title-overlay").css("display", "block");
+        $(".title-overlay").addClass("displayBlock");
         $(".title-screen").append("<div id='nation-select'>");
 
         $("#nation-select")
@@ -259,7 +261,6 @@ $(document).ready(() => {
     addRadarWithAlert = () => {
         $(".radar").addClass("slow-reveal");
         systemsOnline.play();
-        swal("Tactical Map Online", "Time to begin operations, commander.");
     }
 
     // timed with css transitions and animations
@@ -271,7 +272,8 @@ $(document).ready(() => {
 
         setTimeout(() => {
             $("img#russia").remove();
-            $("img#usa").css("margin", "auto");
+            //$("img#usa").css("margin", "auto");
+            $("img#russia").addClass("marginAuto");
             $(".nation-select-title").text(playerNation.name);
             removeTitleOverlay();
         }, 3000);
@@ -289,7 +291,8 @@ $(document).ready(() => {
 
         setTimeout(() => {
             $("img#usa").remove();
-            $("img#russia").css("margin", "auto");
+            //$("img#russia").css("margin", "auto");
+            $("img#usa").addClass("marginAuto");
             $(".nation-select-title").text(playerNation.name);
             removeTitleOverlay();
         }, 3000);
@@ -315,7 +318,7 @@ $(document).ready(() => {
     //Once all title and nation select stages have concluded, clear title overlay from DOM
     removeTitleOverlay = () => {
         setTimeout(() => {
-            $(".title-overlay").css("display", "none");
+            $(".title-overlay").removeClass("displayBlock");
         }, 3000);
     }
 
@@ -340,7 +343,7 @@ $(document).ready(() => {
                 scrollToPanel();
                 // Re-enable scrolling after last animation & intro has ended
                 $("html, body").toggleClass("lock-display");
-            }, 4500);
+            }, 3200);
         }, 4000);
     }
 
@@ -352,14 +355,14 @@ $(document).ready(() => {
             }, 3000);
             setTimeout(() => {
                 controlPanelTutorial();
-            }, 5000);
+            }, 4000);
         }, 4000);
     }
 
     mapTutorial = () => {
 
-        swal("Welcome to the Theatre of War \n\nTactical Map", "This is where you'll enter the Theatre of War");
-        $(".bg-intro-img").remove();
+        $(".options-container").addClass("displayBlock");
+        swal("Welcome to the Theatre of War \n\nTactical Map", "This is your Theatre of War");
     }
 
     controlPanelTutorial = () => {
@@ -390,11 +393,11 @@ $(document).ready(() => {
         setTimeout(() => {
             $(".sidebar").toggleClass("open");
             setTimeout(() => {
-                swal("Command Menu", "This is where you will make decisions that will change the world. Forever. Use this button (or the S key) to give orders. Click on the button, and then click on an area of the world map to execute them.");
+                swal("Command Menu", "This is where you will make decisions that will change the world. Forever. Use this 'commands' button (or the S key) to give orders. Click on the button, and then click on an area of the world map to execute them.");
                 setTimeout(() => {
                     endTutorialAndStartGame();
                 }, 10000);
-            }, 3000);
+            }, 1200);
         }, 1000);
     }
 
@@ -426,11 +429,13 @@ $(document).ready(() => {
         
         setTimeout(() => {
             removeNationSelectElements();
+            $(".options-container").addClass("displayBlock");
         }, 8000);
     }
 
     // Load nation select screen when skip intro or start game button is pressed
     $("#skip-intro-btn, #start-game-btn").click(() => {
+        $(".bg-intro-img").remove();
         introTrack.pause();
         mainTitleTrack.pause();
         explosion.play();
@@ -477,7 +482,7 @@ $(document).ready(() => {
         // main titles: remove after testing
         $("#story-scroll-text, .main-titles, #skip-intro-btn").remove(); 
         $("html, body").toggleClass("lock-display");
-        $(".title-overlay").css("display", "block");
+        $(".title-overlay").addClass("displayBlock");
 
         runEndTitles();
     }
@@ -489,11 +494,13 @@ $(document).ready(() => {
 
         if (playerNation.name === "Russian Federation") {
             $("#end-titles-russia").css("display", "block");
+            $("#end-titles-russia").addClass("displayBlock");
             $(".title-overlay-text").addClass("new-top-setting");
             playEndTheme(ruAnthem);
             insertVictoryImage();
         } else {
-            $("#end-titles-usa").css("display", "block");
+            // $("#end-titles-usa").css("display", "block");
+             $("#end-titles-usa").addClass("displayBlock");
             playEndTheme(usAnthemInstrumental);
             insertVictoryImage();
         }

@@ -23,22 +23,21 @@ BONUS ***********
  
  ******** Notes post completion **********
  
- better intro image that matches the story
  for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
  put link to github readme in html when finished
  check anything to do with objects and addition / subtraction operators
- 
 check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
-adapt image and text and intro so not all in single sentences
-titles to use glow like on game over screen
 make sure all comments are in right place and make sense
+add real world stats and build times to the game
+sort styling of victory screens
+end titles credits a little too big
+remove c panel on victory screen or lock to prevent?
  
- DEBUG / REFACTOR ***********
-
+DEBUG / REFACTOR ***********
 mark all events that cause increase and decrease in approval rating etc
-try not to use css in the jquery. use classes instead
 modulate functions further
+displayblock class not working due to css inheritance - refactor css
 
 //    const arr = ["a", "b", "c"];
     //     

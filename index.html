@@ -23,6 +23,8 @@
 
 <body class="lock-display">
 
+    <!--    <img class="bg-intro-img" src="images/theater-of-war.jpg" alt="theatre of war main image" />-->
+
     <!-- Calendar / time passing displays & game option buttons -->
 
     <div class="game-calendar">
@@ -51,8 +53,6 @@
         <div class="sweep"></div>
     </div>
 
-    <!-- <img class="bg-intro-img" src="images/theater-of-war.jpg" alt="theatre of war main image" /> -->
-
     <!-- Title overlay displaying game's story and title screen via css animations -->
 
     <div class="title-overlay darken-overlay">
@@ -61,21 +61,27 @@
             <div class="title-screen">
                 <div id="story-scroll-text">
                     In 2022, the world teeters on the brink of destruction.<br>
-                    An unexpected and violent coup has taken place in China.<br>
-                    Their nuclear stockpile is distributed globally.<br>
-                    Nuclear weapons are now widely available.<br>
-                    Many nations have armed to unprecedented levels.<br>
-                    Only two nations stand ready to restore order.<br>
-                    Restore order as the United States.<br>
-                    <img src="images/armageddon.jpg" alt="image of destroyed city" class="intro-img" /><br>
-                    Or bring the world to heel as the resurgent Russian Federation.<br>
-                    The United States, and Russia. Who will you lead?<br>
+
+                    An unexpected and violent coup has taken place in China, and their nuclear stockpile has become unaccounted for and distributed globally by a secret society aiming to bring about a nuclear future for currently unknown reasons.<br><br>
+
+                    Nuclear weapons are now widely available. Access to the world's most powerful arsenals has emboldened even the smallest nations, whom have now militarised to unprecedented levels. Conflict has become the new diplomacy.<br><br>
+
+                    And the new diplomacy is war.<br><br>
+
+                    <img src="images/burning-city.jpg" alt="image of destroyed city" class="intro-img" /><br><br>
+
+                    Only two nations stand ready to act.<br><br>
+
+                    Bring order to chaos as the United States of America.<br><br>
+
+                    Or bring fear to chaos as the resurgent Russian Federation.<br><br>
+                    The United States. Russia. Who will you lead?<br><br>
                     Whichever country rises up, the same reality exists...
                 </div>
+
                 <div class="main-titles">
-                    <!-- <img src="images/theater-of-war.jpg" class="title-animation-4 intro-img" alt="warfare image with soldiers" /> -->
-                    <h2 class="title-animation-1">In the 21st century</h2>
-                    <h2 class="title-animation-1-5">There is only the...</h2>
+                    <h2 class="title-animation-1">A Ryan Hadley game</h2>
+                    <h2 class="title-animation-1-5">The...</h2>
                     <h1 class="wargate">
                         <span class="title-animation-2">Theatre</span>
                         <span class="title-animation-3">of</span>
@@ -94,23 +100,21 @@
                     <!-- Credits -->
 
                     <h2>Music</h2>
-                    <p>
-                        <i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and <i>Conflict</i> byAlexandr Zhelanov
-                    </p>
-                    <p><i>Dark</i> by Pheonton</p>
-                    <p><i>Laments Of The War</i> by Cethiel</p>
-                    <p><i>Snow-Covered-Banner</i> by İlker Yalçıner 2018</p>
-                    <p><i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021</p>
-                    <p><i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia)</p>
-                    <p>
-                        <i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020
-                    </p>
-                    <p>Licensed under CC BY 3.0 Creative Commons</p>
+                    <i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and <i>Conflict</i> byAlexandr Zhelanov <br>
+                    <i>Dark</i> by Pheonton <br>
+                    <i>Laments Of The War</i> by Cethiel <br>
+                    <i>Snow-Covered-Banner</i> by İlker Yalçıner 2018 <br>
+                    <i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021 <br>
+                    <i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia) <br>
+
+                    <i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020 <br>
+
+                    Licensed under CC BY 3.0 Creative Commons <br>
 
                     <h2>Fonts</h2>
-                    <p><i>Wargate</i> by Arterfak Project</p>
-                    <p>Hosted on Open Game Art</p>
-                    <p>full credits also found on the readme here: link</p>
+                    <i>Wargate</i> by Arterfak Project <br>
+                    Hosted on Open Game Art <br>
+                    full credits also found on the readme here: link
 
                 </div>
 
@@ -151,8 +155,8 @@
                         <span class="end-text-2">of</span>
                         <span class="end-text-3">War</span>
                     </h2>
-                    <h3>A
-                        <a href="https://github.com/eaglesTear" class="authour-credit">
+                    <h3 class="authour-credit">A
+                        <a href="https://github.com/eaglesTear">
                             Ryan Hadley
                         </a> game
                     </h3>
@@ -184,7 +188,7 @@
             <img src="images/soldiers.png" class="cp-image" alt="soldiers">
             <button type="button" id="deploy-btn">Deploy Military</button>
             <button type="button" id="attack-btn">Attack</button>
-            <select class="agents-imprisoned hidden"></select>
+            <select class="agents-imprisoned"></select>
             <button type="button" id="rescue-btn">Rescue</button>
             <button type="button" id="conscription-btn">Conscription</button>
         </div>
@@ -391,6 +395,7 @@
             Copyright &copy;
             <script>
                 document.write(new Date().getFullYear());
+
             </script>
             Ryan Hadley (eaglesTear)
             <a href="https://www.linkedin.com/in/ryan-had">

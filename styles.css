@@ -41,6 +41,10 @@ select {
     font-family: "Wargate Normal", "Libre Franklin", sans-serif;
 }
 
+.main-titles .wargate {
+    font-size: 5rem;
+}
+
 /* Radar with sweep animation on tactical map - credit to Ana Tudor */
 
 .radar,
@@ -93,13 +97,6 @@ select {
     height: 100vh;
 }
 
-#vmap,
-.options-container,
-intro-img,
-.title-overlay,
-.status-overlay-content {
-    width: 100%;
-}
 
 /* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
 
@@ -217,13 +214,13 @@ footer {
 select {
     border-radius: 5px;
     padding: 10px;
+    width: 360px;
 }
 
 input[type=number] {
     border: none;
     border-bottom: 2px solid #FF3131;
     line-height: 2;
-    margin: auto;
 }
 
 .options-container .cp-image {
@@ -236,15 +233,8 @@ input[type=number] {
     width: 170px;
 }
 
+/*.options-container,*/
 .agents-imprisoned,
-input[type=number],
-.sidebar .cp-image,
-button,
-footer {
-    display: block;
-}
-
-.hidden,
 .title-overlay,
 #game-over-titles,
 #end-titles-usa,
@@ -356,7 +346,8 @@ footer {
 .logo-usa,
 .logo-russia {
     height: 80px;
-    width: 120px;
+    margin-top: 10px;
+    width: 80px;
 }
 
 .status-overlay,
@@ -449,7 +440,7 @@ button,
 
 .title-animation-1,
 .title-animation-1-5 {
-    animation: fade-in-out 4s ease-in-out both;
+    animation: fade-in-out 5s ease-in-out both;
 }
 
 #start-game-btn {
@@ -568,6 +559,7 @@ input[type=number] {
 
 #skip-intro-btn {
     margin: 4rem;
+    width: 120px;
 }
 
 #start-game-btn,
@@ -612,6 +604,7 @@ input[type=number] {
 #end-titles-usa,
 #end-titles-russia {
     animation: end-scroll-text 5s linear forwards 5s;
+    font-size: 1.4rem;
 }
 
 .reveal {
@@ -627,11 +620,19 @@ input[type=number] {
     width: 50%;
 }
 
-/* Game Over (defeated) screen */
+/* Game Over (defeated) screen and main title styling */
 
-.end-header,
-.authour-credit {
+.end-header {
     font-size: 2.5rem;
+}
+
+#victory-img-section .wargate {
+    font-size: 3rem;
+}
+
+.main-titles .wargate,
+#victory-img-section .wargate,
+.end-header {
     text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.7);
 }
 
@@ -744,8 +745,32 @@ footer img {
     width: 30px;
 }
 
-/* Status open and close functionality */
+/* 
+    Status open and close functionality. 'displayBlock' and 'marginAuto' and 'game-over-transition' classes need to be at bottom of the cascade to prevent unwanted effects when JS is applied. Otherwise, the classes will activate where they are in the cascade, so any rules applied below them will override the class every time.
+*/
 
-.status-open {
+#vmap,
+.status-open,
+.options-container,
+intro-img,
+.title-overlay,
+.status-overlay-content {
     width: 100%;
+}
+
+input[type=number],
+.sidebar .cp-image,
+.displayBlock,
+button,
+footer {
+    display: block;
+}
+
+input[type=number],
+.marginAuto {
+    margin: auto;
+}
+
+.game-over-transition {
+    transition: 5s;
 }

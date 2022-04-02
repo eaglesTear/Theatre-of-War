@@ -55,10 +55,9 @@ gameState.time;
 
 // CAN SWITCH OFF CSS DISPLAY NONE & REMOVE DISPLAY BLOCK??
 intro = () => {
-    $(".title-overlay").css("display", "block");
+    $(".title-overlay").addClass("displayBlock");
     introTrack.play();
 }
-
 //intro();
 
 // Show initial status
@@ -254,8 +253,7 @@ gameoverDefeated = (playerIsNuked) => {
 
     $("#removable-status-content").remove();
     $(".status-closebtn").remove();
-    $(".status-overlay").css("width", "100%");
-    $(".status-overlay").css("transition", "5s")
+    $(".status-overlay").addClass("status-open game-over-transition")
         .append(`<h2 class="end-header">GAME OVER</h2>`)
         .append(`<button type="button" class="reload-btn" onclick="reloadGame()">Reload</button>`);
     if (gameState.playerNuked) {
@@ -366,6 +364,7 @@ $(document).ready(() => {
             RNG(5, 0),
             // Set a random amount of satellites
             RNG(50, 0),
+            [],
             // Air tech
             RNG(100, 10),
             // Armour tech
@@ -509,7 +508,7 @@ $(document).ready(() => {
 
 
     // Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
-    
+
     /* 
         All 5 params are ESSENTIAL for nuclear function to run as they are passed between multiple functions to achieve the desired result.
         Currently set to:
@@ -517,9 +516,9 @@ $(document).ready(() => {
             50% chance of cyber attack
             10% chance of nuclear attack
     */
-    
+
     determineAttackTypeOnPlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
-        
+
         if (probability(0.40)) {
             swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
             nationsAtWar();
@@ -546,12 +545,12 @@ $(document).ready(() => {
     }
 
     //After a certain random time: one week & one month (ms) 604800000, 2629800000
-    
+
     // setInterval(nationAttacksPlayerAfterRandomTime, RNG(5000, 4000));
 
     // Don't need definenationstance if being called every second above??
     // Nation begins military build up
-    
+
     const militaryCoup = () => {
 
         const randomNation = Math.floor(Math.random() * allNationsAsObjects.length);
@@ -667,7 +666,7 @@ $(document).ready(() => {
     ];
 
     // COMPLETE EVENT WHEN FINISHED
-    
+
     runRandomWorldEvent = () => {
 
         const randomFunction = Math.floor(Math.random() * worldEvents.length);
@@ -689,7 +688,7 @@ $(document).ready(() => {
         $("#nation-name").text(playerNation.name);
     }
     displayNationNameOnStatus();
-
+    
     $('#vmap').vectorMap({
         backgroundColor: '#151515',
         borderColor: '#12CEFC',
@@ -725,22 +724,28 @@ $(document).ready(() => {
             nationSelect.play();
             showStatusOnPlayerNationSelect(region);
 
-            // If name in object matches region, show it's data in a swal
-            for (let i = 0; i < allNationsAsObjects.length; i++) {
+            // First 'if' prevents code running on the player's selected nation
+            
+            if (region !== playerNation.name) {
+                // If name in object matches region, show it's data in a swal
+                for (let i = 0; i < allNationsAsObjects.length; i++) {
 
-                if (allNationsAsObjects[i].name === region) {
-                    targetNation = allNationsAsObjects[i];
+                    if (allNationsAsObjects[i].name === region) {
+                        targetNation = allNationsAsObjects[i];
 
-                    // Data for nation is displayed only if nation has been infiltrated
-                    infiltratedNations.forEach(nation => {
-                        if (targetNation.name === nation) {
-                            const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
-                            swal(stringifiedNationInfo);
-                        }
-                    });
+                        // Data for nation is displayed only if nation has been infiltrated
+                        playerNation.surveillance.infiltratedNations.forEach(nation => {
+                            if (targetNation.name === nation) {
+                                const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
+                                swal(stringifiedNationInfo);
+                            } else {
+                                swal("No Intel on " + region, "Send agents or use satellites to spy.");
+                            }
+                        });
 
-                    // User-enabled options
-                    playerActions(region, code);
+                        // User-enabled options
+                        playerActions(region, code);
+                    }
                 }
             }
 

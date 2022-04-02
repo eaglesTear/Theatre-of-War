@@ -1,4 +1,4 @@
-// ********** Globals governing game music, voice and sfx **********
+// ********** Globals script governing game music, voice and sfx (directory: sound) **********
 
 // Initialise main game themes and sfx (.mp3)
 
@@ -42,7 +42,13 @@ const enemyEliminated = new Audio("sound/ai-voice/EnemyEliminated.ogg");
 const unitReady = new Audio("sound/ai-voice/UnitReady.ogg");
 const upgradeComplete = new Audio("sound/ai-voice/UpgradeComplete.ogg");
 
-// Vars & code necessary for a self-repeating in-game tracklist
+/* 
+    Vars & code necessary for a self-repeating in-game tracklist.
+    
+    Here, I create a new audio object without a source, as this will be set by the function below. 'currenttrack' will act as an index for the 'inGameTracklist' array, so that each track can be played in succession. See below 'playinGameTracks' function.
+    
+    The 'inGameTracklist' array contains all the game's playing stage music. It can be added to anytime, or reduced, without needing to change any other code in this script.
+*/
 
 const inGameTrack = new Audio();
 let currentTrack = 0;
@@ -60,9 +66,11 @@ const inGameTracklist = [
     "sound/music/tensions.mp3"
 ];
 
-// ES6 destructure for music - too loud by default
-
-[gameOverTrack.volume,  inGameTrack.volume] = [0.5, 0.5];
+/* 
+    Get the length of the tracklist above and store in a const.
+    
+    Afterwards, a function is defined that takes one index parameter which denotes the position of the current playing track. The 'inGameTrack' new Audio object then has its source set to the song array and index, initially at inGameTracklist[0] - or the first track. That (first) track is then played. 
+*/
 
 const inGameTracklistLength = inGameTracklist.length;
 
@@ -72,7 +80,12 @@ playinGameTracks = (index) => {
 }
 
 /* 
-    If current track being played is the last one, the track number is reset to 0 and the tracklist will loop in it's entirety from the beginning of the tracklist array.
+    To achieve a continuous tracklist, an event listener is added to the in-game tracks. When a track has ended, the index of that track is incremeted by one.
+    
+    A control flow then checks whether the current track (index) is equal to the length of the full tracklist. If so, that must be the last track in the list and thus the current track (index) requires resetting to 0, so that the starting track can now loop and play again.
+    Otherwise, once one track has ended, the next one plays, following the incremented index.
+    
+    Generally, if the current track being played is the last one, the track number is reset to 0 and the tracklist will loop in it's entirety from the beginning of the tracklist array.
 */
 
 inGameTrack.addEventListener("ended", () => {
@@ -86,3 +99,7 @@ inGameTrack.addEventListener("ended", () => {
         playinGameTracks(currentTrack);
     }
 });
+
+// ES6 destructure for music & sfx volume - too loud for myself by default. User can modify to suit
+
+[gameOverTrack.volume,  inGameTrack.volume] = [0.5, 0.5];
