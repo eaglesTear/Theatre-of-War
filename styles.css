@@ -27,8 +27,8 @@ body,
 a {
     text-decoration: none;
 }
-
-/* Fonts used in the game - 'wargate' is a military font class used for certain headers */
+/* font-family: 'Amethysta', serif; */
+/* Fonts used in the game: 'wargate' is a military-style font class used for certain headers */
 
 body:not(.wargate),
 select {
@@ -37,12 +37,13 @@ select {
 }
 
 .wargate {
-    color: #FF0000;
-    font-family: "Wargate Normal", "Libre Franklin", sans-serif;
+    color: #000;
+    font-family: "Wargate Normal", sans-serif;
+    letter-spacing: .1em;
 }
 
 .main-titles .wargate {
-    font-size: 5rem;
+    font-size: 4.5rem;
 }
 
 /* Radar with sweep animation on tactical map - credit to Ana Tudor */
@@ -96,7 +97,6 @@ select {
 .bg-intro-img {
     height: 100vh;
 }
-
 
 /* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
 
@@ -205,7 +205,6 @@ footer {
 #year,
 .end-header,
 input[type=number],
-.authour-credit,
 select,
 footer {
     color: #FFF;
@@ -233,13 +232,13 @@ input[type=number] {
     width: 170px;
 }
 
-/*.options-container,*/
+.options-container,
 .agents-imprisoned,
 .title-overlay,
 #game-over-titles,
-#end-titles-usa,
-#end-titles-russia,
-#victory-img-section {
+.end-titles-usa,
+.end-titles-russia,
+.victory-img-section {
     display: none;
 }
 
@@ -249,9 +248,9 @@ input[type=number] {
 }
 
 #story-scroll-text,
-#end-titles-usa,
-#end-titles-russia,
-#victory-img-section,
+.end-titles-usa,
+.end-titles-russia,
+.victory-img-section,
 .options-container div,
 .nation-select-title,
 .status-overlay-content {
@@ -290,8 +289,7 @@ input[type=number] {
 /* Text and content inside / on top of the title overlay */
 
 .title-overlay-text {
-    color: #1E90FF;
-    font-size: 26px;
+    color: #FFD700;
     left: 50%;
     top: 40%;
     transform: translate(-50%, -50%);
@@ -316,12 +314,13 @@ input[type=number] {
 
 #story-scroll-text {
     animation: story-scroll-text 50s linear forwards 5s;
-    height: calc(100vh + 550px);
+    height: calc(100vh + 600px);
 }
 
 #story-scroll-text,
-#end-titles-usa,
-#end-titles-russia {
+.end-titles-usa,
+.end-titles-russia {
+    font-family: 'Amethysta', serif;
     line-height: 1.8;
     transform: translateY(100%);
 }
@@ -333,7 +332,9 @@ input[type=number] {
 }
 
 .intro-img {
+    border-radius: 20px;
     height: 380px;
+    filter: grayscale(1);
 }
 
 .bg-intro-img,
@@ -384,6 +385,7 @@ button,
 }
 
 @keyframes story-scroll-text {
+    
     from {
         transform: translateY(100%);
     }
@@ -405,14 +407,28 @@ button,
     }
 }
 
-@keyframes fade-in-color {
+/* Fire animation applied to 'war' in main titles text (adapted from an idea by Antti Nyman) */
+    
+@keyframes flame {
+    
     0% {
-        color: #1E90FF;
+        text-shadow: 0 0 20px #fefcc9,
+            10px -10px 30px #feec85,
+            -20px -20px 40px #ffae34,
+            20px -40px 50px #ec760c,
+            -20px -60px 60px #cd4606,
+            0 -80px 70px #973716,
+            10px -90px 80px #451b0e;
     }
 
     100% {
-        opacity: 1;
-        color: #FF0000;
+        text-shadow: 0 0 20px #fefcc9,
+            10px -10px 30px #fefcc9,
+            -20px -20px 40px #feec85,
+            22px -42px 60px #ffae34,
+            -22px -58px 50px #ec760c,
+            0 -82px 80px #cd4606,
+            10px -90px 80px #973716;
     }
 }
 
@@ -440,45 +456,37 @@ button,
 
 .title-animation-1,
 .title-animation-1-5 {
-    animation: fade-in-out 5s ease-in-out both;
-}
-
-#start-game-btn {
-    animation: fade-in 4s ease-in-out both 4s;
+    animation: fade-in-out 4s ease-in-out both;
 }
 
 .title-animation-2,
 .title-animation-3,
 .title-animation-4 {
-    animation: fade-in-color 2s ease-in-out both;
+    animation: fade-in 2s ease-in-out both, flame 0.65s ease-in-out 70s infinite alternate;
 }
 
 .title-animation-1 {
-    animation-delay: 55s;
+    animation-delay: 54s;
 }
 
 .title-animation-1-5 {
-    /* animation-delay: 3s; */
     animation-delay: 58s;
 }
 
 .title-animation-2 {
-    /* animation-delay: 7s; */
     animation-delay: 62s;
 }
 
 .title-animation-3 {
-    /* animation-delay: 9s; */
     animation-delay: 64s;
 }
 
 .title-animation-4 {
-    /* animation-delay: 11s; */
     animation-delay: 66s;
 }
 
 #start-game-btn {
-    /* animation-delay: 13s; */
+    animation: fade-in 4s ease-in-out both;
     animation-delay: 68s;
 }
 
@@ -601,14 +609,25 @@ input[type=number] {
     }
 }
 
-#end-titles-usa,
-#end-titles-russia {
+.end-titles-usa,
+.end-titles-russia {
     animation: end-scroll-text 5s linear forwards 5s;
-    font-size: 1.4rem;
+}
+
+.title-overlay-text,
+.end-titles-usa,
+.end-titles-russia,
+.victory-heading,
+.authour-credit {
+    font-size: 1.3rem;
 }
 
 .reveal {
     animation: fade-in 4s ease-in-out both;
+}
+
+.reveal-flame {
+    animation: flame 0.65s ease-in-out infinite alternate 10s, fade-in 4s ease-in-out both;
 }
 
 /* 
@@ -626,12 +645,12 @@ input[type=number] {
     font-size: 2.5rem;
 }
 
-#victory-img-section .wargate {
-    font-size: 3rem;
+.victory-img-section .wargate {
+    font-size: 3.5rem;
 }
 
 .main-titles .wargate,
-#victory-img-section .wargate,
+.victory-img-section .wargate,
 .end-header {
     text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.7);
 }

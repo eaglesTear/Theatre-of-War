@@ -4,17 +4,7 @@
     To avoid this, you can do something like ATK / DEF * WEAPON_DAMAGE This will scale more gradually when ATK or DEF are increased and allow a weak attacker to damage a creature with strong DEF.
 
     graphics / fx / sfx / ui *************************************
-    
-    https://soundcloud.com/gundatsch
-    https://soundcloud.com/alexandr-zhelanov
-    https://ilkeryalciner.bandcamp.com/
-    www.youtube.com/c/Tadon
-    https://airyluvs.com/
-    http://creativecommons.org/licenses/by/3.0/
-    https://arterfakproject.com/
-    https://opengameart.org/
-        
-                
+                   
 BONUS ***********
     
  countries taken over can have bases built on - more bases have perks, faster unit travel etc
@@ -24,20 +14,19 @@ BONUS ***********
  ******** Notes post completion **********
  
  for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
+ in loving memory for all those innocent lives lost in both Russia and Ukraine copyright 2022
  put link to github readme in html when finished
  check anything to do with objects and addition / subtraction operators
 check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
+
 add real world stats and build times to the game
-sort styling of victory screens
-end titles credits a little too big
-remove c panel on victory screen or lock to prevent?
+add all commented functions to the game - all code must be in play
  
 DEBUG / REFACTOR ***********
 mark all events that cause increase and decrease in approval rating etc
 modulate functions further
-displayblock class not working due to css inheritance - refactor css
 
 //    const arr = ["a", "b", "c"];
     //     

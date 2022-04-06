@@ -1,7 +1,7 @@
 // Globals
 
 // Player's selection will decide the value of this variable - undefine when ready to deploy
-let playerNation = Russia;
+let playerNation = USA;
 
 playerNation.specialWeapons.nuclearWeapons = 10; // DELETE WHEN FINISHED
 playerNation.specialWeapons.missileShield = 1; // DELETE WHEN FINISHED
@@ -58,7 +58,7 @@ intro = () => {
     $(".title-overlay").addClass("displayBlock");
     introTrack.play();
 }
-//intro();
+intro();
 
 // Show initial status
 displayMainStatus();
@@ -725,21 +725,29 @@ $(document).ready(() => {
             showStatusOnPlayerNationSelect(region);
 
             // First 'if' prevents code running on the player's selected nation
-            
+
             if (region !== playerNation.name) {
+
                 // If name in object matches region, show it's data in a swal
+
                 for (let i = 0; i < allNationsAsObjects.length; i++) {
 
                     if (allNationsAsObjects[i].name === region) {
                         targetNation = allNationsAsObjects[i];
 
                         // Data for nation is displayed only if nation has been infiltrated
+
                         playerNation.surveillance.infiltratedNations.forEach(nation => {
-                            if (targetNation.name === nation) {
+
+                            const noIntelAlert = swal(`No Intel on ${region}`, "Send agents or use satellites to spy.");
+
+                            if (playerNation.surveillance.infiltratedNations.length === 0) {
+                                noIntelAlert;
+                            } else if (targetNation.name === nation) {
                                 const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
                                 swal(stringifiedNationInfo);
                             } else {
-                                swal("No Intel on " + region, "Send agents or use satellites to spy.");
+                                noIntelAlert;
                             }
                         });
 

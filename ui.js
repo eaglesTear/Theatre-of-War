@@ -272,7 +272,6 @@ $(document).ready(() => {
 
         setTimeout(() => {
             $("img#russia").remove();
-            //$("img#usa").css("margin", "auto");
             $("img#russia").addClass("marginAuto");
             $(".nation-select-title").text(playerNation.name);
             removeTitleOverlay();
@@ -291,7 +290,6 @@ $(document).ready(() => {
 
         setTimeout(() => {
             $("img#usa").remove();
-            //$("img#russia").css("margin", "auto");
             $("img#usa").addClass("marginAuto");
             $(".nation-select-title").text(playerNation.name);
             removeTitleOverlay();
@@ -480,9 +478,10 @@ $(document).ready(() => {
         gameover();
 
         // main titles: remove after testing
-        $("#story-scroll-text, .main-titles, #skip-intro-btn").remove(); 
+        $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-calendar").remove(); 
         $("html, body").toggleClass("lock-display");
         $(".title-overlay").addClass("displayBlock");
+        $(".options-container").removeClass("displayBlock");
 
         runEndTitles();
     }
@@ -491,16 +490,14 @@ $(document).ready(() => {
     runEndTitles = () => {
 
         missionCompleted.play();
+        $(".title-overlay-text").addClass("new-top-setting");
 
         if (playerNation.name === "Russian Federation") {
-            $("#end-titles-russia").css("display", "block");
-            $("#end-titles-russia").addClass("displayBlock");
-            $(".title-overlay-text").addClass("new-top-setting");
+            $(".end-titles-russia").addClass("displayBlock");
             playEndTheme(ruAnthem);
             insertVictoryImage();
         } else {
-            // $("#end-titles-usa").css("display", "block");
-             $("#end-titles-usa").addClass("displayBlock");
+            $(".end-titles-usa").addClass("displayBlock");
             playEndTheme(usAnthemInstrumental);
             insertVictoryImage();
         }
@@ -519,23 +516,24 @@ $(document).ready(() => {
     });
     
     revealVictoryScreenElements = () => {
-        $(".victory-heading, .end-text-1, .end-text-2, .end-text-3, .authour-credit, #reload-btn, .victory-img").addClass("reveal");
+        $(".victory-heading, .authour-credit, #reload-btn, .victory-img").addClass("reveal");
+        $(".end-text-1, .end-text-2, .end-text-3").addClass("reveal-flame");
     }
 
     insertVictoryImage = () => {
 
         // Display the victory img section first
-        $("#victory-img-section").css("display", "block");
+        $(".victory-img-section").addClass("displayBlock");
 
-        $("#end-titles-usa, #end-titles-russia").on("animationend", () => {
+        $(".end-titles-usa, .end-titles-russia").on("animationend", () => {
 
             if (playerNation.name === "Russian Federation") {
-                $("#end-titles-russia").remove();
-                $("#victory-img-section").append("<img class='victory-img' src='images/russia-victory.png'/>");
+                $(".end-titles-russia").remove();
+                $(".victory-img-section").append("<img class='victory-img' src='images/russia-victory.png'/>");
                 revealVictoryScreenElements();
             } else {
-                $("#end-titles-usa").remove();
-                $("#victory-img-section").append("<img class='victory-img' src='images/usa-victory.png'/>");
+                $(".end-titles-usa").remove();
+                $(".victory-img-section").append("<img class='victory-img' src='images/usa-victory.png'/>");
                 revealVictoryScreenElements();
             }
         });
