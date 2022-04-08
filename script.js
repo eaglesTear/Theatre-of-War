@@ -53,12 +53,7 @@ gameState.time;
     This function handles the darkening of the screen via an overlay with diminishing opacity. The overlay is displayed and a css class handles the animation / effect. Following this, the story text will scroll and the intro track will play.
 */
 
-// CAN SWITCH OFF CSS DISPLAY NONE & REMOVE DISPLAY BLOCK??
-intro = () => {
-    $(".title-overlay").addClass("displayBlock");
-    introTrack.play();
-}
-intro();
+//intro();
 
 // Show initial status
 displayMainStatus();
@@ -696,10 +691,7 @@ $(document).ready(() => {
         borderWidth: 0.6,
         color: '#000',
         // #01826d, #12cefc, #5b565e #9575ad - lilac
-        enableZoom: false,
         hoverColor: '#9575AD',
-        hoverOpacity: null,
-        normalizeFunction: 'linear',
         scaleColors: ['#B6D6FF', '#005ACE'],
         // Undefine 'selectedColor' to prevent interference with color change onclick
         selectedColor: '',

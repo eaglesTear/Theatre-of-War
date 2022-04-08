@@ -478,7 +478,7 @@ $(document).ready(() => {
         gameover();
 
         // main titles: remove after testing
-        $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-calendar").remove(); 
+        $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-hud").remove(); 
         $("html, body").toggleClass("lock-display");
         $(".title-overlay").addClass("displayBlock");
         $(".options-container").removeClass("displayBlock");

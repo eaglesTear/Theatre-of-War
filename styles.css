@@ -27,6 +27,7 @@ body,
 a {
     text-decoration: none;
 }
+
 /* font-family: 'Amethysta', serif; */
 /* Fonts used in the game: 'wargate' is a military-style font class used for certain headers */
 
@@ -43,6 +44,7 @@ select {
 }
 
 .main-titles .wargate {
+    color: #111;
     font-size: 4.5rem;
 }
 
@@ -108,7 +110,7 @@ select {
 
 /* HUD - main control panels, buttons & passage of time */
 
-.game-calendar,
+.game-hud,
 #nation-select,
 .options-container div,
 .status-overlay,
@@ -130,28 +132,16 @@ footer div {
     flex-direction: column;
 }
 
-.game-calendar,
-.status-overlay-content,
-button,
-a:hover,
-a:focus {
-    color: #00D7C3;
+.title-overlay-text {
+    color: #FFDB19;
 }
 
 #day,
 #week,
 #month,
 #year {
-    padding: 0.8rem;
+    padding: 0.5rem;
     letter-spacing: 1.3px;
-}
-
-#year {
-    border-right: 5px dotted #00D7C3;
-}
-
-#status-overlay-btn {
-    margin-left: 1.5rem;
 }
 
 .options-container div {
@@ -192,22 +182,20 @@ footer {
     font-weight: 600;
 }
 
-#day,
-#week,
-#month,
-#year {
-    font-weight: 900;
-}
-
+/*#6CFFFB*/
 #day,
 #week,
 #month,
 #year,
 .end-header,
+.status-overlay-content,
 input[type=number],
 select,
-footer {
-    color: #FFF;
+footer,
+button,
+a:hover,
+a:focus {
+    color: #99CCFF;
 }
 
 select {
@@ -289,7 +277,6 @@ input[type=number] {
 /* Text and content inside / on top of the title overlay */
 
 .title-overlay-text {
-    color: #FFD700;
     left: 50%;
     top: 40%;
     transform: translate(-50%, -50%);
@@ -385,7 +372,7 @@ button,
 }
 
 @keyframes story-scroll-text {
-    
+
     from {
         transform: translateY(100%);
     }
@@ -407,29 +394,39 @@ button,
     }
 }
 
-/* Fire animation applied to 'war' in main titles text (adapted from an idea by Antti Nyman) */
-    
+/* Fire animations applied to game title text (adapted from an idea by Antti Nyman) */
+
 @keyframes flame {
-    
+
     0% {
-        text-shadow: 0 0 20px #fefcc9,
-            10px -10px 30px #feec85,
-            -20px -20px 40px #ffae34,
-            20px -40px 50px #ec760c,
-            -20px -60px 60px #cd4606,
+        text-shadow: 0 0 20px #FEFCC9,
+            10px -10px 30px #FEEC85,
+            -20px -20px 40px #FFAE34,
+            20px -40px 50px #EC760C,
+            -20px -60px 60px #CD4606,
             0 -80px 70px #973716,
-            10px -90px 80px #451b0e;
+            10px -90px 80px #451B0E;
     }
 
     100% {
-        text-shadow: 0 0 20px #fefcc9,
-            10px -10px 30px #fefcc9,
-            -20px -20px 40px #feec85,
-            22px -42px 60px #ffae34,
-            -22px -58px 50px #ec760c,
-            0 -82px 80px #cd4606,
+        text-shadow: 0 0 20px #FEFCC9,
+            10px -10px 30px #FEFCC9,
+            -20px -20px 40px #FEEC85,
+            22px -42px 60px #FFAE34,
+            -22px -58px 50px #EC760C,
+            0 -82px 80px #CD4606,
             10px -90px 80px #973716;
     }
+}
+
+/* Adapted from an idea by Ran Enoch */
+
+.fire {
+    text-shadow:
+        0px -2px 4px #FFF,
+        0px -2px 10px #FF3,
+        0px -10px 20px #F90,
+        0px -20px 40px #C33;
 }
 
 .radar,
@@ -454,15 +451,13 @@ button,
     opacity: 0.8;
 }
 
+.game-hud .wargate {
+    margin-right: 1%;
+}
+
 .title-animation-1,
 .title-animation-1-5 {
     animation: fade-in-out 4s ease-in-out both;
-}
-
-.title-animation-2,
-.title-animation-3,
-.title-animation-4 {
-    animation: fade-in 2s ease-in-out both, flame 0.65s ease-in-out 70s infinite alternate;
 }
 
 .title-animation-1 {
@@ -474,15 +469,15 @@ button,
 }
 
 .title-animation-2 {
-    animation-delay: 62s;
+    animation: fade-in 2s ease-in-out 62s both, flame 0.65s ease-in-out 70s infinite alternate;
 }
 
 .title-animation-3 {
-    animation-delay: 64s;
+    animation: fade-in 2s ease-in-out 64s both, flame 0.65s ease-in-out 71s infinite alternate;
 }
 
 .title-animation-4 {
-    animation-delay: 66s;
+    animation: fade-in 2s ease-in-out 66s both, flame 0.65s ease-in-out 72s infinite alternate;
 }
 
 #start-game-btn {
@@ -530,7 +525,7 @@ body,
 select,
 .sidebar,
 input[type=number] {
-    background-color: #151515;
+    background-color: #111;
 }
 
 .sidebar-close-btn {
@@ -553,10 +548,10 @@ input[type=number] {
 #reload-btn,
 .reload-btn,
 .sidebar button,
-.game-calendar button,
+.game-hud button,
 .options-container button {
     background-color: transparent;
-    border-radius: 50px;
+    border-radius: 10px;
     border: 3px solid #00D7C3;
     margin: 15px;
     padding: 8px;
@@ -565,9 +560,22 @@ input[type=number] {
     width: 170px;
 }
 
-#skip-intro-btn {
-    margin: 4rem;
+#start-game-btn {
+    font-size: 1.8rem;
+    width: 250px;
+}
+
+#skip-intro-btn,
+.game-hud button {
     width: 120px;
+}
+
+#skip-intro-btn {
+    margin: 2rem;
+}
+
+.game-hud button {
+    margin: 10px;
 }
 
 #start-game-btn,
@@ -588,7 +596,7 @@ input[type=number] {
 #reload-btn:hover,
 .reload-btn:hover,
 .sidebar button:hover,
-.game-calendar button:hover,
+.game-hud button:hover,
 .options-container button:hover {
     box-shadow: 0 0 10px 0 #00D7C3 inset, 0 0 20px 2px #00D7C3;
 }

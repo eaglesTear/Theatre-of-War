@@ -24,6 +24,13 @@ clearPrevious = () => {
     }
 }
 
+// Introduction function starts the game when called by overlaying title screen and playing audio 
+
+intro = () => {
+    $(".title-overlay").addClass("displayBlock");
+    introTrack.play();
+}
+
 // Function Probability - return a random number between a specified input range
 
 probability = (n => Math.random() < n);
@@ -31,9 +38,6 @@ probability = (n => Math.random() < n);
 // Function that more easily deals with the adding of totals in the game
 
 reduce = (array => array.reduce((total, currentValue) => total + currentValue, 0));
-
-//console.log(`${x} of 10000000 given results by "Math.random()" were under ${prob}`);
-//console.log(`Hence so, a probability of ${x / 100000} %`);
 
 // Main time functionality - disabled if no jQuery, preventing repeated errors to console.
 
