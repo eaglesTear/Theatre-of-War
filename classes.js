@@ -107,7 +107,7 @@ enemyNuclearRetaliation = (enemyIsNuked, playerIsNuked, code, region, targetNati
 
     if (targetNation.status.stance === "hostile" && targetNation.specialWeapons.nuclearWeapons) {
         launchDetected.play();
-        swal("Nuclear Missile Warning", `${region} has launched a nuclear missile at you!`);
+        swal("Nuclear Missile Warning", `${targetNation.name} has launched a nuclear missile at you!`);
         targetNation.specialWeapons.nuclearWeapons -= 1;
         console.log("nukes: " + targetNation.specialWeapons.nuclearWeapons)
         console.log("shield: " + targetNation.specialWeapons.missileShield)
@@ -128,7 +128,7 @@ nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
             text: `Rebuilding Costs Allocated: GDP -$${gdpBeforeStrike - playerNation.gdp}`,
             icon: "warning",
         });
-        //monitorNationGovtApproval();
+        monitorNationGovtApproval();
     } else if (enemyIsNuked) {
         territoriesConqueredByCode.push(code);
         colourDefeatedNations(code, "#fff");
@@ -356,8 +356,8 @@ checkIfAgentsAreHostages = () => {
             icon: "warning",
         });
         return true;
-    }
-    //return false;
+    } //checkif needed
+    return false;
 }
 
 launchHostageRescue = (region) => {
@@ -603,16 +603,16 @@ conscriptTroops = () => {
     const randomConscriptionNumber = Math.floor(Math.random() * 1000);
     playerNation.militaryUnits.infantry += randomConscriptionNumber;
 
-    arrays.dailyInfantryRecruits.push(randomConscriptionNumber);
-    console.log(arrays.dailyInfantryRecruits)
+    dailyInfantryRecruits.push(randomConscriptionNumber);
+    console.log(dailyInfantryRecruits)
 
-    if (arrays.dailyInfantryRecruits.length >= 30) {
+    if (dailyInfantryRecruits.length >= 30) {
 
         commands.conscription = false;
 
         swal({
             title: "Recruitment Drive Report",
-            text: `You have managed to recruit ${reduce(arrays.dailyInfantryRecruits)} new soldiers this month.`,
+            text: `You have managed to recruit ${reduce(dailyInfantryRecruits)} new soldiers this month.`,
             icon: "info",
         });
     }
@@ -1233,21 +1233,6 @@ const Russia = new Nation(
 
 // ************************************************************************************
 // ************************************************************************************
-// STATS GENERATOR FUNCTION THAT DEFINES ALL OTHER NATION'S DATA & OBJECTS
-
-
-// Random Number Generator: set range for use when creating nation stats
-const RNG = (lowerLimit, upperLimit) => {
-    return Math.floor(Math.random() * (upperLimit - lowerLimit) + lowerLimit);
-}
-
-// Initialise a small array of goverment types and then select one at random
-const governmentTypeArray = ["Republic", "Monarchy"];
-const govtArrayRandomSelector = Math.floor(Math.random() * 2);
-const randomGovt = governmentTypeArray[govtArrayRandomSelector];
-
-// ************************************************************************************
-// ************************************************************************************
 // BUILDING INTERFACE: NEW CONSTRUCTION OPTIONS
 
 
@@ -1605,7 +1590,7 @@ generalResourceExpenditureDaily = () => {
     dailyOilProduction += originalDailyOilProduction - playerNation.resources.oilConsumption;
     playerNation.resources.oilProduction = dailyOilProduction;
 
-    console.log("Daily Oil Production: " + dailyOilProduction);
+    //console.log("Daily Oil Production: " + dailyOilProduction);
 }
 
 // Oil used by military units each day
@@ -1667,17 +1652,17 @@ const structureMaintenance = {
 
 monthlyBaseExpenditure = () => {
 
-    arrays.baseMaintenanceTotals = [];
+    baseMaintenanceTotals = [];
 
     for (const value in playerBase) {
 
         if (playerBase[value] !== undefined) {
             playerNation.resources.defenceBudget -= structureMaintenance[value];
             swal(`${value}: ${structureMaintenance[value]}`);
-            arrays.baseMaintenanceTotals.push(structureMaintenance[value]);
+            baseMaintenanceTotals.push(structureMaintenance[value]);
         }
     }
-    swal("Monthly Base Maintenance Report", `Total for base: -$${reduce(arrays.baseMaintenanceTotals)}
+    swal("Monthly Base Maintenance Report", `Total for base: -$${reduce(baseMaintenanceTotals)}
     Current Defence Budget: $${playerNation.resources.defenceBudget}`);
 }
 

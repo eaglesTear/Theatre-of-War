@@ -28,8 +28,17 @@ a {
     text-decoration: none;
 }
 
-/* font-family: 'Amethysta', serif; */
-/* Fonts used in the game: 'wargate' is a military-style font class used for certain headers */
+#story-scroll-text,
+.title-animation-1,
+.title-animation-1-5,
+.end-titles-usa,
+.end-titles-russia {
+    font-family: 'Amethysta', serif;
+    line-height: 1.8;
+    transform: translateY(100%);
+}
+
+/* 'wargate' is a military-style font class used for certain headers */
 
 body:not(.wargate),
 select {
@@ -44,7 +53,6 @@ select {
 }
 
 .main-titles .wargate {
-    color: #111;
     font-size: 4.5rem;
 }
 
@@ -231,8 +239,8 @@ input[type=number] {
 }
 
 .sidebar .cp-image {
-    height: 60px;
-    width: 25%;
+    height: 50px;
+    width: 22%;
 }
 
 #story-scroll-text,
@@ -301,15 +309,7 @@ input[type=number] {
 
 #story-scroll-text {
     animation: story-scroll-text 50s linear forwards 5s;
-    height: calc(100vh + 600px);
-}
-
-#story-scroll-text,
-.end-titles-usa,
-.end-titles-russia {
-    font-family: 'Amethysta', serif;
-    line-height: 1.8;
-    transform: translateY(100%);
+    height: calc(100vh + 550px);
 }
 
 .title-overlay h2,
@@ -419,7 +419,7 @@ button,
     }
 }
 
-/* Adapted from an idea by Ran Enoch */
+/* Adapted from an idea by Ran Enoch - applied to the title branding above the map element */
 
 .fire {
     text-shadow:
@@ -469,20 +469,22 @@ button,
 }
 
 .title-animation-2 {
-    animation: fade-in 2s ease-in-out 62s both, flame 0.65s ease-in-out 70s infinite alternate;
+    animation: fade-in 2s ease-in-out 62s both, flame 0.65s ease-in-out 68s infinite alternate;
 }
 
 .title-animation-3 {
-    animation: fade-in 2s ease-in-out 64s both, flame 0.65s ease-in-out 71s infinite alternate;
+    animation: fade-in 2s ease-in-out 64s both, flame 0.65s ease-in-out 69s infinite alternate;
 }
 
 .title-animation-4 {
-    animation: fade-in 2s ease-in-out 66s both, flame 0.65s ease-in-out 72s infinite alternate;
+    animation: fade-in 2s ease-in-out 66s both, flame 0.65s ease-in-out 70s infinite alternate;
 }
 
 #start-game-btn {
     animation: fade-in 4s ease-in-out both;
-    animation-delay: 68s;
+    animation-delay: 70s;
+    font-size: 1.5rem;
+    width: 230px;
 }
 
 /* Sliding overlay used for displaying status report */
@@ -501,7 +503,7 @@ button,
 }
 
 .status-img {
-    width: 110px;
+    width: 75px;
 }
 
 .status-overlay .status-closebtn {
@@ -558,11 +560,6 @@ input[type=number] {
     text-transform: uppercase;
     transition: all .15s ease-in-out;
     width: 170px;
-}
-
-#start-game-btn {
-    font-size: 1.8rem;
-    width: 250px;
 }
 
 #skip-intro-btn,

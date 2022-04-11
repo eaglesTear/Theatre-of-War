@@ -39,7 +39,7 @@ $(document).ready(() => {
     $("#incite-btn").click(() => {
         commands.incite = true;
     });
-    
+
     // Conscription is a one-time call. The condition prevents 'true' ever happening again
 
     $("#conscription-btn").click(() => {
@@ -163,9 +163,9 @@ $(document).ready(() => {
     });
 
 
-/* 
-    Country selection animations with a conditional statement to check whether the player's selected country has been chosen. If the var 'playerSelectedNation' is defined, then the nation has already been selected; thus the player will no longer be able to select another nation and the rest of the code is not executed. 
-*/
+    /* 
+        Country selection animations with a conditional statement to check whether the player's selected country has been chosen. If the var 'playerSelectedNation' is defined, then the nation has already been selected; thus the player will no longer be able to select another nation and the rest of the code is not executed. 
+    */
 
     // UI
 
@@ -186,9 +186,9 @@ $(document).ready(() => {
             .append("<img id='usa' class='nation-img-usa' src='images/usa.png'/>")
             .append("<img id='russia' class='nation-img-russia' src='images/russia.png'/>");
     }
-    
+
     // Clear overlay for subsequent content such as game over screen etc
-    
+
     removeNationSelectElements = () => {
         $("#nation-select, .nation-select-title").remove();
     }
@@ -320,7 +320,6 @@ $(document).ready(() => {
         }, 3000);
     }
 
-    // BELOW MAY NOT BE NECESSARY...
     // Remove story text block on overlay once animation has finished, allowing titles to show
     $("#story-scroll-text").on("animationend", () => {
         $("#story-scroll-text").remove();
@@ -358,9 +357,8 @@ $(document).ready(() => {
     }
 
     mapTutorial = () => {
-
         $(".options-container").addClass("displayBlock");
-        swal("Welcome to the Theatre of War \n\nTactical Map", "This is your Theatre of War");
+        swal("Tactical Map", "This is your Theatre of War");
     }
 
     controlPanelTutorial = () => {
@@ -411,26 +409,35 @@ $(document).ready(() => {
     gameTickFunctions = () => {
 
         setInterval(() => {
-            displayMainStatus();
-            defineNationStance();
-            checkForGameWin();
+            if (gameState.gameStarted) {
+                displayMainStatus();
+                defineNationStance();
+                checkForGameWin();
+                monitorNationGovtApproval();
+            }
         }, 2000);
-    }
+        
+        //After a certain random time: one week & one month (ms) 604800000, 2629800000
 
-    gameTickFunctions();
+        setInterval(nationAttacksPlayerAfterRandomTime, RNG(10000, 12000));
+    }
 
     // Reactivate sidebar and control panel buttons, start clock & in-game music
     startGame = () => {
         gameState.gameStarted = true;
         playinGameTracks(currentTrack);
+
+        // Call main time object
         gameState.time;
-        
+
+        gameTickFunctions();
+
         setTimeout(() => {
             removeNationSelectElements();
             $(".options-container").addClass("displayBlock");
         }, 8000);
     }
-
+    startGame()
     // Load nation select screen when skip intro or start game button is pressed
     $("#skip-intro-btn, #start-game-btn").click(() => {
         $(".bg-intro-img").remove();
@@ -459,11 +466,9 @@ $(document).ready(() => {
     // Keypress sidebar toggle activation ('s' must be pressed on the keyboard; caps is OK!)
     // Deactivated during intro (or until game start function is ran, changing bool to true)
 
-    //    && gameState.gameStarted
-    //&& gameState.gameStarted
     $(document).on("keypress", (e) => {
-        if (e.keyCode === 115 ||
-            e.keyCode === 83) {
+        if (e.keyCode === 115 && gameState.gameStarted ||
+            e.keyCode === 83 && gameState.gameStarted) {
             $(".sidebar").toggleClass("open");
             menuSelect.play();
         }
@@ -478,7 +483,7 @@ $(document).ready(() => {
         gameover();
 
         // main titles: remove after testing
-        $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-hud").remove(); 
+        $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-hud").remove();
         $("html, body").toggleClass("lock-display");
         $(".title-overlay").addClass("displayBlock");
         $(".options-container").removeClass("displayBlock");
@@ -514,7 +519,7 @@ $(document).ready(() => {
         usAnthemInstrumental.pause();
         reloadGame();
     });
-    
+
     revealVictoryScreenElements = () => {
         $(".victory-heading, .authour-credit, #reload-btn, .victory-img").addClass("reveal");
         $(".end-text-1, .end-text-2, .end-text-3").addClass("reveal-flame");

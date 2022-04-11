@@ -10,6 +10,18 @@ window.onload = () => {
     }
 }
 
+// **** NATION CONSTRUCTION FUNCTIONS ****
+
+
+// Random Number Generator: set range for use when defining all nation objects (data & stats)
+
+const RNG = (min, max) => Math.floor(Math.random() * (max - min) + min);
+
+// Initialise a small array of goverment types and then select one at random
+
+const randomGovt = () => government = Math.random() < 0.5 ? "Republic" : "Monarchy";
+
+
 /* 
     Clear previous commands so that latest button clicked can run. Difference between use when clicking the button is that the game will not ask the user if it wants to run the function again, unless the corresponding button is again clicked.
     The 'conscription' command must be exempt - otherwise, clicking on an alternate command button whilst conscription is active will cancel the conscription function - which relies on the its command method being truthy in order to run.
@@ -59,23 +71,23 @@ passageOfTime = () => {
         $("#month").text("MONTH: " + month);
 
         if (day >= monthlyInterval) {
-            //            monthlyActions();
+            monthlyActions();
             monthlyInterval = day + 30.41;
         }
 
-        //        if (day >= monthlyInterval - 7 && day <= monthlyInterval - 7) {
-        //            alertMonthlyExpenditure();
-        //        }
+        if (day >= monthlyInterval - 7 && day <= monthlyInterval - 7) {
+            alertMonthlyExpenditure();
+        }
 
         if (day >= yearlyInterval) {
             currentYear++;
             $("#year").text("YEAR: " + currentYear);
-            //yearlyActions();
+            yearlyActions();
             yearlyInterval = day + 365;
         }
 
         checkIfConscription(monthlyInterval);
-        //dailyActions();
+        dailyActions();
 
     }, 2000);
 }
@@ -143,7 +155,9 @@ attackNation = (region, code) => {
 
 // Initiate unit battles
 
-nationsAtWar = () => {
+// Parameter for nationsAtWar is required for randomAttack function
+
+nationsAtWar = (targetNation) => {
 
     war.play();
 
@@ -154,6 +168,8 @@ nationsAtWar = () => {
     battle((playerNation.unitTechAndSkillRating.navalTech / 100) * playerNation.militaryUnits.naval, (targetNation.unitTechAndSkillRating.navalTech / 100) * targetNation.militaryUnits.naval, "naval", "naval");
 
     battle((playerNation.unitTechAndSkillRating.armourTech / 100) * playerNation.militaryUnits.tanks, (targetNation.unitTechAndSkillRating.armourTech / 100) * targetNation.militaryUnits.tanks, "tanks", "tanks");
+    
+    console.log(targetNation)
 }
 
 // Function dealing with combat between nation's armed forces - air, naval, armour and infantry
@@ -180,5 +196,22 @@ colourDefeatedNations = (code, colour) => {
                     [code]: colour
             });
         }
+    }
+}
+
+// Nations attacking player: pseudo-random hostile nation attacks
+function nationAttacksPlayerAfterRandomTime(enemyIsNuked, playerIsNuked, code, region, targetNation) {
+    
+    if (!gameState.gameStarted) return;
+    // Go through all nations and see if any are hostile...
+    for (let i = 0; i < allNationsAsObjects.length; i++) {
+        // If any hostile nation is not defeated or already engaged, that is the target
+        if (!territoriesConqueredByRegion.includes(allNationsAsObjects[i].name) &&
+            !gameState.targetNationSelected) {
+            targetNation = allNationsAsObjects[i];
+            console.log("target chosen: " + targetNation.name)
+            determineAttackTypeOnPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation);
+            break;
+        } else return;
     }
 }

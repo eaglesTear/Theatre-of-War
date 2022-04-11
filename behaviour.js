@@ -21,14 +21,14 @@ check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
 add real world stats and build times to the game
-add all commented functions to the game - all code must be in play
-
-most headers grey
-use danger  / error when no thing available swal
  
 DEBUG / REFACTOR ***********
 mark all events that cause increase and decrease in approval rating etc
 modulate functions further
+
+monitor approval not necessary everywhere as in tick function?
+targetnation not losing forces in random attack, player is
+envelop functions into game started if to prevent functions carrying on
 
 //    const arr = ["a", "b", "c"];
     //     

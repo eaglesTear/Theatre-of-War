@@ -14,28 +14,24 @@ let originalDailyOilProduction = dailyOilProduction;
 const yearlyDefenceBudget = playerNation.resources.defenceBudget;
 const yearlyGDP = playerNation.gdp;
 
-// Call main time object
-
-gameState.time;
-
-//// Execute monthly actions here, ie expenditures
-//monthlyActions = () => {
-//    //monthlyBaseExpenditure();
-//    militaryUnitMaintenanceMonthly();
-//    //resourceIncomeMonthly();
-//awardAgriculturalDealBonus();
-//lowerApprovalRatingIfAgentsAreHostages();
-//monthlyExpenditureReport();
-//}
-//// Execute daily actions here, ie expenditures
-//dailyActions = () => {
-//    militaryOilExpenditureDaily();
-//    generalResourceExpenditureDaily();
-//}
-//
-//yearlyActions = () => {
-//    annualDefenceBudgetAndGDP();
-//}
+// Execute monthly actions here, ie expenditures
+monthlyActions = () => {
+    monthlyBaseExpenditure();
+    militaryUnitMaintenanceMonthly();
+    resourceIncomeMonthly();
+    awardAgriculturalDealBonus();
+    lowerApprovalRatingIfAgentsAreHostages();
+    monthlyExpenditureReport();
+}
+// Execute daily actions here, ie expenditures
+dailyActions = () => {
+    militaryOilExpenditureDaily();
+    generalResourceExpenditureDaily();
+}
+// Execute yearly action. Only one, which resetns defence budget
+yearlyActions = () => {
+    annualDefenceBudgetAndGDP();
+}
 
 /*
     Time in this game passes similarly to real life, with periods measured in daily, weekly, monthly and yearly intervals. To make sure that the measurement of an individual calendar month is as accurate as possible, the day count is initiated as a float (see globals). This is so that I can bolt on an additional 30.41 onto the day count when checking if a month has elapsed.
@@ -200,7 +196,7 @@ executiveDecision = (region) => {
 // add other functions to the below block???
 checkForGameWin = () => {
     if (territoriesConqueredByCode.length === 1) {
-        //suggestPlayOtherNation();
+        suggestPlayOtherNation();
     }
 }
 
@@ -232,6 +228,7 @@ reloadGame = () => {
 }
 
 gameover = () => {
+    gameState.gameStarted = false;
     $(".sidebar button").attr("disabled", true);
     $(".radar").removeClass("slow-reveal");
     gameState.gameStarted = false;
@@ -246,8 +243,7 @@ gameoverDefeated = (playerIsNuked) => {
     gameOverTrack.play();
     gameOverTrack.loop = true;
 
-    $("#removable-status-content").remove();
-    $(".status-closebtn").remove();
+    $("#removable-status-content, .game-hud, .status-closebtn").remove();
     $(".status-overlay").addClass("status-open game-over-transition")
         .append(`<h2 class="end-header">GAME OVER</h2>`)
         .append(`<button type="button" class="reload-btn" onclick="reloadGame()">Reload</button>`);
@@ -329,16 +325,13 @@ $(document).ready(() => {
             // Define random nation GDP between $50 billion & $3 trillion
             RNG(3000000000000, 50000000000),
             // Define a random govt type
-            randomGovt,
+            randomGovt(),
             // Define a random population between 3 million and 1.5 billion people
             RNG(1500000000, 3000000),
             // Assign a random diplomacy rating between 0 and 100
             RNG(100, 0),
             // Trade deals, alliances, oil export deals & intel collaboration deals
-            [],
-            [],
-            [],
-            [],
+            [], [], [], [],
             // Set a random amount of researchers between 0 and 1000
             RNG(1000, 0),
             // Define a random amount of oil production
@@ -360,13 +353,10 @@ $(document).ready(() => {
             // Set a random amount of satellites
             RNG(50, 0),
             [],
-            // Air tech
+            // Air, armour, infantry & naval tech
             RNG(100, 10),
-            // Armour tech
             RNG(100, 10),
-            // Infantry tech
             RNG(100, 10),
-            // Naval tech
             RNG(100, 10),
             // Agent infiltration
             RNG(100, 10),
@@ -375,14 +365,13 @@ $(document).ready(() => {
             RNG(3, 0),
             // Aggression Level
             RNG(100, 5),
-            // Stance / attitude = defined by function 'defineNationStance' below
+            // Stance is defined by function 'defineNationStance'
             "",
             // Resistance - how much fight a country has left to wage war / resist submission
             RNG(100, 1),
             // Approval rating for a nation's govt: if this becomes low, game over
             RNG(100, 1)
         );
-
         allNationsAsObjects.push(allNations);
     }
 
@@ -421,7 +410,7 @@ $(document).ready(() => {
                     swal("Nations Have Changed Stance", "Changes are waiting on the overlay.");
 
                     // Print this out on the overlay or for loop section
-                    //                    alert(`${allNationsAsObjects[i].name} has gone from ${previousNationStances[j]} to ${allNationsAsObjects[i].status.stance}`);
+                    alert(`${allNationsAsObjects[i].name} has gone from ${previousNationStances[j]} to ${allNationsAsObjects[i].status.stance}`);
                 }
             }
         }
@@ -478,29 +467,9 @@ $(document).ready(() => {
     // Track all all changes of status every second, to inform the player and enable actions
     // HOW OFTEN TO RUN BELOW FUNCTION? DAILY IN TIME OBJECT? OR SET INTERVAL
     // Important that this is declared after the name of nation is set
-    //    setInterval(() => {
-    //        informPlayerOfNationStanceChange();
-    //    }, 1000);
-
-    // Nations attacking player: pseudo-random hostile nation attacks
-    function nationAttacksPlayerAfterRandomTime() {
-
-        // Go through all nations and see if any are hostile...
-        for (let i = 0; i < allNationsAsObjects.length; i++) {
-
-            if (allNationsAsObjects[i].status.stance === "hostile") {
-
-                // If any hostile nation is not defeated or already engaged, that is the target
-                if (!territoriesConqueredByRegion.includes(allNationsAsObjects[i].name) &&
-                    !gameState.targetNationSelected) {
-                    targetNation = allNationsAsObjects[i];
-                    determineAttackTypeOnPlayer(targetNation);
-                    break;
-                } else return;
-            }
-        }
-    }
-
+    setInterval(() => {
+        informPlayerOfNationStanceChange();
+    }, 1000);
 
     // Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
 
@@ -515,13 +484,14 @@ $(document).ready(() => {
     determineAttackTypeOnPlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
         if (probability(0.40)) {
+            console.log("det attack type running probability")
             swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
-            nationsAtWar();
+            nationsAtWar(targetNation);
             if (armiesDefeated >= 4) {
                 swal(`${playerNation.name} has fought off ${targetNation.name}`);
             } else {
-                swal(`${playerNation.name} has been obliterated by ${targetNation.name} 
-                Game Over.`);
+                swal(`${playerNation.name}'s armies defeated by ${targetNation.name}`, "Game Over");
+                gameoverDefeated();
             }
             armiesDefeated = 0;
         } else if (probability(0.50)) {
@@ -538,10 +508,6 @@ $(document).ready(() => {
         playerNation.gdp -= RNG(100000, 5000000000);
         swal(`Hacked by ${targetNation.name}`, `$${playerGDPBeforeHack - playerNation.gdp} has been stolen.`);
     }
-
-    //After a certain random time: one week & one month (ms) 604800000, 2629800000
-
-    // setInterval(nationAttacksPlayerAfterRandomTime, RNG(5000, 4000));
 
     // Don't need definenationstance if being called every second above??
     // Nation begins military build up
@@ -683,7 +649,7 @@ $(document).ready(() => {
         $("#nation-name").text(playerNation.name);
     }
     displayNationNameOnStatus();
-    
+
     $('#vmap').vectorMap({
         backgroundColor: '#151515',
         borderColor: '#12CEFC',

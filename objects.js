@@ -10,14 +10,6 @@ const gameState = {
     playerNuked: false
 };
 
-// Keep track of the number of daily conscripts so total can be relayed to commander (player)
-// Base maintenance totals
-
-const arrays = {
-    baseMaintenanceTotals: [],
-    dailyInfantryRecruits: []
-}
-
 // Option / nation ability bools PREV: OPTIONS
 
 const commands = {
