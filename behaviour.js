@@ -11,52 +11,38 @@ BONUS ***********
  
  certain nations have different units, costs or stats
  
- ******** Notes post completion **********
+POST PRODUCTION **********
  
- for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
- in loving memory for all those innocent lives lost in both Russia and Ukraine copyright 2022
- put link to github readme in html when finished
- check anything to do with objects and addition / subtraction operators
+change nuke game over image
+for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
+put link to github readme in html when finished
+check anything to do with objects and addition / subtraction operators
 check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
-add real world stats and build times to the game
- 
-DEBUG / REFACTOR ***********
 mark all events that cause increase and decrease in approval rating etc
+
+REFACTOR ***********
+
+shorten and make clear some function names & vars
 modulate functions further
+envelop functions into gamestarted control to prevent functions carrying on
+Any code that affects nation objects must be defined after their creation!!!! - put in classes?
+check what needs doc. ready in terms of jquery - most code is v js
+end goal - have one file that sets up whole game in terms of a function list
+functions & alerts - do they portray right information to the player and what's happening?
 
-monitor approval not necessary everywhere as in tick function?
-targetnation not losing forces in random attack, player is
-envelop functions into game started if to prevent functions carrying on
+DEBUG ***********
 
-//    const arr = ["a", "b", "c"];
-    //     
-    //    informPlayerOfArrayValueChange = () => {
-    //
-    //        let savedOriginalArrayValues = [];
-    //        
-    //        for (let i = 0; i < arr.length; i++) {
-    //
-    //            // SAVE original array numbers in storage array for comparison
-    //            savedOriginalArrayValues.push(arr[i]);
-    //
-    //            // Now, change the values of the array after saving originals separately
-    //            arr[i] = "v";
-    //
-    //            // Loop through saved originals and the new, changed values of that array...
-    //            // ...and if saved originals are not equal to the new values, show them!
-    //
-    //            // SWAL WILL ONLY RUN LAST ITERATION...VERY STRANGE. USE OTHER METHOD?
-    //            if (savedOriginalArrayValues[i] !== arr[i]) {
-    //                alert(`FROM: ${savedOriginalArrayValues[i]}\n TO: ${arr[i]}`);
-    //            }
-    //        }
-    //        // Reset ready for next function run
-    //        savedOriginalArrayValues = [];
-    //    }
-    //    informPlayerOfArrayValueChange();
-    
-    <div class="nation-info-tooltip">Hover
-                <span class="nation-info-tooltip-text">hello</span>
-            </div>
+check random event functions and run them
+watch p-cannon behaviour closely - especially the button. Does it appear after researching?
+check how / when to run nation withdrawal treaties: must come after stance change
+defence budget not going into negative numbers after expenses - log what's going on
+nation target attacking is always afghanistan - are they even hostile - check fn!
+nation also not coloured when defeated if first to attack
+nation not hostile and is attacking
+
+ADDITIONAL FUNCTIONALITY ***********
+
+add real world stats and build times to the game
+function to go through and increase / decrease stats in nations to allow dynamic behaviour

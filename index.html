@@ -7,35 +7,36 @@
     <meta name="description" content="A global strategy game using SweetAlert">
     <meta name="keywords" content="JavaScript, war, game, strategy">
     <meta name="author" content="Ryan Hadley">
-    
+
     <title>Theatre of War</title>
-    
+
     <link rel="icon" type="image/jpg" sizes="32x32" href="images/blast.png">
     <link href="jqvmap-master/dist/jqvmap.css" media="screen" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amethysta&family=Libre+Franklin&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    
+
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="jqvmap-master/dist/jquery.vmap.js"></script>
     <script src="jqvmap-master/dist/maps/jquery.vmap.world.js" charset="utf-8"></script>
     <!-- This program utilises SweetAlert JS alert library -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <!-- Script containing 'credits' function. Required here as used in the HTML -->
+    <!-- Load audio & script containing 'credits' function. Required here as used in the HTML -->
+    <script src="audio.js"></script>
     <script src="credits.js"></script>
 </head>
 
 <body class="lock-display">
 
-    <!--    <img class="bg-intro-img" src="images/theater-of-war.jpg" alt="theatre of war main image" />-->
+<!--    <img class="bg-intro-img" src="images/theater-of-war.jpg" alt="theatre of war main image" />-->
 
     <!-- Calendar / time passing displays & game option buttons -->
 
     <div class="game-hud">
 
         <h1 class="wargate fire">Theatre of War</h1>
-        
+
         <button type="button" id="fast-fwd-btn">Fast FWD</button>
         <button type="button" id="status-overlay-btn">Status</button>
         <button type="button" id="sidebar-btn">Commands</button>
@@ -44,7 +45,7 @@
         <h3 id="week">WEEK: 1</h3>
         <h3 id="month">MONTH: 1</h3>
         <h3 id="year">YEAR: 2022</h3>
-        
+
         <!-- After nation is selected, its logo will appear here -->
         <div id="logo-section"></div>
 
@@ -81,7 +82,7 @@
 
                     Bring order to chaos as the United States of America.<br>
                     Or bring the world to heel as the resurgent Russian Federation.<br><br>
-                    
+
                     The United States.<br> Russia.<br><br> Who will you lead?<br><br>
                     Whichever country rises up, the same reality exists...
                 </div>
@@ -383,12 +384,10 @@
 
     <!-- Game scripts -->
 
-    <script src="globals.js"></script>
     <script src="functions.js"></script>
-    <script src="objects.js"></script>
+    <script src="globals.js"></script>
     <script src="global_regions.js"></script>
     <script src="classes.js"></script>
-    <script src="audio.js"></script>
     <script src="script.js"></script>
     <script src="ui.js"></script>
 

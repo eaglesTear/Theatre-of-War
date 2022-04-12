@@ -405,21 +405,25 @@ $(document).ready(() => {
     }
 
     // Ticks to monitor game state
-
+    
+    // Track all all changes of status every second, to inform the player and enable actions
+    // HOW OFTEN TO RUN BELOW FUNCTION? DAILY IN TIME OBJECT? OR SET INTERVAL
+    // Important that this is declared after the name of nation is set
+        
     gameTickFunctions = () => {
 
         setInterval(() => {
             if (gameState.gameStarted) {
                 displayMainStatus();
-                defineNationStance();
                 checkForGameWin();
                 monitorNationGovtApproval();
+                informPlayerOfNationStanceChange();
             }
         }, 2000);
         
         //After a certain random time: one week & one month (ms) 604800000, 2629800000
 
-        setInterval(nationAttacksPlayerAfterRandomTime, RNG(10000, 12000));
+        setInterval(attackPlayerAfterRandomTime, RNG(10000, 12000));
     }
 
     // Reactivate sidebar and control panel buttons, start clock & in-game music
