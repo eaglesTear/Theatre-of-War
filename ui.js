@@ -1,4 +1,4 @@
-$(document).ready(() => {
+$(() => {
 
     // Play btn fx
     $("button").click(() => {
@@ -417,22 +417,22 @@ $(document).ready(() => {
                 displayMainStatus();
                 checkForGameWin();
                 monitorNationGovtApproval();
-                informPlayerOfNationStanceChange();
+                //evalStateChange();
             }
         }, 2000);
         
         //After a certain random time: one week & one month (ms) 604800000, 2629800000
 
-        setInterval(attackPlayerAfterRandomTime, RNG(10000, 12000));
+        //setInterval(attackPlayerAfterRandomTime, RNG(10000, 12000));
     }
-
+    
     // Reactivate sidebar and control panel buttons, start clock & in-game music
     startGame = () => {
         gameState.gameStarted = true;
         playinGameTracks(currentTrack);
 
         // Call main time object
-        gameState.time;
+        gameState.time();
 
         gameTickFunctions();
 
@@ -441,7 +441,13 @@ $(document).ready(() => {
             $(".options-container").addClass("displayBlock");
         }, 8000);
     }
+    
+    
+    // DELETE WHEN TESTING IS OVER
     startGame()
+    
+    evalStateChange()
+    
     // Load nation select screen when skip intro or start game button is pressed
     $("#skip-intro-btn, #start-game-btn").click(() => {
         $(".bg-intro-img").remove();
@@ -547,5 +553,4 @@ $(document).ready(() => {
             }
         });
     }
-
 });

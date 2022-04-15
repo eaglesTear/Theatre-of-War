@@ -21,6 +21,9 @@ check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
 mark all events that cause increase and decrease in approval rating etc
+be careful of double loops - do I want i or j?
+watch p-cannon behaviour closely - especially the button. Does it appear after researching?
+oil consumption
 
 REFACTOR ***********
 
@@ -35,12 +38,8 @@ functions & alerts - do they portray right information to the player and what's 
 DEBUG ***********
 
 check random event functions and run them
-watch p-cannon behaviour closely - especially the button. Does it appear after researching?
 check how / when to run nation withdrawal treaties: must come after stance change
 defence budget not going into negative numbers after expenses - log what's going on
-nation target attacking is always afghanistan - are they even hostile - check fn!
-nation also not coloured when defeated if first to attack
-nation not hostile and is attacking
 
 ADDITIONAL FUNCTIONALITY ***********
 

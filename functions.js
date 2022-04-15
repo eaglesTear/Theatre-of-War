@@ -82,9 +82,9 @@ yearlyActions = () => {
 */
 
 
-// Main time functionality - disabled if no jQuery, preventing repeated errors to console.
+// Main time functionality, disabled if no jQuery or game start, preventing repeated errors to console.
 
-passageOfTime = () => {
+runGameTime = () => {
 
     if (!window.jQuery) return;
 
@@ -93,6 +93,8 @@ passageOfTime = () => {
     let currentYear = 2022;
 
     setInterval(() => {
+
+        if (!gameState.gameStarted) return;
 
         let week = Math.ceil(day / 7);
         let month = Math.ceil(week / 4);
@@ -199,7 +201,7 @@ nationsAtWar = (targetNation) => {
     battle((playerNation.unitTechAndSkillRating.navalTech / 100) * playerNation.militaryUnits.naval, (targetNation.unitTechAndSkillRating.navalTech / 100) * targetNation.militaryUnits.naval, "naval", "naval", targetNation);
 
     battle((playerNation.unitTechAndSkillRating.armourTech / 100) * playerNation.militaryUnits.tanks, (targetNation.unitTechAndSkillRating.armourTech / 100) * targetNation.militaryUnits.tanks, "tanks", "tanks", targetNation);
-    
+
     console.log(targetNation)
 }
 
@@ -287,15 +289,16 @@ nuclearStrikeOutcomePlayerSide = (enemyIsNuked, playerIsNuked, code, region, tar
     }, 4000);
 }
 
-nuclearStrikeOutcomeEnemySide = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
+nuclearStrikeOutcomeEnemySide = (enemyIsNuked, playerIsNuked, code, region) => {
 
+    playerNation.specialWeapons.missileShield = 10;
     setTimeout(() => {
         if (playerNation.specialWeapons.missileShield) {
-            playerNation.specialWeapons.missileShield -= 1;
             setTimeout(() => {
                 weaponDestroyed.play();
                 swal("Enemy Missile Intercept", "A nuclear missile has been shot down");
             }, 2000);
+            playerNation.specialWeapons.missileShield -= 1;
             return;
         } else {
             nuclearDetonation.play();
@@ -320,17 +323,11 @@ nuclearAttackTargetNationStance = (region, targetNation) => {
 
 enemyNuclearRetaliation = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
-    console.log("retaliating: " + targetNation.name)
-    console.log("aggression: " + targetNation.status.aggressionLevel)
-
     if (targetNation.status.stance === "hostile" && targetNation.specialWeapons.nuclearWeapons) {
         launchDetected.play();
         swal("Nuclear Missile Warning", `${targetNation.name} has launched a nuclear missile at you!`);
         targetNation.specialWeapons.nuclearWeapons -= 1;
-        console.log("nukes: " + targetNation.specialWeapons.nuclearWeapons)
-        console.log("shield: " + targetNation.specialWeapons.missileShield)
         nuclearStrikeOutcomeEnemySide(enemyIsNuked, playerIsNuked, code, region);
-        console.log(targetNation.specialWeapons.nuclearWeapons)
     }
 }
 
@@ -536,175 +533,182 @@ unitArrivalTime = (region, units, time, orders) => {
     }, 0);
 }
 
-
+const previousAttackers = [];
 // Nations attacking player: pseudo-random hostile nation attacks
 function attackPlayerAfterRandomTime(enemyIsNuked, playerIsNuked, code, region, targetNation) {
-    
+
     // prevent running if game ended - REMOVE IF GAME SUCCESSFULLY WRAPPED IN IF
     if (!gameState.gameStarted) return;
-    
+
     // Go through all nations and see if any are hostile...
     for (let i = 0; i < allNationsAsObjects.length; i++) {
-        
+
+        // DO I NEED TO CHECK IF DEFEATED IF NATION IS REMOVED FROM OBJECTS ANYWAY?
         // If any hostile nation is not defeated or already engaged, that is the target
-        if (!territoriesConqueredByRegion.includes(allNationsAsObjects[i].name) &&
-            !gameState.targetNationSelected) {
+        if (!previousAttackers.includes(allNationsAsObjects[i].name) &&
+            !gameState.targetNationSelected &&
+            allNationsAsObjects[i].status.stance === "hostile") {
             targetNation = allNationsAsObjects[i];
+
+            // Insert current chosen target nation into array to prevent same nation attack
+            previousAttackers.push(targetNation.name);
             console.log("target chosen: " + targetNation.name)
+            console.log(previousAttackers);
             determineAttackTypeOnPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation);
             break;
-        } else return;
+            // If no conditions match first nation (ie not hostile), find the next one nation
+        } else continue;
     }
 }
 
 // Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
 
-    /* 
-        All 5 params are ESSENTIAL for nuclear function to run as they are passed between multiple functions to achieve the desired result.
-        Currently set to:
-            40% chance of military attack
-            50% chance of cyber attack
-            10% chance of nuclear attack
-    */
+/* 
+    All 5 params are ESSENTIAL for nuclear function to run as they are passed between multiple functions to achieve the desired result.
+    Currently set to:
+        40% chance of military attack
+        50% chance of cyber attack
+        10% chance of nuclear attack
+*/
 
-    determineAttackTypeOnPlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
+determineAttackTypeOnPlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
-        if (probability(0.40)) {
-            console.log("det attack type running probability")
-            swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
-            nationsAtWar(targetNation);
-            if (armiesDefeated >= 4) {
-                swal(`${playerNation.name} has fought off ${targetNation.name}`);
-            } else {
-                swal(`${playerNation.name}'s armies defeated by ${targetNation.name}`, "Game Over");
-                gameoverDefeated();
-            }
-            armiesDefeated = 0;
-        } else if (probability(0.50)) {
-            cyberAttack(targetNation);
+    if (probability(0.40)) {
+        console.log("det attack type running probability")
+        swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
+        nationsAtWar(targetNation);
+        if (armiesDefeated >= 4) {
+            swal(`${playerNation.name} has fought off ${targetNation.name}`);
         } else {
-            enemyNuclearRetaliation(enemyIsNuked, playerIsNuked, code, region, targetNation);
+            swal(`${playerNation.name}'s armies defeated by ${targetNation.name}`, "Game Over");
+            gameoverDefeated();
         }
+        armiesDefeated = 0;
+    } else if (probability(0.50)) {
+        cyberAttack(targetNation);
+    } else {
+        enemyNuclearRetaliation(enemyIsNuked, playerIsNuked, code, region, targetNation);
     }
+}
 
-    cyberAttack = (targetNation) => {
+cyberAttack = (targetNation) => {
 
-        const playerGDPBeforeHack = playerNation.gdp;
+    const playerGDPBeforeHack = playerNation.gdp;
 
-        playerNation.gdp -= RNG(100000, 5000000000);
-        swal(`Hacked by ${targetNation.name}`, `$${playerGDPBeforeHack - playerNation.gdp} has been stolen.`);
-    }
+    playerNation.gdp -= RNG(100000, 5000000000);
+    swal(`Hacked by ${targetNation.name}`, `$${playerGDPBeforeHack - playerNation.gdp} has been stolen.`);
+}
 
-    // Don't need definenationstance if being called every second above??
-    // Nation begins military build up
+// Don't need definenationstance if being called every second above??
+// Nation begins military build up
 
-    const militaryCoup = () => {
+const militaryCoup = () => {
 
-        const randomNation = Math.floor(Math.random() * allNationsAsObjects.length);
+    const randomNation = Math.floor(Math.random() * allNationsAsObjects.length);
 
-        for (let i = 0; i < allNationsAsObjects.length; i++) {
+    for (let i = 0; i < allNationsAsObjects.length; i++) {
 
-            if (allNationsAsObjects[i] === allNationsAsObjects[randomNation]) {
-                allNationsAsObjects[i].status.aggressionLevel = 100;
+        if (allNationsAsObjects[i] === allNationsAsObjects[randomNation]) {
+            allNationsAsObjects[i].status.aggressionLevel = 100;
 
-                // 50% chance of nuclear armament
-                if (probability(0.50)) {
-                    allNationsAsObjects[i].specialWeapons.nuclearWeapons += 1;
-                }
+            // 50% chance of nuclear armament
+            if (probability(0.50)) {
+                allNationsAsObjects[i].specialWeapons.nuclearWeapons += 1;
+            }
 
-                for (units in allNationsAsObjects[i].militaryUnits) {
-                    allNationsAsObjects[i].militaryUnits[units] += RNG(5000, 10000);
-                }
+            for (units in allNationsAsObjects[i].militaryUnits) {
+                allNationsAsObjects[i].militaryUnits[units] += RNG(5000, 10000);
+            }
 
-                swal(`${allNationsAsObjects[i].name} is experiencing a coup d'état!`, `Aggression Level: 100 
+            swal(`${allNationsAsObjects[i].name} is experiencing a coup d'état!`, `Aggression Level: 100 
                 Stance: Hostile, 
 
                 Nation's Military Power Increased`);
-            }
         }
     }
+}
 
-    const naturalDisaster = () => {
+const naturalDisaster = () => {
 
-        const disasters = ["forest fires", "flooding", "volcanoes", "earthquakes"];
-        const randomDisaster = Math.floor(Math.random() * disasters.length);
-        const previousPlayerGDP = playerNation.gdp;
+    const disasters = ["forest fires", "flooding", "volcanoes", "earthquakes"];
+    const randomDisaster = Math.floor(Math.random() * disasters.length);
+    const previousPlayerGDP = playerNation.gdp;
 
-        playerNation.gdp -= RNG(100000, 1000000);
-        swal("Natural Disaster", `Your nation has been hit by ${disasters[randomDisaster]}! Reparations are necessary. 
+    playerNation.gdp -= RNG(100000, 1000000);
+    swal("Natural Disaster", `Your nation has been hit by ${disasters[randomDisaster]}! Reparations are necessary. 
 
         GDP: - $${previousPlayerGDP - playerNation.gdp}`);
-        playerNation.resources.defenceBudget -= RNG(50000, 100000);
-    }
-    
-    // Terror attack on player's nation
-    const terroristStrike = () => {
+    playerNation.resources.defenceBudget -= RNG(50000, 100000);
+}
 
-        const terrorTargets = ["city", "vital oil refinery"];
-        const randomTarget = Math.floor(Math.random() * terrorTargets.length);
+// Terror attack on player's nation
+const terroristStrike = () => {
 
-        if (terrorTargets[randomTarget] === terrorTargets[0]) {
-            playerNation.status.govtApprovalRating -= 5;
-            playerNation.resources.defenceBudget -= 100000;
-            swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Civilian casualties are reported and a clean-up bill is required. 
+    const terrorTargets = ["city", "vital oil refinery"];
+    const randomTarget = Math.floor(Math.random() * terrorTargets.length);
+
+    if (terrorTargets[randomTarget] === terrorTargets[0]) {
+        playerNation.status.govtApprovalRating -= 5;
+        playerNation.resources.defenceBudget -= 100000;
+        swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Civilian casualties are reported and a clean-up bill is required. 
 
             Approval Rating: -5 
             Defence Budget: - $100000`);
-        } else {
-            const previousOilProduction = playerNation.resources.oilProduction;
-            playerNation.resources.oilProduction -= RNG(50000, 100000);
-            swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Reparations are necessary. 
+    } else {
+        const previousOilProduction = playerNation.resources.oilProduction;
+        playerNation.resources.oilProduction -= RNG(50000, 100000);
+        swal("Terror Attack", `Terrorists have attacked a ${terrorTargets[randomTarget]} in your nation. Reparations are necessary. 
 
             Oil Production: - ${previousOilProduction - playerNation.resources.oilProduction}`);
-        }
     }
+}
 
-    const internationalAid = () => {
+const internationalAid = () => {
 
-        if (playerNation.gdp >= 5200000) {
-            swal("International Aid", "You nation is donating capital to several impoverished nations. \n\n Approval Rating: +2 \nAll Nations Aggression Level: -2 \nGDP: - $5200000");
+    if (playerNation.gdp >= 5200000) {
+        swal("International Aid", "You nation is donating capital to several impoverished nations. \n\n Approval Rating: +2 \nAll Nations Aggression Level: -2 \nGDP: - $5200000");
 
-            playerNation.gdp -= 5200000;
-            playerNation.status.govtApprovalRating + 2;
+        playerNation.gdp -= 5200000;
+        playerNation.status.govtApprovalRating + 2;
 
-            allNationsAsObjects.forEach(nation => {
-                nation.status.aggressionLevel -= 2;
-            });
+        allNationsAsObjects.forEach(nation => {
+            nation.status.aggressionLevel -= 2;
+        });
 
-        } else {
-            swal("Insufficient GDP For International Aid Provision", "Many impoverished nations in the world were relying on you to provide support. \nApproval Rating: -2 \nAll Nations Aggression Level: +2");
+    } else {
+        swal("Insufficient GDP For International Aid Provision", "Many impoverished nations in the world were relying on you to provide support. \nApproval Rating: -2 \nAll Nations Aggression Level: +2");
 
-            playerNation.status.govtApprovalRating - 2;
+        playerNation.status.govtApprovalRating - 2;
 
-            allNationsAsObjects.forEach(nation => {
-                nation.status.aggressionLevel + 2;
-            });
-        }
+        allNationsAsObjects.forEach(nation => {
+            nation.status.aggressionLevel + 2;
+        });
     }
+}
 
-    const globalTreaty = () => {
+const globalTreaty = () => {
 
-        if (playerNation.diplomacy >= 50) {
-            swal("International Treaty", "Your nation has signed a treaty that benefits many of the world's nations, including yours. Congratulations. \n\n All Nations Aggression Level: -5 \nAll Nations Resistance: -2 \nAll Nations GDP: + $1000000000 \nAll Nations Diplomacy: +5");
+    if (playerNation.diplomacy >= 50) {
+        swal("International Treaty", "Your nation has signed a treaty that benefits many of the world's nations, including yours. Congratulations. \n\n All Nations Aggression Level: -5 \nAll Nations Resistance: -2 \nAll Nations GDP: + $1000000000 \nAll Nations Diplomacy: +5");
 
-            allNationsAsObjects.forEach(nation => {
-                nation.status.aggressionLevel - 5;
-                nation.status.resistance - 2;
-                nation.gdp + 1000000000;
-                nation.diplomacy + 5;
-            });
+        allNationsAsObjects.forEach(nation => {
+            nation.status.aggressionLevel - 5;
+            nation.status.resistance - 2;
+            nation.gdp + 1000000000;
+            nation.diplomacy + 5;
+        });
 
-        } else {
-            swal("Treaty Diplomacy Failed", "Your nation attempted to sign a global treaty. Alas, negotiations broke down and it will need to wait for another day. \nAll Nations Diplomacy: +3");
+    } else {
+        swal("Treaty Diplomacy Failed", "Your nation attempted to sign a global treaty. Alas, negotiations broke down and it will need to wait for another day. \nAll Nations Diplomacy: +3");
 
-            allNationsAsObjects.forEach(nation => {
-                nation.diplomacy + 3;
-            });
-        }
+        allNationsAsObjects.forEach(nation => {
+            nation.diplomacy + 3;
+        });
     }
+}
 
-    // Set an array of events that can be randomised to produce game-changing dynamics
-    const worldEvents = [
+// Set an array of events that can be randomised to produce game-changing dynamics
+const worldEvents = [
             militaryCoup,
             naturalDisaster,
             terroristStrike,
@@ -712,29 +716,29 @@ function attackPlayerAfterRandomTime(enemyIsNuked, playerIsNuked, code, region, 
             globalTreaty
     ];
 
-    // COMPLETE EVENT WHEN FINISHED - call this somehow
+// COMPLETE EVENT WHEN FINISHED - call this somehow
 
-    runRandomWorldEvent = () => {
+runRandomWorldEvent = () => {
 
-        const randomFunction = Math.floor(Math.random() * worldEvents.length);
+    const randomFunction = Math.floor(Math.random() * worldEvents.length);
 
-        for (let i = 0; i < worldEvents.length; i++) {
-            console.log(worldEvents[randomFunction]());
-        }
+    for (let i = 0; i < worldEvents.length; i++) {
+        console.log(worldEvents[randomFunction]());
     }
+}
 
-    showStatusOnPlayerNationSelect = (region) => {
-        if (playerNation === Russia && region === "Russian Federation" ||
-            playerNation === USA && region === "United States of America") {
-            $(".status-overlay").addClass("status-open");
-        }
+showStatusOnPlayerNationSelect = (region) => {
+    if (playerNation === Russia && region === "Russian Federation" ||
+        playerNation === USA && region === "United States of America") {
+        $(".status-overlay").addClass("status-open");
     }
+}
 
-    // Call after nation select is completed
-    displayNationNameOnStatus = () => {
-        $("#nation-name").text(playerNation.name);
-    }
-    
+// Call after nation select is completed
+displayNationNameOnStatus = () => {
+    $("#nation-name").text(playerNation.name);
+}
+
 /* 
     Need to only allow country targeted to be auto attacked as soon as amount of waiting days are over. save country region as global var to then run inside a new deployment attack fn. once this new fn runs, can consider switching attack disallowed bool back to false.
 */
@@ -1612,17 +1616,17 @@ awardResources = () => {
 
 defineNationStance = () => {
 
-        for (let i = 0; i < allNationsAsObjects.length; i++) {
-            if (allNationsAsObjects[i].status.aggressionLevel > 50) {
-                allNationsAsObjects[i].status.stance = "hostile";
-            } else if (allNationsAsObjects[i].status.aggressionLevel > 40 &&
-                allNationsAsObjects[i].status.aggressionLevel < 50) {
-                allNationsAsObjects[i].status.stance = "neutral";
-            } else {
-                allNationsAsObjects[i].status.stance = "friendly";
-            }
+    for (let i = 0; i < allNationsAsObjects.length; i++) {
+        if (allNationsAsObjects[i].status.aggressionLevel >= 0 && allNationsAsObjects[i].status.aggressionLevel < 40) {
+            allNationsAsObjects[i].status.stance = "friendly";
+        } else if (allNationsAsObjects[i].status.aggressionLevel >= 40 &&
+            allNationsAsObjects[i].status.aggressionLevel <= 50) {
+            allNationsAsObjects[i].status.stance = "neutral";
+        } else {
+            allNationsAsObjects[i].status.stance = "hostile";
         }
     }
+}
 
 // Functions to monitor the effects of public mood and feeling. Enemy is conquered if it melts
 monitorNationResistance = (region, code) => {
@@ -1648,7 +1652,7 @@ monitorNationGovtApproval = () => {
 
 // add other functions to the below block???
 checkForGameWin = () => {
-    if (territoriesConqueredByCode.length === 1) {
+    if (territoriesConqueredByCode.length === 10) {
         suggestPlayOtherNation();
     }
 }
@@ -1707,38 +1711,56 @@ gameoverDefeated = (playerIsNuked) => {
     }
 }
 
-// How often or where to run this??? Twice every game day? Make saved stance array global?
-informPlayerOfNationStanceChange = () => {
+let previousNationStances = [];
+let stateHasChanged = false;
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
+controlStateChange = () => {
 
-        // 1st loop: Create a new array and store all initial nation stances inside it
+    if (stateHasChanged) {
+        console.log("States have changed - emptying old state")
+        previousNationStances = [];
+        console.log("state has changed - storing current state")
+        storeNationStance();
+        stateHasChanged = false;
+    }
 
-        let previousNationStances = [];
-        previousNationStances.push(allNationsAsObjects[i].status.stance);
+}
 
-        // DELETE AGGRESSION INCREASE BELOW WHEN FINISHED - used to test
-        //allNationsAsObjects[i].status.aggressionLevel += 10;
-        defineNationStance();
+// If state has changed, repopulate the array and save current stances
 
-        for (let j = 0; j < previousNationStances.length; j++) {
+storeNationStance = () => {
 
-            /* 
-                2nd loop: iterate through previous stances and if not equal to current stance, show alert stating which nation stances have altered, and to what stance
-            */
+    allNationsAsObjects.forEach(nation => {
+        previousNationStances.push(nation.status.stance);
+    });
+}
 
-            if (previousNationStances[j] !== allNationsAsObjects[i].status.stance) {
+// Iterate through both the previous stances and the current ones - check for discrepancies
 
-                alert(`${allNationsAsObjects[i].name} has gone from ${previousNationStances[j]} to ${allNationsAsObjects[i].status.stance}`);
+evalStateChange = () => {
+
+    controlStateChange();
+
+    // DEL WHEN TESTING OVER
+    //allNationsAsObjects[0].status.aggressionLevel += 20;
+    defineNationStance();
+
+    for (let i = 0; i < previousNationStances.length; i++) {
+        for (let j = 0; j < allNationsAsObjects.length; j++) {
+            if (previousNationStances[i] !== allNationsAsObjects[i].status.stance) {
+                stateHasChanged = true;
+                console.log("prev: " + previousNationStances[i] + " current: " + allNationsAsObjects[i].status.stance)
+                alert(`${allNationsAsObjects[i].name} has become ${allNationsAsObjects[i].status.stance}`);
+                break;
             }
         }
     }
 
     // Hostile nations are removed from treaties / deals on both sides
-    //hostileNationsTreatyWithdrawal();
+    //treatyWithdrawal();
 }
 
-hostileNationsTreatyWithdrawal = () => {
+treatyWithdrawal = () => {
 
     allNationsAsObjects.forEach(nation => {
         removePlayerNationFromPartnerArray(nation);

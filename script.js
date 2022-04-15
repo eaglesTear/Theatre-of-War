@@ -140,17 +140,22 @@ for (let i = 0; i < worldNationsObjectLength; i++) {
     allNationsAsObjects.push(allNations);
 }
 
+// Store the initial nation stances and assign the nation it's actual name
+
 for (let i = 0; i < allNationsAsObjects.length; i++) {
     for (let j = 0; j < worldNations.length; j++) {
-
         allNationsAsObjects[i].name = worldNations[i];
     }
 }
 
 // Set once on game start, then recalled daily to dynamically adapt nation behaviour
+
 defineNationStance();
-playerNation.specialWeapons.missileDefenceShield = 10;
-$(document).ready(() => {
+
+storeNationStance();
+
+
+$(() => {
 
     $('#vmap').vectorMap({
         backgroundColor: '#151515',
@@ -181,9 +186,11 @@ $(document).ready(() => {
 
         onRegionClick: (element, code, region) => {
 
+            gameState.targetNationSelected = true;
+
             nationSelect.play();
             showStatusOnPlayerNationSelect(region);
-            
+
 
             // First 'if' prevents code running on the player's selected nation
 
@@ -195,7 +202,7 @@ $(document).ready(() => {
 
                     if (allNationsAsObjects[i].name === region) {
                         targetNation = allNationsAsObjects[i];
-                        console.log(allNationsAsObjects)
+
                         // Data for nation is displayed only if nation has been infiltrated
 
                         playerNation.surveillance.infiltratedNations.forEach(nation => {
@@ -223,6 +230,7 @@ $(document).ready(() => {
             for (let i = 0; i < territoriesConqueredByCode.length; i++) {
                 if (territoriesConqueredByCode[i] === code) return;
             }
+            gameState.targetNationSelected = false;
         }
     });
 });

@@ -445,7 +445,7 @@ monthlyExpenditureReport = () => {
     });
 }
 
-// Alert player to incoming monthly expenditures (embedded in 'passageoftime' fn)
+// Alert player to incoming monthly expenditures (embedded in 'runGameTime' fn)
 alertMonthlyExpenditure = () => {
 
     swal({

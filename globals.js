@@ -176,11 +176,12 @@ let researchersAvailable;
 
 // Only have one shot at any deal with a nation
 // Allowed to access options UNTIL any one negotiation fails - then menu won't open
+
 const diplomacyAttempted = [];
 
 // Track whether assistance from one country has already been provided
-const assistanceProvided = [];
 
+const assistanceProvided = [];
 
 /*
     1. Keep track of the number of daily conscripts so total can be relayed to commander (player)
@@ -204,11 +205,13 @@ let nationsHoldingAgents = [];
 let researchersAssigned = [];
 let baseMaintenanceTotals = [];
 
-// Main game object NEW OBJECT LITERAL
+// OBJECT LITERALS
+
+// Main game object
 
 const gameState = {
-    time: passageOfTime(),
     gameStarted: false,
+    time: runGameTime,
     unitsOnCampaign: false,
     targetNationSelected: false,
     conscriptionStarted: false,
@@ -240,4 +243,4 @@ const assigned = {
     kineticArmour: "",
     particleCannon: "",
     missileDefenceShield: ""
-}
+};
