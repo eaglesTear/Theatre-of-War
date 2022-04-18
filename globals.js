@@ -183,6 +183,9 @@ const diplomacyAttempted = [];
 
 const assistanceProvided = [];
 
+let previousNationStances = [];
+let stanceHasChanged = false;
+
 /*
     1. Keep track of the number of daily conscripts so total can be relayed to commander (player)
     2. Array holding nations conquered by the player
@@ -199,8 +202,8 @@ const territoriesConqueredByCode = [];
 const territoriesConqueredByRegion = [];
 const allNationsAsObjects = [];
 const allNationsCodeArray = [];
-const GDP = [];
-const oilProduction = [];
+const defeatedNationGDP = [];
+const defeatedNationOil = [];
 let nationsHoldingAgents = [];
 let researchersAssigned = [];
 let baseMaintenanceTotals = [];
@@ -244,3 +247,14 @@ const assigned = {
     particleCannon: "",
     missileDefenceShield: ""
 };
+
+const structureMaintenance = {
+    intelOps: 20000,
+    airbase: 30000,
+    barracks: 10000,
+    warFactory: 25000,
+    navalYard: 80000,
+    launchPad: 92000,
+    researchCentre: 35000,
+    missileSilo: 500000,
+}

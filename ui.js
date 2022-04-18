@@ -417,7 +417,7 @@ $(() => {
                 displayMainStatus();
                 checkForGameWin();
                 monitorNationGovtApproval();
-                //evalStateChange();
+                detectStanceChange();
             }
         }, 2000);
         
@@ -442,11 +442,9 @@ $(() => {
         }, 8000);
     }
     
-    
+    randomWorldEvent();
     // DELETE WHEN TESTING IS OVER
     startGame()
-    
-    evalStateChange()
     
     // Load nation select screen when skip intro or start game button is pressed
     $("#skip-intro-btn, #start-game-btn").click(() => {

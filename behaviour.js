@@ -24,9 +24,11 @@ mark all events that cause increase and decrease in approval rating etc
 be careful of double loops - do I want i or j?
 watch p-cannon behaviour closely - especially the button. Does it appear after researching?
 oil consumption
+defence budget not going into negatives: issues was with resourceIncome: truncing empty arrays
 
 REFACTOR ***********
 
+does targetnation need to be a param in every function it is used in?
 shorten and make clear some function names & vars
 modulate functions further
 envelop functions into gamestarted control to prevent functions carrying on
@@ -34,14 +36,29 @@ Any code that affects nation objects must be defined after their creation!!!! - 
 check what needs doc. ready in terms of jquery - most code is v js
 end goal - have one file that sets up whole game in terms of a function list
 functions & alerts - do they portray right information to the player and what's happening?
+store values (eg unit exp points) in an object
+nothing to increase hostility in random events -  alter??
 
 DEBUG ***********
 
-check random event functions and run them
-check how / when to run nation withdrawal treaties: must come after stance change
-defence budget not going into negative numbers after expenses - log what's going on
+//if condition in terror means occasional no terror strike - ok or not
+weekly alert func not working if clicked on
 
 ADDITIONAL FUNCTIONALITY ***********
 
+playernation aggression increase when attacking other nation - build in to treaty functions
+if no money, approval drops or game over - tick function
 add real world stats and build times to the game
-function to go through and increase / decrease stats in nations to allow dynamic behaviour
+Event log on new screen - stance changes etc
+
+/*
+
+*************************************************************************************************
+    
+    NUCLEAR WARFARE
+ 
+    If a nation suffers nuclear annihilation, colour is same as bg and is wiped and unable to be acquired for resources. If the target has nuclear defense, and they defend, they may launch against you if hostility or stance says so. Add new strategic element to object. Remember, nukes needed to validate function.
+
+*************************************************************************************************
+
+*/

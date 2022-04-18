@@ -379,11 +379,11 @@ militaryOilExpenditureDaily = () => {
         });
     }
     playerNation.resources.oilProduction -= Math.trunc(reduce(militaryUnitsOilExpenditure));
+    //console.log(Math.trunc(reduce(militaryUnitsOilExpenditure)));
 }
 
 // MONTHLY EXPENDITURE
 
-// Basic Russian upkeep is nearly $90 billion!
 militaryUnitMaintenanceMonthly = () => {
 
     const unitsToMaintain = [
@@ -395,24 +395,13 @@ militaryUnitMaintenanceMonthly = () => {
         playerNation.surveillance.satellites * 125000,
         playerNation.specialWeapons.nuclearWeapons * 2916666666,
         playerNation.researchers * 40000,
-        playerNation.specialWeapons.nuclearWeapons * 100000000
+        playerNation.specialWeapons.nuclearWeapons * 20000
     ];
 
-    nuclearProgrammeAnnualExpenditure(unitsToMaintain);
+    nuclearProgrammeMonthlyExpenditure(unitsToMaintain);
     playerNation.resources.defenceBudget -= reduce(unitsToMaintain);
 
-    swal(`Military (including any Nuclear Programmes): ${reduce(unitsToMaintain)}`);
-}
-
-const structureMaintenance = {
-    intelOps: 20000,
-    airbase: 30000,
-    barracks: 10000,
-    warFactory: 25000,
-    navalYard: 80000,
-    launchPad: 92000,
-    researchCentre: 35000,
-    missileSilo: 500000,
+    alert(`Military (including any Nuclear Programmes): $${reduce(unitsToMaintain)}`);
 }
 
 /*
@@ -427,40 +416,37 @@ monthlyBaseExpenditure = () => {
 
         if (playerBase[value] !== undefined) {
             playerNation.resources.defenceBudget -= structureMaintenance[value];
-            swal(`${value}: ${structureMaintenance[value]}`);
+            alert(`${value}: ${structureMaintenance[value]}`);
             baseMaintenanceTotals.push(structureMaintenance[value]);
         }
     }
-    swal("Monthly Base Maintenance Report", `Total for base: -$${reduce(baseMaintenanceTotals)}
-    Current Defence Budget: $${playerNation.resources.defenceBudget}`);
+    alert(`Monthly Base Maintenance Report: - $${reduce(baseMaintenanceTotals)}`);
 }
 
 monthlyExpenditureReport = () => {
-
     swal({
         title: "Monthly Expenditure Report",
-        text: `Current GDP: ${playerNation.gdp},
-        Current Defence Budget: ${playerNation.resources.defenceBudget}`,
+        text: `Current GDP: $${playerNation.gdp},
+        Current Defence Budget: $${playerNation.resources.defenceBudget}`,
         icon: "info"
     });
 }
 
 // Alert player to incoming monthly expenditures (embedded in 'runGameTime' fn)
 alertMonthlyExpenditure = () => {
-
     swal({
         title: "Expenditures Due: 1 Week",
         icon: "warning"
     });
 }
 
-// YEARLY EXPENDITURE
+// WHEN NUCLEAR PROGRAMME ACTIVE, COST IS $65,000,000,000???
 
-// WHEN NUCLEAR PROGRAMME ACTIVE, COST IS $65,000,000,000
-
-nuclearProgrammeAnnualExpenditure = (unitsToMaintain) => {
+nuclearProgrammeMonthlyExpenditure = (unitsToMaintain) => {
     if (playerNation.specialWeapons.nuclearWeapons) unitsToMaintain.push(300);
 }
+
+// YEARLY EXPENDITURE
 
 
 // ************************************************************************************
@@ -471,10 +457,10 @@ nuclearProgrammeAnnualExpenditure = (unitsToMaintain) => {
 // MONTHLY REVENUES
 
 // Tally up the arrays holding player's resources from other nations & award monthly
-resourceIncomeMonthly = () => {
 
-    playerNation.resources.defenceBudget = Math.trunc(reduce(GDP));
-    playerNation.resources.oilProduction = Math.trunc(reduce(oilProduction));
+resourceIncomeMonthly = () => {
+        playerNation.resources.defenceBudget += Math.trunc(reduce(defeatedNationGDP)); 
+        playerNation.resources.oilProduction += Math.trunc(reduce(defeatedNationOil));
 }
 
 annualDefenceBudgetAndGDP = () => {
@@ -482,7 +468,8 @@ annualDefenceBudgetAndGDP = () => {
     playerNation.resources.defenceBudget += yearlyDefenceBudget;
     playerNation.gdp += yearlyGDP;
 
-    swal("Yearly GDP and Defence Budget Allocated", `GDP: ${playerNation.gdp} <br> ${playerNation.resources.defenceBudget}`);
+    swal("Yearly GDP and Defence Budget Allocated", `GDP: $${playerNation.gdp} <br> $${playerNation.resources.defenceBudget}`);
+    console.log("yearly defence budget")
 }
 
 // TRADE
