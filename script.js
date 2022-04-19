@@ -21,9 +21,9 @@ displayNationNameOnStatus();
 
 
 // These commands MUST have a desired map target
-  
+
 playerActions = (region, code) => {
-console.log("TN Name: " + targetNation.name);
+    console.log("TN Name: " + targetNation.name);
     // Prevent commands being used on player's own nation
     if (playerNation.name === region) return;
 
@@ -75,7 +75,6 @@ console.log("TN Name: " + targetNation.name);
 
         default:
             console.log("No player actions selected.");
-            console.log("TN Name: " + targetNation.name);
     }
     console.log("TN Name: " + targetNation.name);
 }
@@ -153,6 +152,8 @@ for (let i = 0; i < allNationsAsObjects.length; i++) {
 
 defineNationStance();
 
+definePlayerStance();
+
 storeNationStance();
 
 
@@ -186,7 +187,7 @@ $(() => {
         },
 
         onRegionClick: (element, code, region) => {
-            
+
             gameState.targetNationSelected = true;
 
             nationSelect.play();
@@ -207,19 +208,19 @@ $(() => {
 
                         // Data for nation is displayed only if nation has been infiltrated
 
-//                        playerNation.surveillance.infiltratedNations.forEach(nation => {
-//
-//                            const noIntelAlert = swal(`No Intel on ${region}`, "Send agents or use satellites to spy.");
-//
-//                            if (!playerNation.surveillance.infiltratedNations.length) {
-//                                noIntelAlert;
-//                            } else if (targetNation.name === nation) {
-//                                const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
-//                                swal(stringifiedNationInfo);
-//                            } else {
-//                                noIntelAlert;
-//                            }
-//                        });
+                        playerNation.surveillance.infiltratedNations.forEach(nation => {
+
+                            const noIntelAlert = swal(`No Intel on ${region}`, "Send agents or use satellites to spy.");
+
+                            if (!playerNation.surveillance.infiltratedNations.length) {
+                                noIntelAlert;
+                            } else if (targetNation.name === nation) {
+                                const stringifiedNationInfo = JSON.stringify(targetNation, null, 4);
+                                swal(stringifiedNationInfo);
+                            } else {
+                                noIntelAlert;
+                            }
+                        });
 
                         // User-enabled options
                         playerActions(region, code);

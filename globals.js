@@ -101,7 +101,7 @@ const USA = new Nation(
     85, // Infantry skill
     95.8, // Naval tech
     87.8, // Infiltration
-    5174, // Nuclear Weapons
+    0, // Nuclear Weapons
     0, // Missile Shield
     10, // Aggression
     "", // Stance - defined by aggression level
@@ -146,7 +146,7 @@ const Russia = new Nation(
 
 
 // Player's selection will decide the value of this variable - undefine when ready to deploy
-let playerNation = USA;
+let playerNation = Russia;
 
 // Parsing as float allows the most accurate measurement of an average calendar month later on
 let day = parseFloat(1);
@@ -185,6 +185,10 @@ const assistanceProvided = [];
 
 let previousNationStances = [];
 let stanceHasChanged = false;
+
+// track whether 'lowerApprovalOnAggresssion' has run once (as it should)
+
+let hasRan = false;
 
 /*
     1. Keep track of the number of daily conscripts so total can be relayed to commander (player)

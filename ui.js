@@ -417,6 +417,7 @@ $(() => {
                 displayMainStatus();
                 checkForGameWin();
                 monitorNationGovtApproval();
+                lowerApprovalOnAggression();
                 detectStanceChange();
             }
         }, 2000);
@@ -442,7 +443,7 @@ $(() => {
         }, 8000);
     }
     
-    randomWorldEvent();
+    //randomWorldEvent();
     // DELETE WHEN TESTING IS OVER
     startGame()
     

@@ -38,18 +38,18 @@ end goal - have one file that sets up whole game in terms of a function list
 functions & alerts - do they portray right information to the player and what's happening?
 store values (eg unit exp points) in an object
 nothing to increase hostility in random events -  alter??
+check addition & comparison operators!!!!
 
 DEBUG ***********
-
-//if condition in terror means occasional no terror strike - ok or not
-weekly alert func not working if clicked on
-
+agents not showing after capturing
+ 1:57am 19/4/22 All major bugs eliminated
+ 
 ADDITIONAL FUNCTIONALITY ***********
-
+ 
 playernation aggression increase when attacking other nation - build in to treaty functions
 if no money, approval drops or game over - tick function
-add real world stats and build times to the game
-Event log on new screen - stance changes etc
+>> add real world stats and build times to the game
+>> Event log on new screen - stance changes etc
 
 /*
 
