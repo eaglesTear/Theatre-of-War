@@ -41,15 +41,14 @@ nothing to increase hostility in random events -  alter??
 check addition & comparison operators!!!!
 
 DEBUG ***********
-agents not showing after capturing
+
  1:57am 19/4/22 All major bugs eliminated
+ remove alliance colours after nation leaves???
  
 ADDITIONAL FUNCTIONALITY ***********
  
-playernation aggression increase when attacking other nation - build in to treaty functions
 if no money, approval drops or game over - tick function
 >> add real world stats and build times to the game
->> Event log on new screen - stance changes etc
 
 /*
 

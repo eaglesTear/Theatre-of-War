@@ -418,6 +418,7 @@ $(() => {
                 checkForGameWin();
                 monitorNationGovtApproval();
                 lowerApprovalOnAggression();
+                lowerApprovalOnBankruptcy();
                 detectStanceChange();
             }
         }, 2000);
@@ -445,6 +446,7 @@ $(() => {
     
     //randomWorldEvent();
     // DELETE WHEN TESTING IS OVER
+    playerNation.surveillance.fieldAgents = 4;
     startGame()
     
     // Load nation select screen when skip intro or start game button is pressed

@@ -212,6 +212,10 @@ select {
     width: 360px;
 }
 
+.sidebar select {
+    width: 170px;
+}
+
 input[type=number] {
     border: none;
     border-bottom: 2px solid #FF3131;
@@ -229,7 +233,6 @@ input[type=number] {
 }
 
 .options-container,
-.agents-imprisoned,
 .title-overlay,
 .hidden,
 #game-over-titles,

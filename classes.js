@@ -468,7 +468,8 @@ annualDefenceBudgetAndGDP = () => {
     playerNation.resources.defenceBudget += yearlyDefenceBudget;
     playerNation.gdp += yearlyGDP;
 
-    swal("Yearly GDP and Defence Budget Allocated", `GDP: $${playerNation.gdp} <br> $${playerNation.resources.defenceBudget}`);
+    swal("Yearly GDP and Defence Budget Allocated", 
+    `GDP: $${playerNation.gdp} $${playerNation.resources.defenceBudget}`);
     console.log("yearly defence budget")
 }
 
@@ -486,7 +487,7 @@ sellOil = () => {
             icon: "warning",
         });
         return;
-    }
+    } 
 
     swal("Sell Oil",
             `Sell ${numberOfBarrels} oil for $${oilSalePrice}?`, {

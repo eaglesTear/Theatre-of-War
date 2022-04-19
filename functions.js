@@ -107,12 +107,12 @@ runGameTime = () => {
 
         // setInterval detects a week before month up but includes failsafe to stop repeat
 
-//        const handleInterval = setInterval(() => {
-//            if (day >= monthlyInterval - 7 && day <= monthlyInterval - 6) {
-//                alertMonthlyExpenditure();
-//                clearInterval(handleInterval);
-//            }
-//        }, 200);
+        //        const handleInterval = setInterval(() => {
+        //            if (day >= monthlyInterval - 7 && day <= monthlyInterval - 6) {
+        //                alertMonthlyExpenditure();
+        //                clearInterval(handleInterval);
+        //            }
+        //        }, 200);
 
         if (day >= monthlyInterval) {
             //monthlyActions();
@@ -356,10 +356,11 @@ nuclearStrike = (region, code) => {
                     missileLaunch.play();
                     swal({
                         title: "Nuclear Missile Launched",
+                        text: "Your nation has increased its aggression: +5",
                         icon: "warning",
                     });
                     playerNation.specialWeapons.nuclearWeapons -= 1;
-                    playerNation.status.aggressionLevel += 10;
+                    playerNation.status.aggressionLevel += 5;
                     definePlayerStance();
                     nuclearStrikeOutcomePlayerSide(enemyIsNuked, playerIsNuked, code, region, targetNation);
                 }
@@ -754,7 +755,7 @@ const globalTreaty = () => {
 
     } else {
         swal("Treaty Diplomacy Failed", "Your nation attempted to sign a global treaty. Alas, negotiations broke down and it will need to wait for another day. \nAll Nations Diplomacy: +3");
-        
+
         allNationsAsObjects.forEach(nation => {
             nation.diplomacy += 3;
             nation.status.aggressionLevel += 5;
@@ -852,7 +853,7 @@ gatherIntel = (region) => {
         agentsAreCaptured(region);
         captureRegion = region;
         nationsHoldingAgents.push(captureRegion);
-        $(".agents-imprisoned").append(`<option value="${captureRegion}">${captureRegion}</option>`).removeClass("hidden");
+        $(".agents-imprisoned").append(`<option value="${captureRegion}">${captureRegion}</option>`).addClass("displayBlock");
         // If less than the number defined by 'prob', agents successfully report back with nation data 
     } else if (probability(0.86)) {
         espionageSuccessful(region);
@@ -930,7 +931,7 @@ checkIfAgentsAreHostages = () => {
             icon: "warning",
         });
         return true;
-    } //checkif needed
+    } //check  if needed
     return false;
 }
 
@@ -1017,6 +1018,16 @@ removeAgentFromHostageArray = () => {
     nationsHoldingAgents.splice(indexForNationOfAgentRescue, 1);
 
     $(`.agents-imprisoned option[value=${nationChosenForRescueAttempt}]`).remove();
+    hideCaptiveDropdown();
+}
+
+// Remove dropdown list of agents being held in certain countries when empty
+
+hideCaptiveDropdown = () => {
+
+    if (!nationsHoldingAgents.length) {
+        $(".agents-imprisoned").removeClass("displayBlock");
+    }
 }
 
 // Clear the dropdown from sidebar if no living agents are captive 
@@ -1573,11 +1584,11 @@ storeNationStance = () => {
 detectStanceChange = () => {
 
     controlStanceChange();
-    
+
     defineNationStance();
-    
+
     definePlayerStance();
-    
+
     // setTimeOut prevents message being overridden by other messages that occur concurrently
 
     for (let i = 0; i < previousNationStances.length; i++) {
@@ -1772,15 +1783,15 @@ defineNationStance = () => {
 }
 
 definePlayerStance = () => {
-    
-        if (playerNation.status.aggressionLevel >= 0 && playerNation.status.aggressionLevel < 40) {
-            playerNation.status.stance = "friendly";
-        } else if (playerNation.status.aggressionLevel >= 40 &&
-            playerNation.status.aggressionLevel <= 50) {
-            playerNation.status.stance = "neutral";
-        } else {
-            playerNation.status.stance = "hostile";
-        }
+
+    if (playerNation.status.aggressionLevel >= 0 && playerNation.status.aggressionLevel < 40) {
+        playerNation.status.stance = "friendly";
+    } else if (playerNation.status.aggressionLevel >= 40 &&
+        playerNation.status.aggressionLevel <= 50) {
+        playerNation.status.stance = "neutral";
+    } else {
+        playerNation.status.stance = "hostile";
+    }
 }
 
 // Functions to monitor the effects of public mood and feeling. Enemy is conquered if it melts
@@ -1807,11 +1818,20 @@ monitorNationGovtApproval = () => {
 // Govt approval lowers when a nation 
 
 lowerApprovalOnAggression = () => {
-    
-    if (playerNation.status.stance === "hostile" && !hasRan) {
+
+    if (playerNation.status.stance === "hostile" && !LAOAHasRan) {
+        swal(`${playerNation.name} Now Hostile`, "You have led the nation into an aggessive stance. Your people perceive you as a cruel tyrant.");
         playerNation.status.govtApprovalRating -= 2;
-        swal(`${playerNation.name} Now Hostile`, "You have led your nation into an aggessive stance");
-        hasRan = true;
+        LAOAHasRan = true;
+    }
+}
+
+lowerApprovalOnBankruptcy = () => {
+
+    if (playerNation.resources.defenceBudget <= 0 && !LAOBHasRan) {
+        swal(`${playerNation.name} Now Bankrupt`, "You have led the nation into bankruptcy, and your people are suffering. Try to balance your nation's books!");
+        playerNation.status.govtApprovalRating -= 2;
+        LAOBHasRan = true;
     }
 }
 

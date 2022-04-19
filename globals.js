@@ -186,9 +186,8 @@ const assistanceProvided = [];
 let previousNationStances = [];
 let stanceHasChanged = false;
 
-// track whether 'lowerApprovalOnAggresssion' has run once (as it should)
-
-let hasRan = false;
+let LAOAHasRan = false;
+let LAOBHasRan = false;
 
 /*
     1. Keep track of the number of daily conscripts so total can be relayed to commander (player)
