@@ -32,22 +32,19 @@ does targetnation need to be a param in every function it is used in?
 shorten and make clear some function names & vars
 modulate functions further
 envelop functions into gamestarted control to prevent functions carrying on
-Any code that affects nation objects must be defined after their creation!!!! - put in classes?
-check what needs doc. ready in terms of jquery - most code is v js
-end goal - have one file that sets up whole game in terms of a function list
 functions & alerts - do they portray right information to the player and what's happening?
 store values (eg unit exp points) in an object
 nothing to increase hostility in random events -  alter??
 check addition & comparison operators!!!!
+may be necessary to only use swal for buttons etc - danger they will override each other
+check all globals are actually being used!!!
 
 DEBUG ***********
 
  1:57am 19/4/22 All major bugs eliminated
- remove alliance colours after nation leaves???
  
 ADDITIONAL FUNCTIONALITY ***********
  
-if no money, approval drops or game over - tick function
 >> add real world stats and build times to the game
 
 /*
