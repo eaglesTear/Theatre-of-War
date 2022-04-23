@@ -1,3 +1,16 @@
+/*
+
+*************************************************************************************************
+    
+    UI: BUTTONS. THEY, YOU KNOW...DO STUFF
+ 
+    There are a plethora of buttons and commands in Theatre of War. Some access menus such as thestatus of a player's chosen nation, others allow interaction with the tactical map. As a rule, buttons in the 'commands' sidebar menu MUST have a map target following their clicking, with the sole exception of 'conscription' and 'rescue', which will automatically recruit a random number of troops to your military over the course of one month and allow you to attempt a rescue of any agents being held hostage.
+
+*************************************************************************************************
+
+*/
+
+
 $(() => {
 
     // Play btn fx
@@ -80,6 +93,7 @@ $(() => {
     $("#sell-oil").click(sellOil);
     $("#sell-weapons").click(sellWeapons);
     $("#make-small-arms").click(manufactureWeapons);
+    $("#assign").click(beginResearch);
 
     // Game status overlay
     $("#status-overlay-btn").click(() => {
@@ -123,39 +137,142 @@ $(() => {
         reloadGame();
     });
 
-
-    // ************************************************************************************
-    // ************************************************************************************
     // UPGRADES & RESEARCH: All research requires research personnel, and amount affects speed
 
     // Four upgrades are instant, provided money is no object and researchers are present
 
     $("#upgrade-aircraft").click(() => {
         if (checkFunds(10000000)) return;
-        if (!checkResearchFacilityAvailable()) return;
-        upgrade(10000000, "aircraft", "airTech", 5);
+        if (!researchFacilityAvailability()) return;
+        upgradeUnits(10000000, "aircraft", "airTech", 5);
         $("#upgrade-aircraft").text("Purchased").attr("disabled", "true");
     });
 
     $("#upgrade-navy").click(() => {
         if (checkFunds(20000000)) return;
-        if (!checkResearchFacilityAvailable()) return;
-        upgrade(20000000, "navy", "navalTech", 5);
+        if (!researchFacilityAvailability()) return;
+        upgradeUnits(20000000, "navy", "navalTech", 5);
         $("#upgrade-navy").text("Purchased").attr("disabled", "true");
     });
 
     $("#upgrade-infantry").click(() => {
         if (checkFunds(playerNation.militaryUnits.infantry * 2000)) return;
-        if (!checkResearchFacilityAvailable()) return;
-        upgrade(playerNation.militaryUnits.infantry * 2000, "infantry", "infantrySkill", 5);
+        if (!researchFacilityAvailability()) return;
+        upgradeUnits(playerNation.militaryUnits.infantry * 2000, "infantry", "infantrySkill", 5);
         $("#upgrade-infantry").text("Purchased").attr("disabled", "true");
     });
 
     $("#upgrade-armour").click(() => {
         if (checkFunds(40000000)) return;
-        if (!checkResearchFacilityAvailable()) return;
-        upgrade(40000000, "tanks", "armourTech", 5);
+        if (!researchFacilityAvailability()) return;
+        upgradeUnits(40000000, "tanks", "armourTech", 5);
         $("#upgrade-armour").text("Purchased").attr("disabled", "true");
+    });
+    
+    $("#airbase").click(() => {
+        if (playerBase.airbase) return;
+        if (checkFunds(280000000)) return;
+        constructionManager(playerBase.airbase, "airbase", day + 3, 280000000);
+    });
+
+    $("#intel-ops").click(() => {
+        if (playerBase.intelOps) return;
+        if (checkFunds(5470000000)) return;
+        constructionManager(playerBase.intelOps, "intelOps", day + 2, 5470000000);
+    });
+
+    $("#barracks").click(() => {
+        if (playerBase.barracks) return;
+        if (checkFunds(2000000)) return;
+        constructionManager(playerBase.barracks, "barracks", day + 2, 2000000);
+    });
+
+    $("#naval-yard").click(() => {
+        if (playerBase.navalYard) return;
+        if (checkFunds(2600000000)) return;
+        constructionManager(playerBase.navalYard, "navalYard", day + 2, 2600000000);
+    });
+
+    $("#war-factory").click(() => {
+        if (playerBase.warFactory) return;
+        if (checkFunds(11300000000)) return;
+        constructionManager(playerBase.warFactory, "warFactory", day + 2, 11300000000);
+    });
+
+    $("#launch-pad").click(() => {
+        if (playerBase.launchPad) return;
+        if (checkFunds(444000000)) return;
+        constructionManager(playerBase.launchPad, "launchPad", day + 2, 444000000);
+    });
+
+    $("#research-centre").click(() => {
+        if (playerBase.researchCentre) return;
+        if (checkFunds(48859900)) return;
+        constructionManager(playerBase.researchCentre, "researchCentre", day + 2, 48859900);
+    });
+
+    $("#missile-silo").click(() => {
+        if (playerBase.missileSilo) return;
+        if (checkFunds(120000000)) return;
+        constructionManager(playerBase.missileSilo, "missileSilo", day + 2, 120000000);
+    });
+
+
+/*
+
+*************************************************************************************************
+    
+    UNIT TRAINING INTERFACE: WHEN RELEVANT FACILITIES ARE CONSTRUCTED
+     
+  
+*************************************************************************************************
+
+*/
+    
+
+    $("#train-agents").click(() => {
+        if (!playerHasBuilding("intelOps", "Intel Ops")) return;
+        processUnitTraining(parseInt($("#field-agents").val()), 100000, playerNation.surveillance, "fieldAgents");
+    });
+
+    $("#purchase-infantry").click(() => {
+        if (!playerHasBuilding("barracks", "Barracks")) return;
+        processUnitTraining(parseInt($("#infantry").val()), 80000, playerNation.militaryUnits, "infantry");
+    });
+
+    $("#purchase-aircraft").click(() => {
+        if (!playerHasBuilding("airbase", "Airbase")) return;
+        processUnitTraining(parseInt($("#aircraft").val()), 64000000, playerNation.militaryUnits, "air");
+    });
+
+    $("#purchase-warships").click(() => {
+        if (!playerHasBuilding("navalYard", "Naval Yard")) return;
+        processUnitTraining(parseInt($("#warships").val()), 100000000, playerNation.militaryUnits, "naval");
+    });
+
+    $("#purchase-tanks").click(() => {
+        if (!playerHasBuilding("warFactory", "War Factory")) return;
+        processUnitTraining(parseInt($("#tanks").val()), 5000000, playerNation.militaryUnits, "tanks");
+    });
+
+    $("#launch-satellite").click(() => {
+        if (!playerHasBuilding("launchPad", "Launch Pad")) return;
+        processUnitTraining(parseInt($("#satellites").val()), 470000000, playerNation.surveillance, "satellites");
+    });
+
+    $("#hire-researchers").click(() => {
+        if (!playerHasBuilding("researchCentre", "Research Centre")) return;
+        processUnitTraining(parseInt($("#researchers").val()), 52000, playerNation, "researchers");
+    });
+
+    $("#build-nukes").click(() => {
+        if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
+        processUnitTraining(parseInt($("#warheads").val()), 28000000, playerNation.specialWeapons, "nuclearWeapons");
+    });
+
+    $("#build-shield").click(() => {
+        if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
+        processUnitTraining(parseInt($("#shield").val()), 38000000, playerNation.specialWeapons, "missileShield");
     });
     
 });

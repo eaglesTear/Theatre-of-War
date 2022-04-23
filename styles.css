@@ -5,9 +5,13 @@
 
 /* This snippet prevents scrolling at the start of the game so that intro can play out */
 
+html,
+body,
 .lock-display,
 .reload-btn,
-.end-header {
+.end-header,
+.status-overlay,
+.sidebar {
     margin: 0;
 }
 
@@ -224,7 +228,7 @@ input[type=number] {
 
 .options-container .cp-image {
     height: 90px;
-    width: 70px;
+    width: 85px;
 }
 
 .cp-image-rifle {
@@ -337,9 +341,9 @@ input[type=number] {
 
 .logo-usa,
 .logo-russia {
-    height: 80px;
-    margin-top: 10px;
-    width: 80px;
+    height: auto;
+    margin: 8px 12px 0 0;
+    width: 60px;
 }
 
 .status-overlay,
@@ -456,7 +460,7 @@ button,
 }
 
 .game-hud .wargate {
-    margin-right: 3%;
+    margin-right: 2%;
 }
 
 .title-animation-1,

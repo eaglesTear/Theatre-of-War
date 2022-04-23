@@ -62,18 +62,18 @@ class Nation {
             govtApprovalRating: govtApprovalRating
         };
         this.attackNation = attackNation,
-            this.deployForces = deployForces,
-            this.deployAgents = deployAgents,
-            this.launchHostageRescue = launchHostageRescue,
-            this.beginSpecOps = beginSpecOps,
-            this.undertakeSabotage = undertakeSabotage,
-            this.inciteRebellion = inciteRebellion,
-            this.negotiation = negotiation,
-            this.spySatellite = spySatellite,
-            this.nuclearStrike = nuclearStrike,
-            this.particleCannonStrike = particleCannonStrike,
-            this.requestAllianceReinforcement = requestAllianceReinforcement,
-            this.hackFunds = hackFunds
+        this.deployForces = deployForces,
+        this.deployAgents = deployAgents,
+        this.launchHostageRescue = launchHostageRescue,
+        this.beginSpecOps = beginSpecOps,
+        this.undertakeSabotage = undertakeSabotage,
+        this.inciteRebellion = inciteRebellion,
+        this.negotiation = negotiation,
+        this.spySatellite = spySatellite,
+        this.nuclearStrike = nuclearStrike,
+        this.particleCannonStrike = particleCannonStrike,
+        this.requestAllianceReinforcement = requestAllianceReinforcement,
+        this.hackFunds = hackFunds
     }
 }
 

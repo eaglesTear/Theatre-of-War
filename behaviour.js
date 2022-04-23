@@ -1,9 +1,4 @@
 /* 
-    
-    Casualties:  (ATK - DEF) +/- 20% as it's done in World's End (an RPG strategy game). This will mean that attacks against an opponent with strong DEF could do no damage at all. For instace ATK = 10, ENEMY DEF = 12, (ATK - DEF) = -2 and it also means that high attack vs slightly lower def, could do little damage, potentially making battles longer. For instance with ATK = 1010, ENEMY DEF = 1005, the damage would be 5. The damage will also increase dramatically now if the ATK is increased by a small percentage. For instance ATK = 1055, will do 900% more damage with only a %5 increase in ATK value.
-    To avoid this, you can do something like ATK / DEF * WEAPON_DAMAGE This will scale more gradually when ATK or DEF are increased and allow a weak attacker to damage a creature with strong DEF.
-
-    graphics / fx / sfx / ui *************************************
                    
 BONUS ***********
     
@@ -25,26 +20,24 @@ be careful of double loops - do I want i or j?
 watch p-cannon behaviour closely - especially the button. Does it appear after researching?
 oil consumption
 defence budget not going into negatives: issues was with resourceIncome: truncing empty arrays
+get cost of things in swal header
+how do nations get missile shields??
 
 REFACTOR ***********
 
 does targetnation need to be a param in every function it is used in?
-shorten and make clear some function names & vars
 modulate functions further
 envelop functions into gamestarted control to prevent functions carrying on
 functions & alerts - do they portray right information to the player and what's happening?
-store values (eg unit exp points) in an object
 nothing to increase hostility in random events -  alter??
-check addition & comparison operators!!!!
 may be necessary to only use swal for buttons etc - danger they will override each other
-check all globals are actually being used!!!
 
 DEBUG ***********
 
  1:57am 19/4/22 All major bugs eliminated
  
 ADDITIONAL FUNCTIONALITY ***********
- 
+ 540
 >> add real world stats and build times to the game
 
 /*

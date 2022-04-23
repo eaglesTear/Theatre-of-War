@@ -1,22 +1,30 @@
 // Globals
 
 // Player's selection will decide the value of this variable - undefine when ready to deploy
-let playerNation = Russia;
-
-// Parsing as float allows the most accurate measurement of an average calendar month later on
-let day = parseFloat(1);
+let playerNation = USA;
 
 // Define the newly created country (object) for use in the battle function 
 let targetNation;
 
+/* Keep track of the original value for player's oil production as we need to increment it by itself later on */
+let dailyOilProduction;
+let originalDailyOilProduction;
+
+// Ensure the yearly defence budget / GDP allocation remains unchanged for awarding each year
+let yearlyDefenceBudget;
+let yearlyGDP;
+
+// Parsing as float allows the most accurate measurement of an average calendar month later on
+let day = parseFloat(1);
+
 // Checks whether any agents of the player are being held captive
-let agentsCaptured = false;
+let agentCaptured = false;
 
 // This variable stores the location (nation) of any captured agents
 let captureRegion;
 
 // Store the location that spec-ops will be sent to raid
-let nationChosenForRescueAttempt;
+let rescueAttemptNation;
 
 // Store how many army types have been defeated - if all 4, nation has lost war
 let armiesDefeated = 0;
@@ -31,14 +39,6 @@ let stanceHasChanged = false;
 let LAOAHasRan = false;
 let LAOBHasRan = false;
 
-/* Keep track of the original value for player's oil production as we need to increment it by itself later on */
-let dailyOilProduction = playerNation.resources.oilProduction;
-let originalDailyOilProduction = dailyOilProduction;
-
-// Ensure the yearly defence budget / GDP allocation remains unchanged for awarding each year
-const yearlyDefenceBudget = playerNation.resources.defenceBudget;
-const yearlyGDP = playerNation.gdp;
-
 // Globally-defined arrays
 
 // Only have one shot at any deal with a nation
@@ -49,6 +49,8 @@ const diplomacyAttempted = [];
 // Track whether assistance from one country has already been provided
 
 const assistanceProvided = [];
+
+const previousAttackers = [];
 
 let previousNationStances = [];
 
@@ -65,6 +67,7 @@ let previousNationStances = [];
 // 'territoriesConqueredByRegion' uses 'let' declaration as it will be subject to ES6 filter
 
 const dailyInfantryRecruits = [];
+const rebellionAttempted = [];
 const territoriesConqueredByCode = [];
 let territoriesConqueredByRegion = [];
 const allNationsAsObjects = [];

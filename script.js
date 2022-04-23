@@ -4,12 +4,6 @@ $(() => {
 
     //intro();
 
-    // Show initial statuses
-
-    displayMainStatus();
-
-    displayNationNameOnStatus();
-    
     setNationAttributes();
 
     // Store the initial nation stances and assign the nation it's actual name
@@ -20,15 +14,13 @@ $(() => {
 
     defineNationStance();
 
-    definePlayerStance();
-
     storeNationStance();
 
     initMap();
     
-    displayDOMResearcherInfo();
+    completeSetup();
     
-    // DELETE WHEN TESTING IS OVER
+    // DAT
     startGame();
 
 });

@@ -14,7 +14,6 @@ const missileLaunch = new Audio("sound/sfx/launch.mp3");
 const nuclearDetonation = new Audio("sound/sfx/atomic-bomb.mp3");
 const particleCannon = new Audio("sound/sfx/particle-cannon.mp3");
 const cannonImpact = new Audio("sound/sfx/cannon-impact.mp3");
-const war = new Audio("sound/sfx/war.mp3");
 
 // Menu / click events (.wav)
 
