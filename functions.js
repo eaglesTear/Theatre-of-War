@@ -23,6 +23,7 @@ const RNG = (min, max) => Math.floor(Math.random() * (max - min) + min);
 */
 
 clearPrevious = () => {
+
     for (const command in commands) {
         if (command === "conscription") {
             continue;
@@ -83,10 +84,42 @@ yearlyActions = () => {
 
 // Main time functionality, disabled if no jQuery or game start, preventing repeated errors to console.
 
+addTimeDOM = (week, month) => {
+    $("#day").text("DAY: " + parseInt(day++));
+    $("#week").text("WEEK: " + week);
+    $("#month").text("MONTH: " + month);
+}
+
+// setInterval detects a week before month up but includes failsafe to stop repeat
+
+trackDueExpenditure = (monthlyInterval) => {
+
+    const handleInterval = setInterval(() => {
+
+        if (day >= monthlyInterval - 7 && day <= monthlyInterval - 6) {
+            expenditureAlert();
+            clearInterval(handleInterval);
+        }
+
+    }, 200);
+}
+
+// Also resets intervals
+
+milestones = (monthlyInterval, yearlyInterval, currentYear) => {
+
+    if (day >= monthlyInterval) {
+        //monthlyActions();
+    } else if (day >= yearlyInterval) {
+        currentYear++;
+        $("#year").text("YEAR: " + currentYear);
+        yearlyActions();
+    }
+}
+
 runGameTime = () => {
 
     if (!window.jQuery) return;
-
     let monthlyInterval = day + 30.41;
     let yearlyInterval = day + 365;
     let currentYear = 2022;
@@ -94,34 +127,20 @@ runGameTime = () => {
     setInterval(() => {
 
         if (!gameState.gameStarted) return;
-
         let week = Math.ceil(day / 7);
         let month = Math.ceil(week / 4);
-
-        $("#day").text("DAY: " + parseInt(day++));
-        $("#week").text("WEEK: " + week);
-        $("#month").text("MONTH: " + month);
-
-        // setInterval detects a week before month up but includes failsafe to stop repeat
-
-        //        const handleInterval = setInterval(() => {
-        //            if (day >= monthlyInterval - 7 && day <= monthlyInterval - 6) {
-        //                expenditureAlert();
-        //                clearInterval(handleInterval);
-        //            }
-        //        }, 200);
+        dailyActions();
+        addTimeDOM(week, month);
+        //trackDueExpenditure(monthlyInterval);
+        checkConscription(monthlyInterval);
+        milestones(monthlyInterval, yearlyInterval, currentYear);
 
         if (day >= monthlyInterval) {
-            //monthlyActions();
             monthlyInterval = day + 30.41;
         } else if (day >= yearlyInterval) {
-            currentYear++;
-            $("#year").text("YEAR: " + currentYear);
-            yearlyActions();
             yearlyInterval = day + 365;
         }
-        checkConscription(monthlyInterval);
-        dailyActions();
+
     }, 2000);
 }
 
@@ -131,10 +150,8 @@ checkConscription = (monthlyInterval) => {
 
 // Skip forward in time via ui click (1 day per click)
 fastForward = (monthlyInterval) => {
-
     $("#day").text("DAY: " + parseInt(day++));
     $("#week").text("WEEK: " + Math.ceil(day / 7));
-
     checkConscription(monthlyInterval);
 }
 
@@ -155,37 +172,36 @@ fastForward = (monthlyInterval) => {
 // Adds the building to the new 'Buildings' instance derived from the 'Base' class
 // Base object then tracks what has been constructed and ultimately what can be built
 
+confirmConstruction = (structureKey, structureValue, cost) => {
+
+    swal({
+        title: `Construction Complete: ${structureValue}`,
+        icon: "success"
+    });
+
+    constructionComplete.play();
+    structureKey = structureValue;
+    playerBase[structureKey] = structureKey;
+    playerNation.resources.defenceBudget -= cost;
+}
+
 constructionManager = (structureKey, structureValue, daysToBuild, cost, value) => {
 
     const structureCost = cost;
     const buildTime = daysToBuild;
-
     swal(`Construct ${structureValue}?`,
         `ETA: ${buildTime} days 
-    Cost: $${cost}`, {
+        Cost: $${cost}`, {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
         if (value) {
-
             confirmPurchase(structureValue);
-
             swal("Building");
 
             const handleInterval = setInterval(() => {
-
                 if (day === buildTime) {
                     clearInterval(handleInterval);
-
-                    swal({
-                        title: `Construction Complete: ${structureValue}`,
-                        icon: "success",
-                    });
-
-                    constructionComplete.play();
-
-                    structureKey = structureValue;
-                    playerBase[structureKey] = structureKey;
-                    playerNation.resources.defenceBudget -= cost;
+                    confirmConstruction(structureKey, structureValue, cost);
                 }
             }, 0);
         }
@@ -238,44 +254,79 @@ playerHasBuilding = (building, text) => {
     if (!playerBase[building]) {
         swal({
             title: `Facility Required: ${text}`,
-            icon: "warning",
+            icon: "warning"
         });
         return false;
     }
+
     return true;
 }
 
 checkFunds = (unitCost) => {
 
-    const budget = playerNation.resources.defenceBudget;
+    if (playerNation.resources.defenceBudget < unitCost) {
 
-    if (budget < unitCost) {
         swal({
             title: "Insufficient Funds",
-            text: `Funds available: ${budget}. 
-                Funds required: ${unitCost}.`,
-            icon: "error",
+            text: `Funds available: $${playerNation.resources.defenceBudget}. 
+                Funds required: $${unitCost}.`,
+            icon: "error"
         });
         return true;
     }
+
+    return false;
 }
 
 disallowZeroUnits = (quantity) => {
+
     if (quantity <= 0) {
         swal({
             title: "Cannot Train or Build Zero Units",
-            icon: "error",
+            icon: "error"
         });
         return true;
     }
+
+    return false;
 }
+
+alertUnitBuilding = (unitType) => {
+
+    if (unitType === "nuclearWeapons" || unitType === "satellites") {
+        swal("Building");
+    } else {
+        swal("Training");
+    }
+}
+
+alertUnitReady = (unitType, numberOfUnits) => {
+
+    if (unitType === "nuclearWeapons" || unitType === "satellites") {
+        constructionComplete.play();
+    } else {
+        unitReady.play();
+    }
+
+    swal({
+        title: "Units Ready",
+        text: `${numberOfUnits} ${unitType} have entered service, commander.`,
+        icon: "success"
+    });
+}
+
+addUnits = (playerUnits, unitType, numberOfUnits, unitCost) => {
+    playerUnits[unitType] += numberOfUnits;
+    playerNation.resources.defenceBudget -= unitCost;
+}
+
+// Are units affordable? Is there more than zero selected for building / training?
 
 processUnitTraining = (quantity, cost, playerUnits, unitType) => {
 
     const numberOfUnits = quantity;
     const unitCost = numberOfUnits * cost;
 
-    // Are units affordable? Is there more than zero selected for building / training?
     if (checkFunds(unitCost)) return;
     if (disallowZeroUnits(quantity)) return;
 
@@ -287,33 +338,14 @@ processUnitTraining = (quantity, cost, playerUnits, unitType) => {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
         if (value) {
-
-            if (unitType === "nuclearWeapons" || unitType === "satellites") {
-                swal("Building");
-            } else {
-                swal("Training");
-            }
+            alertUnitBuilding(unitType);
 
             const handleInterval = setInterval(() => {
-
                 if (day >= unitCompletionTime) {
-
-                    if (unitType === "nuclearWeapons" || unitType === "satellites") {
-                        constructionComplete.play();
-                    } else {
-                        unitReady.play();
-                    }
-
-                    swal({
-                        title: "Units Ready",
-                        text: `${numberOfUnits} ${unitType} have entered service, commander.`,
-                        icon: "success",
-                    });
                     clearInterval(handleInterval);
-
-                    playerUnits[unitType] += numberOfUnits;
+                    alertUnitReady(unitType, numberOfUnits);
+                    addUnits(playerUnits, unitType, numberOfUnits, unitCost);
                     if (unitType === "researchers") displayResearcherInfo();
-                    playerNation.resources.defenceBudget -= unitCost;
                 }
             }, 0);
         }
@@ -321,41 +353,47 @@ processUnitTraining = (quantity, cost, playerUnits, unitType) => {
 }
 
 
-// ************************************************************************************
-// ************************************************************************************
-// UPKEEP & EXPENDITURE: MAINTENANCE COSTS FOR PLAYER ASSETS 
+/*
+
+*************************************************************************************************
+    
+    UPKEEP & EXPENDITURE: MAINTENANCE COSTS FOR PLAYER ASSETS 
+ 
+
+*************************************************************************************************
+
+*/
 
 
 // DAILY EXPENDITURE
 
 // Player oil supply is how much oil player actually has
-generalResourceExpenditure = () => {
+// Oil: production minus consumption, daily
 
-    // Oil: production minus consumption, daily
+generalResourceExpenditure = () => {
     dailyOilProduction += originalDailyOilProduction - playerNation.resources.oilConsumption;
     playerNation.resources.oilProduction = dailyOilProduction;
-
-    //console.log("Daily Oil Production: " + dailyOilProduction);
 }
 
 // Oil used by military units each day
+// Assets covered by the defence budget
+// If units are deployed, they use 20% more oil
+
 militaryOilExpenditure = () => {
 
-    // Assets covered by the defence budget
     const militaryUnitsOilExpenditure = [
     playerNation.militaryUnits.air * 1000,
     playerNation.militaryUnits.naval * 1500,
     playerNation.militaryUnits.tanks * 2000
 ];
 
-    // If units are deployed, they use 20% more oil
     if (gameState.unitsOnCampaign) {
         militaryUnitsOilExpenditure.forEach((unit) => {
             unit += (20 / 100) * unit;
         });
     }
+
     playerNation.resources.oilProduction -= Math.trunc(sum(militaryUnitsOilExpenditure));
-    //console.log(Math.trunc(sum(militaryUnitsOilExpenditure)));
 }
 
 // MONTHLY EXPENDITURE
@@ -373,10 +411,8 @@ militaryMaintenance = () => {
     playerNation.researchers * 40000,
     playerNation.specialWeapons.nuclearWeapons * 20000
 ];
-
     nuclearExpenditure(unitsToMaintain);
     playerNation.resources.defenceBudget -= sum(unitsToMaintain);
-
     alert(`Military (including any Nuclear Programmes): $${sum(unitsToMaintain)}`);
 }
 
@@ -389,26 +425,28 @@ baseExpenditure = () => {
     baseMaintenanceTotals = [];
 
     for (const value in playerBase) {
-
         if (playerBase[value] !== undefined) {
             playerNation.resources.defenceBudget -= structureMaintenance[value];
             alert(`${value}: ${structureMaintenance[value]}`);
             baseMaintenanceTotals.push(structureMaintenance[value]);
         }
     }
+
     alert(`Monthly Base Maintenance Report: - $${sum(baseMaintenanceTotals)}`);
 }
 
 expenditureReport = () => {
+
     swal({
         title: "Monthly Expenditure Report",
         text: `Current GDP: $${playerNation.gdp},
-    Current Defence Budget: $${playerNation.resources.defenceBudget}`,
+        Current Defence Budget: $${playerNation.resources.defenceBudget}`,
         icon: "info"
     });
 }
 
 // Alert player to incoming monthly expenditures (embedded in 'runGameTime' fn)
+
 expenditureAlert = () => {
     swal({
         title: "Expenditures Due: 1 Week",
@@ -422,12 +460,17 @@ nuclearExpenditure = (unitsToMaintain) => {
     if (playerNation.specialWeapons.nuclearWeapons) unitsToMaintain.push(300);
 }
 
-// YEARLY EXPENDITURE
 
+/*
 
-// ************************************************************************************
-// ************************************************************************************
-// INCOME: SOURCES OF REVENUE FOR PLAYER'S NATION
+*************************************************************************************************
+    
+    INCOME: SOURCES OF REVENUE FOR PLAYER'S NATION
+ 
+
+*************************************************************************************************
+
+*/
 
 
 // MONTHLY REVENUES
@@ -442,45 +485,91 @@ resourceIncome = () => {
 // Yearly revenue
 
 defenceBudgetGDP = () => {
-
     playerNation.resources.defenceBudget += yearlyDefenceBudget;
     playerNation.gdp += yearlyGDP;
-
     swal("Yearly GDP and Defence Budget Allocated",
         `GDP: $${playerNation.gdp} 
     Defence Budget: $${playerNation.resources.defenceBudget}`);
 }
 
-// TRADE
+/*
 
-sellOil = () => {
+*************************************************************************************************
+    
+    TRADE: OIL & WEAPONS
+ 
 
-    const numberOfBarrels = parseInt($("#oil").val());
-    const oilSalePrice = numberOfBarrels * 75;
+*************************************************************************************************
+
+*/
+
+checkOilBarrels = (numberOfBarrels) => {
 
     if (playerNation.resources.oilProduction < numberOfBarrels || playerNation.resources.oilProduction <= 0) {
         swal({
             title: "Insufficient Oil",
             text: `Oil remaining: ${playerNation.resources.oilProduction} barrels.`,
-            icon: "warning",
+            icon: "warning"
         });
-        return;
+        return false;
     }
 
-    swal("Sell Oil",
-        `Sell ${numberOfBarrels} oil for $${oilSalePrice}?`, {
-            buttons: ["Cancel", "Confirm"]
-        }).then((value) => {
+    return true;
+}
+
+confirmOilSale = (numberOfBarrels, oilSalePrice) => {
+
+    sale.play();
+    playerNation.resources.oilProduction -= numberOfBarrels;
+    playerNation.resources.defenceBudget += oilSalePrice;
+
+    swal({
+        title: "Sale Successful",
+        text: `Oil remaining: ${playerNation.resources.oilProduction} barrels.`,
+        icon: "success"
+    });
+}
+
+sellOil = () => {
+
+    const numberOfBarrels = parseInt($("#oil").val());
+    const oilSalePrice = numberOfBarrels * 75;
+    if (!checkOilBarrels(numberOfBarrels)) return;
+
+    swal("Sell Oil", `Sell ${numberOfBarrels} oil for $${oilSalePrice}?`, {
+        buttons: ["Cancel", "Confirm"]
+    }).then((value) => {
         if (value) {
-            sale.play();
-            playerNation.resources.oilProduction -= numberOfBarrels;
-            playerNation.resources.defenceBudget += oilSalePrice;
-            swal({
-                title: "Sale Successful",
-                text: `Oil remaining: ${playerNation.resources.oilProduction} barrels.`,
-                icon: "success",
-            });
+            confirmOilSale(numberOfBarrels, oilSalePrice);
         }
+    });
+}
+
+checkWeaponCount = (numberOfWeapons) => {
+
+    if (playerNation.resources.weaponStocks < numberOfWeapons ||
+        playerNation.resources.weaponStocks <= 0) {
+        swal({
+            title: "Insufficient Weapons",
+            text: `Not enough weapons. Weapons remaining: ${playerNation.resources.weaponStocks}.`,
+            icon: "warning"
+        });
+        return false;
+    }
+
+    return true;
+}
+
+confirmWeaponSale = (numberOfWeapons, weaponSalePrice) => {
+
+    sale.play();
+    playerNation.resources.weaponStocks -= numberOfWeapons;
+    playerNation.resources.defenceBudget += weaponSalePrice;
+
+    swal({
+        title: "Sale Successful",
+        text: `Weapons remaining: ${playerNation.resources.weaponStocks}.`,
+        icon: "success"
     });
 }
 
@@ -488,60 +577,45 @@ sellWeapons = () => {
 
     const numberOfWeapons = parseInt($("#weapons-to-sell").val());
     const weaponSalePrice = numberOfWeapons * 1400;
+    if (!checkWeaponCount(numberOfWeapons)) return;
 
-    if (playerNation.resources.weaponStocks < numberOfWeapons || playerNation.resources.weaponStocks <= 0) {
-        swal({
-            title: "Insufficient Weapons",
-            text: `Not enough weapons. Weapons remaining: ${playerNation.resources.weaponStocks}.`,
-            icon: "warning",
-        });
-        return;
-    }
-
-    swal("Sell Weapons",
-        `Sell ${numberOfWeapons} weapons for $${weaponSalePrice}?`, {
-            buttons: ["Cancel", "Confirm"]
-        }).then((value) => {
+    swal("Sell Weapons", `Sell ${numberOfWeapons} weapons for $${weaponSalePrice}?`, {
+        buttons: ["Cancel", "Confirm"]
+    }).then((value) => {
         if (value) {
-            sale.play();
-            playerNation.resources.weaponStocks -= numberOfWeapons;
-            playerNation.resources.defenceBudget += weaponSalePrice;
-            swal({
-                title: "Sale Successful",
-                text: `Weapons remaining: ${playerNation.resources.weaponStocks}.`,
-                icon: "success",
-            });
+            confirmWeaponSale(numberOfWeapons, weaponSalePrice);
         }
+    });
+}
+
+addWeapons = (numberOfWeapons) => {
+
+    constructionComplete.play();
+    playerNation.resources.weaponStocks += numberOfWeapons;
+
+    swal({
+        title: "Manufacture Complete",
+        text: `Weapons in stock: ${playerNation.resources.weaponStocks}.`,
+        icon: "success"
     });
 }
 
 manufactureWeapons = () => {
 
-    const numberOfWeaponsToBuild = parseInt($("#weapons-to-build").val());
-    const costOfManufacture = numberOfWeaponsToBuild * 700;
-    const timeToManufacture = Math.trunc(day + (numberOfWeaponsToBuild / 100) * 5);
+    const numberOfWeapons = parseInt($("#weapons-to-build").val());
+    const costOfManufacture = numberOfWeapons * 700;
+    const timeToManufacture = Math.trunc(day + (numberOfWeapons / 100) * 5);
 
     swal("Manufacture Weapons",
-        `Manufacture ${numberOfWeaponsToBuild} weapons at a cost of $${costOfManufacture}?`, {
+        `Manufacture ${numberOfWeapons} weapons at a cost of $${costOfManufacture}?`, {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
         if (value) {
-
             swal(`Completion Time: Day ${timeToManufacture}.`);
-
             const handle = setInterval(() => {
-
                 if (day >= timeToManufacture) {
                     clearInterval(handle);
-
-                    playerNation.resources.weaponStocks += numberOfWeaponsToBuild;
-
-                    constructionComplete.play();
-                    swal({
-                        title: "Manufacture Complete",
-                        text: `Weapons in stock: ${playerNation.resources.weaponStocks}.`,
-                        icon: "success"
-                    });
+                    addWeapons(numberOfWeapons);
                 }
             }, 500);
         }
@@ -549,16 +623,23 @@ manufactureWeapons = () => {
 }
 
 
-// ************************************************************************************
-// ************************************************************************************
-// UPGRADES & RESEARCH: All research requires research personnel, and amount affects speed
+/*
 
+*************************************************************************************************
+    
+    UPGRADES & RESEARCH: All research requires research personnel, and amount affects speed
+ 
+
+*************************************************************************************************
+
+*/
+
+
+// Time factor to be in increments of 1000s, ie 6000 for 60 days if 100 researchers
 
 beginResearch = () => {
 
     const researcherAllocation = parseInt($("#researcher-allocation").val());
-
-    // Time factor to be in increments of 1000s, ie 6000 for 60 days if 100 researchers
     let researchProject = $("#research-options").val();
 
     if (!checkResearchCapacity(researcherAllocation) ||
@@ -587,17 +668,17 @@ beginResearch = () => {
     researchProjectStart(researcherAllocation, researchProject, costOfResearch, timeToCompleteProject);
 }
 
-
 researchFacilityAvailability = () => {
 
     if (!playerBase.researchCentre) {
         swal({
             title: "No Research Centre",
             text: "Research Facility Required for Upgrades",
-            icon: "warning",
+            icon: "warning"
         });
         return false;
     }
+
     return true;
 }
 
@@ -609,14 +690,13 @@ upgradeUnits = (costOfUpgrade, unitToUpgrade, ratingToIncrease, upgradeValue) =>
     const upgradeUnit = unitToUpgrade;
     const ratingIncrease = ratingToIncrease;
 
-    upgradeComplete.play();
-
     swal({
         title: "Upgrade Successful",
         text: `Upgrading ${unitToUpgrade} for ${costOfUpgrade}`,
-        icon: "success",
+        icon: "success"
     });
 
+    upgradeComplete.play();
     playerNation.resources.defenceBudget -= costOfUpgrade;
     playerNation.unitTechAndSkillRating[ratingToIncrease] += upgradeValue;
 }
@@ -624,14 +704,16 @@ upgradeUnits = (costOfUpgrade, unitToUpgrade, ratingToIncrease, upgradeValue) =>
 // Next 2 functions check that there are researchers hired, and whether any are available
 
 checkResearchCapacity = (researcherAllocation) => {
+
     if (!playerNation.researchers || researcherAllocation > playerNation.researchers) {
         swal({
             title: "Not Enough Researchers",
             text: `Researchers available: ${playerNation.researchers}`,
-            icon: "warning",
+            icon: "warning"
         });
         return false;
     }
+
     return true;
 }
 
@@ -640,17 +722,21 @@ preventNullValues = (researchProject) => {
     if (researchProject === null) {
         return true;
     }
+
     return false;
 }
 
 checkResearchersAvailable = (researcherAllocation, researchersAvailable) => {
+
     if (researcherAllocation > researchersAvailable) {
         swal({
             title: `You have ${researchersAvailable} researchers available for projects.`,
-            icon: "warning",
+            icon: "warning"
         });
         return true;
     }
+
+    return false;
 }
 
 setResearchAndCostFactor = (costOfResearch, timeFactor) => {
@@ -664,19 +750,14 @@ getResearchersAvailable = () => {
 
 researchProjectStart = (researcherAllocation, researchProject, costOfResearch, timeToCompleteProject) => {
 
-    swal("Begin Research",
-        `Assign ${researcherAllocation} researchers to the ${researchProject} for $${costOfResearch}?`, {
-            buttons: ["Cancel", "Confirm"]
-        }).then((value) => {
+    swal("Begin Research", `Assign ${researcherAllocation} researchers to the ${researchProject} for $${costOfResearch}?`, {
+        buttons: ["Cancel", "Confirm"]
+    }).then((value) => {
         if (value) {
-
             researchersAssigned.push(researcherAllocation);
             getResearchersAvailable();
-            // Remove respective option when research is initiated 
             $("select option[value='" + researchProject + "']").attr("disabled", true);
-
             assigned[researchProject] = researcherAllocation;
-
             swal(`Researching ${researchProject}`, `Completion: Day ${timeToCompleteProject}.`);
             playerNation.resources.defenceBudget -= costOfResearch;
             researchProjectCompletion(timeToCompleteProject, researchProject, researchProject, researcherAllocation);
@@ -684,39 +765,40 @@ researchProjectStart = (researcherAllocation, researchProject, costOfResearch, t
     });
 }
 
+alertProjectComplete = (researchProject) => {
+
+    swal({
+        title: `Project ${researchProject} Complete.`,
+        icon: "success"
+    });
+
+    if (researchProject === "particleCannon") {
+        constructionComplete.play();
+    } else {
+        upgradeComplete.play();
+    }
+}
+
 // effects of research, assigning researchers
 researchProjectCompletion = (timeToCompleteProject, researchProject, projectToUnassign, researcherAllocation) => {
 
     const handle = setInterval(() => {
-
         if (day >= timeToCompleteProject) {
             clearInterval(handle);
-
-            removeResearcherAssignedStatus(researcherAllocation);
-
-            swal({
-                title: `Project ${researchProject} Complete.`,
-                icon: "success",
-            });
-
-            if (researchProject === "particleCannon") {
-                constructionComplete.play();
-            } else {
-                upgradeComplete.play();
-            }
-
+            removeAssignedResearchers(researcherAllocation);
+            alertProjectComplete(researchProject);
             researchersAvailable += assigned[projectToUnassign];
             $("#researchers-available").text(" " + researchersAvailable);
-
             delete assigned[projectToUnassign];
             researchImpact(researchProject);
         }
     }, 0);
 }
 
-removeResearcherAssignedStatus = (researcherAllocation) => {
+// 'removeAssignedResearchers' MUST BE REDECLARED TO CHECK CURRENT AMOUNT OF RESEARCHERS!!!
 
-    // MUST BE REDECLARED TO CHECK CURRENT AMOUNT OF RESEARCHERS!!!
+removeAssignedResearchers = (researcherAllocation) => {
+
     getResearchersAvailable();
 
     for (let i = 0; i < researchersAssigned.length; i++) {
@@ -761,30 +843,57 @@ researchImpact = (researchProject) => {
     }
 }
 
+// Set the max value of researchers available in html as player's total researcher number
+
 displayResearcherInfo = () => {
-    // Set the max value of researchers available in html as player's total researcher number
     $("#researcher-allocation").attr("max", playerNation.researchers);
     $("#researchers-employed").text(" " + playerNation.researchers);
     $("#researchers-available").text(" " + playerNation.researchers);
 }
 
 
-// ************************************************************************************
-// ************************************************************************************
-// MONTHLY REPORT DISPLAY: Show useful info to player, such as unit info and budget etc.
+/*
 
-// Main status: overview of all the main stats in the game
+*************************************************************************************************
+    
+    MONTHLY REPORT DISPLAY: Show useful info to player, such as unit info and budget etc.
+ 
+    
 
-displayMainStatus = () => {
+*************************************************************************************************
+
+*/
+
+
+outputMainStats = () => {
 
     $("li").remove();
-    // Print resources to DOM with jQuery chaining
     $("#overview").append(`<li>GDP: $ ${playerNation.gdp}</li>`)
         .append(`<li>Defence Budget: $ ${playerNation.resources.defenceBudget}</li>`)
         .append(`<li>Researchers Employed: ${playerNation.researchers}</li>`)
-        .append(`<li>Nations Conquered: ${territoriesConqueredByCode.length}</li>`)
+        .append(`<li>Nations Conquered: ${nationsConqueredCode.length}</li>`)
         .append(`<li>Public Approval: ${playerNation.status.govtApprovalRating}</li>`)
         .append(`<li>Agents Imprisoned: ${nationsHoldingAgents.length}</li>`);
+}
+
+
+outputAuxStats = (info) => {
+
+    info.forEach(item => {
+        for (const value in item) {
+            if (value === "defenceBudget") {
+                continue;
+            }
+            $("#overview").append(`<li>${value}: ${item[value]}</li>`);
+        }
+    });
+}
+
+// Main status: overview of all the main stats in the game
+
+// Print resources to DOM with jQuery chaining
+
+displayMainStatus = () => {
 
     const info = [
     playerNation.resources,
@@ -794,17 +903,8 @@ displayMainStatus = () => {
     playerNation.unitTechAndSkillRating,
     playerNation.specialWeapons
 ];
-
-    // Iterate through nation object to display info to user - skip some shown above already
-    info.forEach(item => {
-        for (const value in item) {
-            // No need to show these again
-            if (value === "defenceBudget") {
-                continue;
-            }
-            $("#overview").append(`<li>${value}: ${item[value]}</li>`);
-        }
-    });
+    outputMainStats();
+    outputAuxStats(info);
 }
 
 
@@ -874,7 +974,11 @@ attackNation = (region, code, targetNation) => {
     This scales more gradually when tech or skill levels are increased and thus still allow a weaker nation to damage a nation with vastly superior military.
 */
 
-// Initiate unit battles - parameter for war is required for randomAttack function
+/* 
+    Initiate unit battles - parameter for war is required for randomAttack function.
+    
+    'war' calls the 'battle' function on each military arm so they face each other
+*/
 
 war = (targetNation) => {
 
@@ -893,7 +997,6 @@ battle = (playerStrength, enemyStrength, playerUnits, enemyUnits, targetNation) 
 
     playerUnitsRemaining = playerStrength - enemyStrength;
     enemyUnitsRemaining = enemyStrength - playerStrength;
-
     playerNation.militaryUnits[playerUnits] = Math.trunc(playerUnitsRemaining);
     targetNation.militaryUnits[enemyUnits] = Math.trunc(enemyUnitsRemaining);
 
@@ -902,12 +1005,12 @@ battle = (playerStrength, enemyStrength, playerUnits, enemyUnits, targetNation) 
 
 // Control what happens when a battle is concluded - 'armiesDefeated' MUST BE RESET!!!
 // If even one army is not defeated, player is deemed to lose or draw
-// CHECK BACK HERE IF ANY ERRORS IN VICTORY IN BATTLE
+
 trackDefeatedNations = (region, code, targetNation) => {
 
     if (armiesDefeated >= 4) {
-        territoriesConqueredByCode.push(code);
-        territoriesConqueredByRegion.push(region);
+        nationsConqueredCode.push(code);
+        nationsConqueredRegion.push(region);
         winWar(region, targetNation);
     } else {
         loseWar();
@@ -919,8 +1022,8 @@ trackDefeatedNations = (region, code, targetNation) => {
 winWar = (region, targetNation) => {
     militaryVictory(targetNation);
     awardResources();
-    militaryUnitsGainExp();
-    releaseAgentHostages();
+    militaryUnitsGainXP(2);
+    releaseHostagesWar(targetNation);
 }
 
 militaryVictory = (targetNation) => {
@@ -937,8 +1040,8 @@ militaryVictory = (targetNation) => {
         Navy: ${playerNation.militaryUnits.naval}`, {
             button: "Bonuses"
         }).then((value) => {
-        swal(`Resources: + 1% of the total GDP of ${targetNation.name} $${parseInt(targetNation.gdp / 100 * 1)} - awarded monthly to player defence budget
-        Military Units Exp: + 12.5 
+        swal("Debrief", `Resources: + 1% of the total GDP of ${targetNation.name} $${parseInt(targetNation.gdp / 100 * 1)} - awarded monthly to player defence budget
+        Military Units XP: + 2 
         Any agents held in ${targetNation.name} will be released`);
     });
 }
@@ -955,27 +1058,30 @@ militaryDefeat = () => {
         Navy: ${playerNation.militaryUnits.naval}`, {
             button: "Bonuses"
         }).then((value) => {
-        swal("XP Up", `Military Units Exp: + 3`);
+        swal("Debrief", `Military Units XP: + 0.5
+        Public Approval: - 5`);
     });
 }
 
 loseWar = () => {
     militaryDefeat();
+    militaryUnitsGainXP(0.5);
     playerNation.status.govtApprovalRating -= 5;
 }
 
 // Exp is awarded for military participants, so we don't want to award exp to the agents here
-militaryUnitsGainExp = () => {
+
+militaryUnitsGainXP = (XP) => {
 
     for (rating in playerNation.unitTechAndSkillRating) {
-
         if (rating === "infiltration") continue;
-        playerNation.unitTechAndSkillRating[rating] += 12.5;
+        playerNation.unitTechAndSkillRating[rating] += XP;
         unitRatingCap();
     }
 }
 
 // Units should max out at 100 on skill and tech ratings
+
 unitRatingCap = () => {
     for (rating in playerNation.unitTechAndSkillRating) {
         if (playerNation.unitTechAndSkillRating[rating] > 100) {
@@ -1007,7 +1113,7 @@ missileFired = () => {
     swal({
         title: "Nuclear Missile Launched",
         text: "Your nation has increased its aggression: +5",
-        icon: "warning",
+        icon: "warning"
     });
 }
 
@@ -1015,14 +1121,13 @@ alertNoNukes = () => {
     swal({
         title: "Nuclear Capability Offline",
         text: "No nuclear weapons in current arsenal",
-        icon: "error",
+        icon: "error"
     });
 }
 
 nuclearStrike = (region, code) => {
 
     clearPrevious();
-
     let playerIsNuked, enemyIsNuked;
 
     if (playerNation.specialWeapons.nuclearWeapons) {
@@ -1050,6 +1155,7 @@ hit = () => {
 }
 
 // If player launches, it is intercepted after 3 secs. Enemy response after further 3 secs
+
 nuclearOutcomePlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
     setTimeout(() => {
@@ -1057,15 +1163,19 @@ nuclearOutcomePlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation)
             targetNation.specialWeapons.missileShield -= 1;
             intercepted();
             nuclearTargetStance(region, targetNation);
+
             setTimeout(() => {
                 enemyNuclearRetaliation(enemyIsNuked, playerIsNuked, code, region, targetNation);
             }, 3000);
+
             return;
         } else {
             hit();
+
             setTimeout(() => {
                 nuclearDetonation.play();
             }, 600);
+
             enemyIsNuked = true;
             nuclearAftermath(enemyIsNuked, playerIsNuked, code, region);
         }
@@ -1074,23 +1184,24 @@ nuclearOutcomePlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation)
 
 nuclearOutcomeEnemy = (enemyIsNuked, playerIsNuked, code, region) => {
 
-    // DAT
-    playerNation.specialWeapons.missileShield = 10;
-
     setTimeout(() => {
         if (playerNation.specialWeapons.missileShield) {
+
             setTimeout(() => {
                 weaponDestroyed.play();
                 swal("Enemy Missile Intercept", "A nuclear missile has been shot down");
             }, 2000);
+
             playerNation.specialWeapons.missileShield -= 1;
             return;
         } else {
             nuclearDetonation.play();
             swal("Nuclear Strike", `${playerNation.name} has suffered a nuclear strike from ${region}`);
+
             setTimeout(() => {
                 criticalDamage.play();
             }, 2000);
+
             playerIsNuked = true;
             gameState.playerNuked = true;
             nuclearAftermath(enemyIsNuked, playerIsNuked, code, region);
@@ -1122,13 +1233,15 @@ nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
         playerNation.status.govtApprovalRating -= 10;
         const gdpBeforeStrike = playerNation.gdp;
         playerNation.gdp -= RNG(10000000000, 30000000000);
+
         swal({
             title: "You Suffered a Nuclear Strike",
             text: `Rebuilding Costs Allocated: GDP -$${gdpBeforeStrike - playerNation.gdp}`,
             icon: "warning",
         });
+
     } else if (enemyIsNuked) {
-        territoriesConqueredByCode.push(code);
+        nationsConqueredCode.push(code);
         colourDefeatedNations(code, "#fff");
     }
 }
@@ -1137,8 +1250,8 @@ nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
 // Nations defeated (either militarily or by turning inward via rebellion or civil war) turn red
 
 colourDefeatedNations = (code, colour) => {
-    for (let i = 0; i < territoriesConqueredByCode.length; i++) {
-        if (code === territoriesConqueredByCode[i]) {
+    for (let i = 0; i < nationsConqueredCode.length; i++) {
+        if (code === nationsConqueredCode[i]) {
             $("#vmap").vectorMap("set", "colors", {
                 [code]: colour
             });
@@ -1155,15 +1268,16 @@ cannonDamage = (region, targetNation) => {
     cannonImpact.play();
     swal("Target Hit",
         `${region} Resistance: - 50
-            ${region} Infantry: - 1000 
-                ${region} Tanks: -40`);
+        ${region} Infantry: - 1000 
+        ${region} Tanks: -40`
+    );
 }
+
+// 8 hours until weapon above target
 
 particleCannonStrike = (region, code) => {
 
     clearPrevious();
-
-    // 8 hours until weapon above target
     const timeToTargetOrbit = day / 3;
 
     swal("Particle Cannon Strike",
@@ -1192,55 +1306,57 @@ particleCannonStrike = (region, code) => {
     'orders' takes a callback function that determines what the units do when they get to where they are sent. Each unit will arrive in a country to do something specific. Agents, for example, will arrive to sabotage a nation's operations whilst military units arriving will pressure a nation or attack them.
 */
 
+unitCampaign = (units, region) => {
+
+    if (units === "military") {
+        gameState.unitsOnCampaign = true;
+        swal("Military Deployed", `Commander, ${units} have arrived in ${region}.`);
+    } else {
+        swal("Agents Deployed", `Commander, ${units} have arrived in ${region}.`);
+    }
+}
+
 // The try-catch here stops an error being thrown if no orders are given to units (missing param)
+
 unitArrivalTime = (region, units, time, orders) => {
 
     const arrivalDay = day + time;
-
     const handleInterval = setInterval(() => {
 
         if (day >= arrivalDay) {
-
             clearInterval(handleInterval);
-
-            if (units === "military") {
-                gameState.unitsOnCampaign = true;
-                swal("Military Deployed", `Commander, ${units} have arrived in ${region}.`);
-            } else {
-                swal("Agents Deployed", `Commander, ${units} have arrived in ${region}.`);
-            }
-
+            unitCampaign(units, region);
             try {
                 orders();
             } catch (err) {
                 console.log(`No orders given for units after arriving in ${region}.`);
             }
         }
+
     }, 0);
 }
 
 // Nations attacking player: pseudo-random hostile nation attacks
+// prevent running if game ended - REMOVE IF GAME SUCCESSFULLY WRAPPED IN IF
+// Go through all nations and see if any are hostile...
+// If hostile nation has not been conquered
+// If any hostile nation is not defeated or already engaged, that is the target
+// Insert current chosen target nation into array to prevent same nation attack
+// If no conditions match first nation (ie not hostile), find the next one nation
+
 function attackPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation) {
 
-    // prevent running if game ended - REMOVE IF GAME SUCCESSFULLY WRAPPED IN IF
     if (!gameState.gameStarted) return;
 
-    // Go through all nations and see if any are hostile...
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-
-        // If hostile nation has not been conquered
-        // If any hostile nation is not defeated or already engaged, that is the target
-        if (!previousAttackers.includes(allNationsAsObjects[i].name) &&
+    for (let i = 0; i < nations.length; i++) {
+        if (!previousAttackers.includes(nations[i].name) &&
             !gameState.targetNationSelected &&
-            !territoriesConqueredByRegion.includes(allNationsAsObjects[i].name) &&
-            allNationsAsObjects[i].status.stance === "hostile") {
-            targetNation = allNationsAsObjects[i];
-
-            // Insert current chosen target nation into array to prevent same nation attack
+            !nationsConqueredRegion.includes(nations[i].name) &&
+            nations[i].status.stance === "hostile") {
+            targetNation = nations[i];
             previousAttackers.push(targetNation.name);
             setAttackTypeCPU(enemyIsNuked, playerIsNuked, code, region, targetNation);
             break;
-            // If no conditions match first nation (ie not hostile), find the next one nation
         } else continue;
     }
 }
@@ -1277,7 +1393,6 @@ setAttackTypeCPU = (enemyIsNuked, playerIsNuked, code, region, targetNation) => 
 cyberAttack = (targetNation) => {
 
     const playerGDPBeforeHack = playerNation.gdp;
-
     playerNation.gdp -= RNG(100000, 5000000000);
     swal(`Hacked by ${targetNation.name}`, `$${playerGDPBeforeHack - playerNation.gdp} has been stolen.`);
 }
@@ -1304,7 +1419,6 @@ cyberAttack = (targetNation) => {
 randomWorldEvent = () => {
 
     const worldEvents = [militaryCoup, naturalDisaster, terrorStrike, internationalAid, globalTreaty];
-
     const randomFunction = Math.floor(Math.random() * worldEvents.length);
 
     for (let i = 0; i < worldEvents.length; i++) {
@@ -1315,45 +1429,38 @@ randomWorldEvent = () => {
 
 mobilise = (nation) => {
 
-    console.log(nation.specialWeapons.nuclearWeapons)
     if (probability(0.50) && !nation.specialWeapons.nuclearWeapons) {
         nation.specialWeapons.nuclearWeapons += 1;
         console.log(nation.specialWeapons.nuclearWeapons)
     }
 
-    console.log(nation.militaryUnits)
     for (units in nation.militaryUnits) {
         nation.militaryUnits[units] += RNG(5000, 10000);
     }
-    console.log(nation.militaryUnits)
 }
 
 // Nation begins military build up
+// Select a nation that is not already hostile as the random aggressor
+// If nation selected is not hostile, nothing happens and player remains unaware
+// 50% chance of nuclear armament IF nation has none to begin with
+// An extra nuclear nation makes the world more dangerous!
 
 const militaryCoup = () => {
 
-    const randomNation = Math.floor(Math.random() * allNationsAsObjects.length);
+    const randomNation = Math.floor(Math.random() * nations.length);
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
+    for (let i = 0; i < nations.length; i++) {
+        if (nations[i] === nations[randomNation] &&
+            nations[i].status.stance !== "hostile") {
 
-        // Select a nation that is not already hostile as the random aggressor
-        // If nation selected is not hostile, nothing happens and player remains unaware
-
-        if (allNationsAsObjects[i] === allNationsAsObjects[randomNation] &&
-            allNationsAsObjects[i].status.stance !== "hostile") {
-
-            swal(`${allNationsAsObjects[i].name} is experiencing a coup d'état!`,
+            swal(`${nations[i].name} is experiencing a coup d'état!`,
                 `Aggression Level: 100 
                 Stance: Hostile 
 
             This nation's military power has increased and it may now have nuclear arms.`);
 
-            allNationsAsObjects[i].status.aggressionLevel = 100;
-
-            // 50% chance of nuclear armament IF nation has none to begin with
-            // An extra nuclear nation makes the world more dangerous!
-
-            mobilise(allNationsAsObjects[i]);
+            nations[i].status.aggressionLevel = 100;
+            mobilise(nations[i]);
         }
     }
 }
@@ -1363,17 +1470,17 @@ const naturalDisaster = () => {
     const disasters = ["forest fires", "flooding", "volcanoes", "earthquakes"];
     const randomDisaster = Math.floor(Math.random() * disasters.length);
     const previousDefenceBudget = playerNation.resources.defenceBudget;
-
     playerNation.resources.defenceBudget -= RNG(100000, 1000000);
+
     swal("Natural Disaster", `Your nation has been hit by ${disasters[randomDisaster]}! Reparations are necessary and money has been diverted from your defence budget. 
 
     Defence Budget: - $${previousDefenceBudget - playerNation.resources.defenceBudget}`);
 }
 
 cityStrike = () => {
-
     playerNation.status.govtApprovalRating -= 5;
     playerNation.resources.defenceBudget -= 100000;
+
     swal("Terror Attack", "Terrorists have attacked a city in your nation. Civilian casualties are reported and reparations are required. \n\nApproval Rating: -5 \nDefence Budget: - $100000");
 }
 
@@ -1381,6 +1488,7 @@ refineryStrike = () => {
 
     const previousOilProduction = playerNation.resources.oilProduction;
     playerNation.resources.oilProduction -= RNG(50000, 100000);
+
     swal("Terror Attack",
         `Terrorists have attacked a vital oil refinery in your nation. 
 
@@ -1389,21 +1497,18 @@ refineryStrike = () => {
 
 // Terror attack on player's nation
 const terrorStrike = () => {
-
     const terrorTargets = ["city", "vital oil refinery"];
     const randomTarget = Math.floor(Math.random() * terrorTargets.length);
-
     terrorTargets[randomTarget] === "city" ? cityStrike() : refineryStrike();
 }
 
 aidSuccess = () => {
 
     swal("International Aid", "Your nation is donating capital to several impoverished nations. \n\n Approval Rating: +2 \nAll Nations Aggression Level: -2 \nGDP: - $5200000");
-
     playerNation.gdp -= 5200000;
     playerNation.status.govtApprovalRating + 2;
 
-    allNationsAsObjects.forEach(nation => {
+    nations.forEach(nation => {
         nation.status.aggressionLevel -= 2;
     });
 }
@@ -1411,10 +1516,9 @@ aidSuccess = () => {
 aidFailed = () => {
 
     swal("Insufficient GDP For International Aid Provision", "Many impoverished nations in the world were relying on you to provide support. \nApproval Rating: -2 \nAll Nations Aggression Level: +2");
-
     playerNation.status.govtApprovalRating -= 2;
 
-    allNationsAsObjects.forEach(nation => {
+    nations.forEach(nation => {
         nation.status.aggressionLevel += 2;
     });
 }
@@ -1427,7 +1531,7 @@ treatySuccess = () => {
 
     swal("International Treaty Signed", "Your nation has signed a treaty that benefits many of the world's nations, including yours. Congratulations. \n\n All Nations Aggression Level: -5 \nAll Nations Resistance: -2 \nAll Nations GDP: + $1000000000 \nAll Nations Diplomacy: +5");
 
-    allNationsAsObjects.forEach(nation => {
+    nations.forEach(nation => {
         nation.status.aggressionLevel -= 5;
         nation.status.resistance -= 2;
         nation.gdp += 1000000000;
@@ -1439,7 +1543,7 @@ treatyFailed = () => {
 
     swal("Treaty Diplomacy Failed", "Your nation attempted to agree a global treaty that reduces aggression and military action worldwide. Alas, negotiations broke down and hostilities will continue to escalate. \nAll Nations Diplomacy: +3 \nAll Nations Aggression Level: +5");
 
-    allNationsAsObjects.forEach(nation => {
+    nations.forEach(nation => {
         nation.diplomacy += 3;
         nation.status.aggressionLevel += 5;
     });
@@ -1490,10 +1594,8 @@ deployForces = (region) => {
 deployAgents = (region) => {
 
     clearPrevious();
-
     if (preventIntel(region)) return;
     if (!checkAgents()) return;
-
     const timeToAcquireIntel = day + 4;
 
     swal("Agent Deployment",
@@ -1503,11 +1605,9 @@ deployAgents = (region) => {
         if (value) {
             swal("Agents Deployed", `Agents on the way to ${region}`);
             unitArrivalTime(region, "agents", 2);
-
-            const handleInterval = setInterval(() => {
-
+            const handle = setInterval(() => {
                 if (day === timeToAcquireIntel) {
-                    clearInterval(handleInterval);
+                    clearInterval(handle);
                     gatherIntel(region);
                 }
             }, 0);
@@ -1525,6 +1625,7 @@ checkAgents = () => {
         });
         return false;
     }
+
     return true;
 }
 
@@ -1532,18 +1633,18 @@ checkAgents = () => {
     This function uses several control flows to determine the outcome of any attempted espionage. Firstly, if the player's nation has an infiltation rating higher than the target nation, they have a 75% chance of gaining access to a nation's data. If the player's nation has a lower infiltration rating than the nation they have chosen to spy on, the chance to successfully obtain any data drops to 30%. This mirrors the unpredictable and cut-throat world of espionage!
 */
 
+// If less than the number defined by 'prob', agents successfully report back with nation data 
+
 gatherIntel = (region) => {
 
-    playerNation.unitTechAndSkillRating.infiltration += 1;
-
     const captured = setProbabilityOfAgentCapture();
+    playerNation.unitTechAndSkillRating.infiltration += 1;
 
     if (captured) {
         agentsCaptured(region);
         captureRegion = region;
         nationsHoldingAgents.push(captureRegion);
         $(".agents-imprisoned").append(`<option value="${captureRegion}">${captureRegion}</option>`).addClass("displayBlock");
-        // If less than the number defined by 'prob', agents successfully report back with nation data 
     } else if (probability(0.86)) {
         espionageSuccessful(region);
     }
@@ -1556,36 +1657,38 @@ preventIntel = (region) => {
         swal("Gathering Intel Disallowed", `Agents are already being held by ${region}. They will be on heightened alert and we should not send any more agents at this time.`);
         return true;
     }
+
     return false;
 }
 
 agentsCaptured = (region) => {
 
     agentCaptured = true;
+    playerNation.surveillance.fieldAgents -= 1;
+    playerNation.status.govtApprovalRating -= 2;
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-        if (region === allNationsAsObjects[i].name) {
+    for (let i = 0; i < nations.length; i++) {
+        if (region === nations[i].name) {
             swal(`${region} Has Captured Your Agent`, `Field Agents: -1 
-        Approval Rating: -2 
-        ${region} Aggression Level: +5`);
-            allNationsAsObjects[i].status.aggressionLevel + 5;
+            Approval Rating: -2 
+            ${region} Aggression Level: +5`);
+            nations[i].status.aggressionLevel += 5;
         }
     }
-    playerNation.surveillance.fieldAgents -= 1;
-    playerNation.status.govtApprovalRating -= 3;
 }
 
 espionageSuccessful = (region) => {
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-        if (region === allNationsAsObjects[i].name) {
+    for (let i = 0; i < nations.length; i++) {
+        if (region === nations[i].name) {
             swal({
                 title: "Data Retrieved",
-                text: JSON.stringify(allNationsAsObjects[i], null, 4),
+                text: JSON.stringify(nations[i], null, 4),
                 icon: "success",
             });
         }
     }
+
     playerNation.unitTechAndSkillRating.infiltration += 3;
     playerNation.surveillance.infiltratedNations.push(region);
 }
@@ -1597,18 +1700,18 @@ setProbabilityOfAgentCapture = () => {
     } else {
         captured = probability(1.00);
     }
+
     return captured;
 }
 
 // Refactor this into one function with params, as it is used several times
-releaseAgentHostages = (region) => {
+releaseHostagesWar = (targetNation) => {
 
-    if (nationsHoldingAgents.includes(region)) {
-
-        const indexRescueNation = nationsHoldingAgents.indexOf(region);
+    if (nationsHoldingAgents.includes(targetNation.name)) {
+        const indexRescueNation = nationsHoldingAgents.indexOf(targetNation.name);
         nationsHoldingAgents.splice(indexRescueNation, 1);
-
-        $(`.agents-imprisoned option[value=${region}]`).remove();
+        $(`.agents-imprisoned option[value=${targetNation.name}]`).remove();
+        hideCaptiveDropdown();
     }
 }
 
@@ -1618,29 +1721,34 @@ agentsHostage = () => {
     if (!agentCaptured) {
         swal({
             title: "No Hostages Detected",
-            icon: "warning",
+            icon: "warning"
         });
         return false;
     }
+
     return true;
 }
 
 launchHostageRescue = (region) => {
 
     if (!agentsHostage()) return;
-
     rescueAttemptNation = $(".agents-imprisoned").val();
 
     for (let i = 0; i < nationsHoldingAgents.length; i++) {
-
         if (nationsHoldingAgents[i] === rescueAttemptNation) {
-
             swal("Spec-Ops Raid",
                 `Confirm Hostage Rescue in ${rescueAttemptNation}?`, {
                     buttons: ["Cancel", "Confirm"]
                 }).then((value) => {
                 if (value) {
-                    swal("Spec-Ops Team Deploying", '"Seal Team 1 here, Sir. We are moving out and will be in position in 3 days."');
+
+                    swal({
+                        title: "Raid In Progress",
+                        text: `Your Spec Ops team is beginning their raid on ${rescueAttemptNation}.`,
+                        icon: "info"
+                    });
+
+                    $("select option[value='" + rescueAttemptNation + "']").attr("disabled", true);
                     unitArrivalTime(rescueAttemptNation, "spec-ops", 2, beginSpecOps);
                 }
             });
@@ -1648,13 +1756,32 @@ launchHostageRescue = (region) => {
     }
 }
 
-beginSpecOps = (region) => {
+// Successful or fail, remove nation holding the agents from respective array and dropdown list
 
+rescueAlert = (title, text, icon) => {
     swal({
-        title: "Raid In Progress",
-        text: `Your Spec Ops team is beginning their raid on ${rescueAttemptNation}.`,
-        icon: "info",
+        title: title,
+        text: text,
+        icon: icon
     });
+}
+
+rescueOutcome = (rescued) => {
+
+    if (rescued) {
+        rescueAlert("Mission Accomplished", `Agent retrieved from ${rescueAttemptNation}. 
+            Field Agents: +1`, "success");
+        playerNation.surveillance.fieldAgents += 1;
+    } else {
+        rescueAlert("Mission Failure", `Your agent was killed in the rescue attempt. 
+            Field Agents: -1`, "error");
+        playerNation.surveillance.fieldAgents -= 1;
+    }
+    clearHostageStatus();
+    hideCaptiveDropdown();
+}
+
+beginSpecOps = (region) => {
 
     let rescued;
 
@@ -1663,49 +1790,14 @@ beginSpecOps = (region) => {
     } else {
         rescued = probability(0.40);
     }
-
-    if (rescued) {
-        agentRescued(region);
-    } else {
-        agentKilled();
-    }
-}
-
-// If successful rescue, remove nation holding the agents from respective array and dropdown list
-agentRescued = (region) => {
-
-    swal({
-        title: "Mission Accomplished",
-        text: `Agent has been retrieved from ${region}. 
-            Field Agents: +1`,
-        icon: "success",
-    });
-
-    clearHostageStatus();
-    clearEmptyDropdown();
-    playerNation.surveillance.fieldAgents += 1;
-}
-
-agentKilled = () => {
-
-    swal({
-        title: "Mission Failure",
-        text: `Your agent was killed in the rescue attempt. 
-            Field Agents: -1`,
-        icon: "error",
-    });
-
-    clearHostageStatus();
-    clearEmptyDropdown();
-    playerNation.surveillance.fieldAgents -= 1;
+    rescueOutcome(rescued);
 }
 
 // How is this clearing array in ransom function????!!!
-clearHostageStatus = () => {
 
+clearHostageStatus = () => {
     const indexAgentRescueNation = nationsHoldingAgents.indexOf(rescueAttemptNation);
     nationsHoldingAgents.splice(indexAgentRescueNation, 1);
-
     $(`.agents-imprisoned option[value=${rescueAttemptNation}]`).remove();
     hideCaptiveDropdown();
 }
@@ -1715,14 +1807,6 @@ clearHostageStatus = () => {
 hideCaptiveDropdown = () => {
     if (!nationsHoldingAgents.length) {
         $(".agents-imprisoned").removeClass("displayBlock");
-    }
-}
-
-// Clear the dropdown from sidebar if no living agents are captive 
-
-clearEmptyDropdown = () => {
-    if (nationsHoldingAgents.length === 0) {
-        $(".agents-imprisoned").addClass("hidden");
     }
 }
 
@@ -1739,7 +1823,6 @@ lowerApprovalHostages = () => {
 }
 
 payRansom = (region, ransom, ransomNation) => {
-
     ransomNation = $(".agents-imprisoned").val();
     ransom = RNG(5000000, 50000000);
     ransomOptions(ransom, ransomNation);
@@ -1757,11 +1840,13 @@ ransomOptions = (ransom, ransomNation) => {
                 confirm: "Pay Ransom Request"
             },
         }).then((value) => {
+
         if (value) {
             ransomSuccess(ransom, ransomNation);
         } else {
             ransomDenied(ransom, ransomNation);
         }
+
     });
 }
 
@@ -1770,15 +1855,15 @@ ransomSuccess = (ransom, ransomNation) => {
     swal({
         title: "Ransom Paid",
         text: `Your agent has been released from ${ransomNation}. 
-            Field Agents: +1 
-            GDP: - $${ransom}`,
-        icon: "success",
+        Field Agents: +1 
+        GDP: - $${ransom}`,
+        icon: "success"
     });
 
     playerNation.surveillance.fieldAgents += 1;
     playerNation.gdp -= ransom;
     clearHostageStatus();
-    clearEmptyDropdown();
+    hideCaptiveDropdown();
     $(`.agents-imprisoned option[value=${ransomNation}]`).remove();
 }
 
@@ -1787,8 +1872,8 @@ ransomDenied = (ransom, ransomNation) => {
     swal({
         title: "Ransom Request Denied",
         text: `You have refused to pay $${ransom} to ${ransomNation}. 
-            Your agent will continue to be held until you order a spec-ops team to release them, negotiate a release, or invade this nation.`,
-        icon: "error",
+            Your agent will continue to be held until you order a spec-ops team to release them, pay a ransom, or invade this nation.`,
+        icon: "info"
     });
 }
 
@@ -1811,9 +1896,11 @@ undertakeSabotage = (region) => {
 chanceToSabotage = () => {
 
     if (probability(0.50)) {
+
         swal("Sabotage Successful",
             `Agents have successfully sabotaged enemy radar of ${targetNation.name} 
-                Enemy Air Units: - 5000`);
+        Enemy Air Units: - 5000`);
+
         targetNation.militaryUnits.air -= 5000;
     }
 }
@@ -1828,13 +1915,33 @@ disallowIncite = (region, code) => {
         });
         return true;
     }
+
     return false;
+}
+
+// If incite lvl is higher than enemy lvl, your chance for success is 25%. Else, 10%
+
+chanceOfRebellion = (region, code, playerInciteLvl, targetInciteLvl) => {
+
+    let successfulRebellion;
+
+    if (playerInciteLvl > targetInciteLvl) {
+        successfulRebellion = probability(0.25);
+    } else {
+        successfulRebellion = probability(0.10);
+    }
+
+    if (successfulRebellion) {
+        nationRebelled(region, code);
+    } else {
+        rebellionFailed(region);
+        return;
+    }
 }
 
 inciteRebellion = (region, code) => {
 
     clearPrevious();
-
     if (disallowIncite(region, code)) return;
 
     swal("Incite Unrest: $500000000",
@@ -1842,7 +1949,6 @@ inciteRebellion = (region, code) => {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
         if (value) {
-
             playerNation.resources.defenceBudget -= 500000000;
             rebellionAttempted.push(code);
 
@@ -1850,35 +1956,21 @@ inciteRebellion = (region, code) => {
                 playerNation.unitTechAndSkillRating.infiltration + playerNation.diplomacy;
             const targetInciteLvl =
                 targetNation.unitTechAndSkillRating.infiltration + targetNation.diplomacy;
-
-            // If incite lvl is higher than enemy lvl, your chance for success is 25%. Else, 10%
-            let successfulRebellion;
-
-            if (playerInciteLvl > targetInciteLvl) {
-                successfulRebellion = probability(0.25);
-            } else {
-                successfulRebellion = probability(0.10);
-            }
-
-            if (successfulRebellion) {
-                nationRebelled(region, code);
-            } else {
-                rebellionFailed(region);
-                return;
-            }
+            chanceOfRebellion(region, code);
         }
     });
 }
 
 nationRebelled = (region, code) => {
+
     swal({
         title: "Rebellion Incited",
         text: `Your agents have caused ${region} to suffer internal dissent. They are no longer a player in the theatre of war.`,
-        icon: "success",
+        icon: "success"
     });
 
-    territoriesConqueredByCode.push(code);
-    territoriesConqueredByRegion.push(region);
+    nationsConqueredCode.push(code);
+    nationsConqueredRegion.push(region);
     colourDefeatedNations(code, "#AA0000");
 }
 
@@ -1886,72 +1978,49 @@ rebellionFailed = (region) => {
     swal({
         title: "Rebellion Failed",
         text: `Your agents have failed to stir up enough dissent in ${region}. Perhaps the conditions are not yet right.`,
-        icon: "warning",
+        icon: "warning"
     });
 }
 
 // Use defence budget to draft soldiers into compulsory military service on a daily basis
 // Campaign lasts one month
+// 1st IF: Stop alert playing every second, as it is inside psg of time function
 conscriptTroops = () => {
 
-    // Stop alert playing every second, as it is inside psg of time function
     if (!gameState.conscriptionStarted) {
         swal("Conscripting Troops", "Total recruits will be reported in one month.");
         gameState.conscriptionStarted = true;
     }
 
     const randomConscriptionNumber = Math.floor(Math.random() * 1000);
-
     playerNation.militaryUnits.infantry += randomConscriptionNumber;
-    dailyInfantryRecruits.push(randomConscriptionNumber);
-
+    infantryRecruits.push(randomConscriptionNumber);
     reportConscription();
 }
 
 reportConscription = () => {
 
-    if (dailyInfantryRecruits.length >= 30) {
-
+    if (infantryRecruits.length >= 30) {
         commands.conscription = false;
-
         swal({
             title: "Recruitment Drive Report",
-            text: `You have managed to recruit ${sum(dailyInfantryRecruits)} new soldiers this month.`,
-            icon: "info",
+            text: `You have managed to recruit ${sum(infantryRecruits)} new soldiers this month.`,
+            icon: "info"
         });
     }
 }
 
-// ************************************************************************************
-// ************************************************************************************
-// DIPLOMACY
 
+/*
 
-disallowNegotitationDeals = (region) => {
+*************************************************************************************************
+    
+    DIPLOMACY
 
-    if (diplomacyAttempted.includes(region)) {
-        swal({
-            title: "Diplomacy Disallowed",
-            text: `${region} is not open to negotiation.`,
-            icon: "warning",
-        });
-        return true;
-    }
-    return false;
-}
+*************************************************************************************************
 
-disallowNegotitationStance = (region, targetNation) => {
+*/
 
-    if (targetNation.status.stance === "hostile") {
-        swal({
-            title: "Hostile Nation",
-            text: `Commander, ${region} is hostile and will not negotiate.`,
-            icon: "warning",
-        });
-        return true;
-    }
-    return false;
-}
 
 disallowAllianceStance = (region, targetNation) => {
 
@@ -1959,34 +2028,52 @@ disallowAllianceStance = (region, targetNation) => {
         swal({
             title: "Alliance Not Possible",
             text: `${region} must be classed as 'friendly'.`,
-            icon: "warning",
+            icon: "warning"
         });
         return true;
     }
+
     return false;
 }
+
+checkCondition = (region, targetNation, condition, title, text) => {
+
+    if (condition) {
+        swal({
+            title: title,
+            text: text,
+            icon: "warning"
+        });
+        return true;
+    }
+
+    return false;
+}
+
+// Run what happens in event of alliance
 
 determineAllianceSuccess = (region, code) => {
 
     const chanceOfAlliance = 0.95;
 
     if (probability(chanceOfAlliance)) {
-        // Run what happens in event of alliance
         alliancePact(region, code);
     } else {
         swal({
             title: "Alliance Unsuccessful",
             text: `${region} refuses to enter into an alliance with your nation at present.`,
-            icon: "warning",
+            icon: "warning"
         });
         if (!diplomacyAttempted.includes(region)) {
             diplomacyAttempted.push(region);
         }
+
         return;
     }
 }
 
 // Chance of agreement is dependent on stances
+
 determineChanceOfAgreement = (targetNation) => {
 
     if (targetNation.status.stance === "neutral") {
@@ -1997,6 +2084,9 @@ determineChanceOfAgreement = (targetNation) => {
         successfulTradeProbability = 0.95;
     }
 }
+
+// Check that option is not cancel, so that attempted diplomacy is confirmed and recorded 
+// Record that diplomacy has been attempted with this nation
 
 agreementStage1 = (region, value, code, targetNation) => {
 
@@ -2022,9 +2112,7 @@ agreementStage1 = (region, value, code, targetNation) => {
                     },
                 },
             }).then((value) => {
-            // Check that option is not cancel, so that attempted diplomacy is confirmed and recorded // Record that diplomacy has been attempted with this nation
             if (value) diplomacyAttempted.push(region);
-
             let successfulTradeProbability;
             determineChanceOfAgreement(targetNation);
             agreementStage2(value, region, targetNation);
@@ -2043,13 +2131,13 @@ agreementStage2 = (value, region, targetNation) => {
     } else if (!value) {
         swal({
             title: "Negotiation Cancelled",
-            icon: "info",
+            icon: "info"
         });
     } else {
         swal({
             title: "Negotiation Unsuccessful",
             text: `Attempt at negotiation with ${region} has been unsuccessful.`,
-            icon: "info",
+            icon: "info"
         });
     }
 }
@@ -2058,8 +2146,9 @@ negotiation = (region, code, targetNation) => {
 
     clearPrevious();
 
-    if (disallowNegotitationDeals(region)) return;
-    if (disallowNegotitationStance(region, targetNation)) return;
+    if (checkCondition(region, targetNation, diplomacyAttempted.includes(region), "Diplomacy Disallowed", `${region} is not open to negotiation.`)) return;
+
+    if (checkCondition(region, targetNation, targetNation.status.stance === "hostile", "Hostile Nation", `Commander, ${region} is hostile and will not negotiate.`)) return;
 
     swal("Negotiation & Diplomacy",
         `How would you like to approach this nation?`, {
@@ -2081,16 +2170,15 @@ negotiation = (region, code, targetNation) => {
 
 // AGRICULTURE
 
+// If no trade deal already, push the new one's region
+
 tariffSuspension = (region, targetNation) => {
 
-    // If no trade deal already, push the new one's region
     if (!playerNation.internationalRelations.tradeDeals.includes(region)) {
-
         pushDeal(region, targetNation, "tradeDeals");
-
         swal("New Trade Deal Ratified",
             `Congratulations commander, you have signed a trade deal with ${region}. 
-                Benefits of the deal will be awarded on a monthly basis.`, {
+            Benefits of the deal will be awarded on a monthly basis.`, {
                 button: "View Monthly Bonuses"
             }).then((value) => {
             swal(`Approval Rating: + 1 
@@ -2100,7 +2188,7 @@ tariffSuspension = (region, targetNation) => {
         swal({
             title: "Previous Trade Deal Signed",
             text: `You already have a trade deal with ${region}.`,
-            icon: "warning",
+            icon: "warning"
         });
     }
 }
@@ -2108,43 +2196,42 @@ tariffSuspension = (region, targetNation) => {
 // Monthly award of any trade deal bonuses. Ran inside 'monthly Actions'
 agriculturalBonus = () => {
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
+    for (let i = 0; i < nations.length; i++) {
         for (let j = 0; j < playerNation.internationalRelations.tradeDeals.length; j++) {
-
-            if (allNationsAsObjects[i].name === playerNation.internationalRelations.tradeDeals[j]) {
-                playerNation.gdp += Math.trunc(allNationsAsObjects[i].gdp / 100 * 0.2);
+            if (nations[i].name === playerNation.internationalRelations.tradeDeals[j]) {
+                playerNation.gdp += Math.trunc(nations[i].gdp / 100 * 0.2);
                 playerNation.status.govtApprovalRating += 1;
-                allNationsAsObjects[i].gdp -= Math.trunc(allNationsAsObjects[i].gdp / 100 * 0.2);
-                allNationsAsObjects[i].status.resistance += 5;
+                nations[i].gdp -= Math.trunc(nations[i].gdp / 100 * 0.2);
+                nations[i].status.resistance += 5;
             }
         }
     }
+
     alert("Agricultural Deal Bonus: See 'console' (F12)")
 }
 
 // ALLIANCE ASSISTANCE
 
 // Push to region array allows nation alliance colours to be removed if hostile 
+// Check no current alliance formed
 
 alliancePact = (region, code) => {
-    // Check no current alliance formed
+
     if (!playerNation.internationalRelations.alliances.includes(region)) {
-
         pushDeal(region, targetNation, "alliances");
-
-        territoriesConqueredByCode.push(code);
-        territoriesConqueredByRegion.push(region);
+        nationsConqueredCode.push(code);
+        nationsConqueredRegion.push(region);
         colourDefeatedNations(code, "dodgerblue");
         swal({
             title: "Alliance Forged",
             text: `${playerNation.name} and ${region} have become allies.`,
-            icon: "success",
+            icon: "success"
         });
     } else {
         swal({
             title: "Alliance Already Ratified",
             text: `${playerNation.name} and ${region} are allies.`,
-            icon: "info",
+            icon: "info"
         });
     }
 }
@@ -2164,15 +2251,16 @@ requestAllianceReinforcement = (region) => {
             swal({
                 title: "No Alliance Found",
                 text: `You are not allied with ${region} and cannot request military support.`,
-                icon: "warning",
+                icon: "warning"
             });
         }
     } else {
         swal({
             title: "Nation Cannot Assist",
             text: `${region} has aided your military once before.`,
-            icon: "warning",
+            icon: "warning"
         });
+
         return;
     }
 }
@@ -2184,12 +2272,14 @@ reinforcementImpact = () => {
     targetNation.status.aggressionLevel += 2;
 }
 
+// Increment player units with allied units
+// Decrement allied units
+
 assignAlliedUnitsToPlayer = () => {
-    // Increment player units with allied units
+
     for (units in playerNation.militaryUnits) {
         playerNation.militaryUnits[units] += targetNation.militaryUnits[units] / 100 * 10;
     }
-    // Decrement allied units
     for (units in targetNation.militaryUnits) {
         targetNation.militaryUnits[units] -= targetNation.militaryUnits[units] / 100 * 10;
     }
@@ -2198,12 +2288,10 @@ assignAlliedUnitsToPlayer = () => {
 oilExports = (region, targetNation) => {
 
     if (!playerNation.internationalRelations.oilExportDeals.includes(region)) {
-
         pushDeal(region, targetNation, "oilExportDeals");
-
         swal("New Oil Export Deal Ratified",
             `Congratulations commander, you have signed a trade deal with ${region}. 
-                Benefits of the deal will be awarded on a monthly basis.`, {
+            Benefits of the deal will be awarded on a monthly basis.`, {
                 button: "View Monthly Bonuses"
             }).then((value) => {
             swal(`GDP: + 0.3% of ${region} GDP 
@@ -2215,21 +2303,20 @@ oilExports = (region, targetNation) => {
             text: `${playerNation.name} is currently exporting to ${region}.`,
             icon: "info",
         });
+
         return;
     }
 }
 
 oilBonus = () => {
 
-    console.log(playerNation.resources.oilProduction);
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
+    for (let i = 0; i < nations.length; i++) {
         for (let j = 0; j < playerNation.internationalRelations.oilExportDeals.length; j++) {
-
-            if (allNationsAsObjects[i].name === playerNation.internationalRelations.oilExportDeals[j]) {
-                playerNation.resources.oilProduction += Math.trunc(allNationsAsObjects[i].resources.oilProduction / 100 * 0.3);
+            if (nations[i].name === playerNation.internationalRelations.oilExportDeals[j]) {
+                playerNation.resources.oilProduction += Math.trunc(nations[i].resources.oilProduction / 100 * 0.3);
                 playerNation.status.govtApprovalRating += 1;
-                allNationsAsObjects[i].resources.oilProduction -= Math.trunc(allNationsAsObjects[i].resources.oilProduction / 100 * 0.3);
-                allNationsAsObjects[i].status.resistance += 1;
+                nations[i].resources.oilProduction -= Math.trunc(nations[i].resources.oilProduction / 100 * 0.3);
+                nations[i].status.resistance += 1;
             }
         }
     }
@@ -2243,12 +2330,10 @@ pushDeal = (region, targetNation, deal) => {
 intelCollaboration = (region, targetNation) => {
 
     if (!playerNation.internationalRelations.intelCollaborationDeals.includes(region)) {
-
         pushDeal(region, targetNation, "intelCollaborationDeals");
-
         swal("Share Intel Agreement Ratified",
             `Congratulations commander, you have signed an intel deal with ${region}. 
-                    Benefits of the deal will be awarded on a monthly basis.`, {
+            Benefits of the deal will be awarded on a monthly basis.`, {
                 button: "View Monthly Bonuses"
             }).then((value) => {
             swal(`Both Nations: Agent Skill + 1
@@ -2259,22 +2344,22 @@ intelCollaboration = (region, targetNation) => {
         swal({
             title: "Intel Pact Exists",
             text: `${playerNation.name} is currently exchanging intel with ${region}.`,
-            icon: "info",
+            icon: "info"
         });
+
         return;
     }
 }
 
 intelBonus = () => {
 
-    console.log(playerNation.unitTechAndSkillRating.infiltration);
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
+    for (let i = 0; i < nations.length; i++) {
         for (let j = 0; j < playerNation.internationalRelations.intelCollaborationDeals.length; j++) {
-            if (allNationsAsObjects[i].name === playerNation.internationalRelations.intelCollaborationDeals[j]) {
+            if (nations[i].name === playerNation.internationalRelations.intelCollaborationDeals[j]) {
                 playerNation.unitTechAndSkillRating.infiltration += 1;
                 playerNation.status.govtApprovalRating += 1;
-                allNationsAsObjects[i].unitTechAndSkillRating.infiltration += 1;
-                allNationsAsObjects[i].status.resistance += 1;
+                nations[i].unitTechAndSkillRating.infiltration += 1;
+                nations[i].status.resistance += 1;
             }
         }
     }
@@ -2294,43 +2379,40 @@ controlStanceChange = () => {
 }
 
 storeNationStance = () => {
-    allNationsAsObjects.forEach(nation => {
+    nations.forEach(nation => {
         previousNationStances.push(nation.status.stance);
     });
 }
 
 // Iterate through both the previous stances and the current ones - check for discrepancies
+// setTimeOut prevents message being overridden by other messages that occur concurrently
+// Hostile nations are removed from treaties / deals on both sides
 
 detectStanceChange = () => {
 
     controlStanceChange();
-
     defineNationStance();
-
     definePlayerStance();
 
-    // setTimeOut prevents message being overridden by other messages that occur concurrently
-
     for (let i = 0; i < previousNationStances.length; i++) {
-        for (let j = 0; j < allNationsAsObjects.length; j++) {
-            if (previousNationStances[i] !== allNationsAsObjects[i].status.stance) {
+        for (let j = 0; j < nations.length; j++) {
+            if (previousNationStances[i] !== nations[i].status.stance) {
                 stanceHasChanged = true;
                 setTimeout(() => {
                     swal("Nation Stances Changed", "F12 for details.");
                 }, 3000);
-                console.log(`${allNationsAsObjects[i].name} has become ${allNationsAsObjects[i].status.stance}`);
+                console.log(`${nations[i].name} has become ${nations[i].status.stance}`);
                 break;
             }
         }
     }
 
-    // Hostile nations are removed from treaties / deals on both sides
     treatyWithdrawal();
 }
 
 treatyWithdrawal = () => {
     if (stanceHasChanged) {
-        allNationsAsObjects.forEach(nation => {
+        nations.forEach(nation => {
             severTies(playerNation.internationalRelations, nation.name, nation);
             severTies(nation.internationalRelations, playerNation.name, nation);
         });
@@ -2354,50 +2436,77 @@ treatyWithdrawal = () => {
 severTies = (relations, member, nation) => {
 
     for (relationship in relations) {
-
         if (relations[relationship].includes(member) && nation.status.stance === "hostile") {
-
             alert(`${member} is withdrawing from the ${relationship}`);
-
             let index = relations[relationship].indexOf(member);
-
             relations[relationship].splice(index, 1);
-
             removeAlliedColours(nation);
         }
     }
 }
 
 removeAlliedColours = (nation) => {
-    for (let i = 0; i < territoriesConqueredByRegion.length; i++) {
+
+    for (let i = 0; i < nationsConqueredRegion.length; i++) {
         if (nation.status.stance === "hostile" &&
-            territoriesConqueredByRegion[i] === nation.name) {
-            console.log(nation.name)
+            nationsConqueredRegion[i] === nation.name) {
+
             $("#vmap").vectorMap("set", "colors", {
-                [territoriesConqueredByCode[i]]: "#000"
+                [nationsConqueredCode[i]]: "#000"
             });
-            territoriesConqueredByRegion = territoriesConqueredByRegion.filter(value => value !== territoriesConqueredByRegion[i]);
+
+            nationsConqueredRegion = nationsConqueredRegion.filter(value => value !== nationsConqueredRegion[i]);
             break;
         }
     }
 }
 
+// Ensure a satellite exists
+
 spySatellite = (region, code) => {
 
     clearPrevious();
 
-    // Ensure a satellite exists
-    if (!playerNation.surveillance.satellites) {
+    if (!playerNation.surveillance.satellites) {      
         swal({
             title: "Satellite Unavailable",
             text: "You do not yet have a satellite in orbit, commander.",
-            icon: "warning",
+            icon: "warning"
         });
+
         return;
     }
-    swal("Military Forces Reported: \n" + JSON.stringify(targetNation.militaryUnits, null, 4));
-    swal("Nuclear Weapons Identifed: " + JSON.stringify(targetNation.specialWeapons.nuclearWeapons, null, 4));
+    
+    swal({
+        title: `Military Capability: ${region}`,
+        text: `Military Forces: ${JSON.stringify(targetNation.militaryUnits, null, 4)}
+        Special Weapons: ${JSON.stringify(targetNation.specialWeapons, null, 4)}`,
+        icon: "info"
+    });
 }
+
+// Probability of hack
+
+chanceOfHack = (successfulHack, region) => {
+
+    if (successfulHackProbability(successfulHack)) {
+        const amountStolen = RNG(50000, 1000000);
+        awardHackingBonus(region, amountStolen);
+        swal({
+            title: "Hack Successful",
+            text: `You have stolen $${amountStolen} from ${region}.`,
+            icon: "success"
+        });
+    } else {
+        swal({
+            title: "Hack Unsuccessful",
+            text: `${region} has prevented you from acquiring resources.`,
+            icon: "success"
+        });
+    }
+}
+
+// There is a cost to cyberattack attempts
 
 hackFunds = (region) => {
 
@@ -2407,30 +2516,10 @@ hackFunds = (region) => {
         `Attempt to syphon funds from ${region}?`, {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
-        // If cyberattack confirmed...
         if (value) {
-
-            // There is a cost to cyberattack attempts
             playerNation.resources.defenceBudget -= RNG(50000, 150000);
-
-            // Probability of hack
             let successfulHack, detected;
-
-            if (successfulHackProbability(successfulHack)) {
-                const amountStolen = RNG(50000, 1000000);
-                swal({
-                    title: "Hack Successful",
-                    text: `You have stolen $${amountStolen} from ${region}.`,
-                    icon: "success",
-                });
-                awardHackingBonus(region, amountStolen);
-            } else {
-                swal({
-                    title: "Hack Unsuccessful",
-                    text: `${region} has prevented you from acquiring resources.`,
-                    icon: "success",
-                });
-            }
+            chanceOfHack(successfulHack, region);
             hackDetectedAction(region, detected);
         } else return;
     });
@@ -2440,23 +2529,23 @@ hackFunds = (region) => {
 hackDetectedAction = (region, detected) => {
 
     setTimeout(() => {
-
         if (hackDetectionProbability(detected)) {
+            playerNation.status.govtApprovalRating -= 5;
+
             swal({
                 title: `${region} Detected Your Hack!`,
                 text: `${region} Aggression Level: + 10 
-                    ${region} Resistance Level: + 5 
-                    Your Approval Rating: - 5`,
-                icon: "warning",
+                ${region} Resistance Level: + 5 
+                Your Approval Rating: - 5`,
+                icon: "warning"
             });
 
-            allNationsAsObjects.forEach(nation => {
+            nations.forEach(nation => {
                 if (nation.name === region) {
                     nation.status.aggressionLevel += 10;
                     nation.status.resistance += 5;
                 }
             });
-            playerNation.status.govtApprovalRating -= 5;
         }
     }, 3000);
 }
@@ -2468,6 +2557,7 @@ successfulHackProbability = () => {
     } else {
         successfulHack = probability(0.95);
     }
+
     return successfulHack;
 }
 
@@ -2478,6 +2568,7 @@ hackDetectionProbability = () => {
     } else {
         detected = probability(0.90);
     }
+
     return detected;
 }
 
@@ -2488,31 +2579,29 @@ awardHackingBonus = (region, amountStolen) => {
     targetNation.gdp -= amountStolen;
 }
 
-// Resources stockpiled after successfully defeating another nation - added to monthly totals 
-
+// Resources stockpiled after successfully defeating another nation - added to monthly totals
+// Lump sum  awarded to player's national defence budget (1% of defeated nation's GDP)
+// Figure awarded to player's national defence budget each month for occupying a nation
+// Oil awarded to player each month for occupying a nation (0.5% of defeated nation's oil) 
 awardResources = () => {
 
     const nationGDP = targetNation.gdp;
     const nationOil = targetNation.resources.oilProduction;
-
-    // Lump sum  awarded to player's national defence budget (1% of defeated nation's GDP)
     playerNation.resources.defenceBudget += targetNation.gdp / 100 * 1;
-    // Figure awarded to player's national defence budget each month for occupying a nation
     defeatedNationGDP.push(nationGDP / 100 * 0.5);
-    // Oil awarded to player each month for occupying a nation (0.5% of defeated nation's oil) 
     defeatedNationOil.push(nationOil / 100 * 0.5);
 }
 
 defineNationStance = () => {
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-        if (allNationsAsObjects[i].status.aggressionLevel >= 0 && allNationsAsObjects[i].status.aggressionLevel < 40) {
-            allNationsAsObjects[i].status.stance = "friendly";
-        } else if (allNationsAsObjects[i].status.aggressionLevel >= 40 &&
-            allNationsAsObjects[i].status.aggressionLevel <= 50) {
-            allNationsAsObjects[i].status.stance = "neutral";
+    for (let i = 0; i < nations.length; i++) {
+        if (nations[i].status.aggressionLevel >= 0 && nations[i].status.aggressionLevel < 40) {
+            nations[i].status.stance = "friendly";
+        } else if (nations[i].status.aggressionLevel >= 40 &&
+            nations[i].status.aggressionLevel <= 50) {
+            nations[i].status.stance = "neutral";
         } else {
-            allNationsAsObjects[i].status.stance = "hostile";
+            nations[i].status.stance = "hostile";
         }
     }
 }
@@ -2536,7 +2625,7 @@ monitorNationResistance = (region, code) => {
         swal("DEFEAT", "You have failed in your mission, commander. \nYour people's resistance is now so low that there is no more desire for the struggle for supremacy. \nChaos reigns in the streets, and you have no option now but to step down before you are overthrown.");
         gameoverDefeated();
     } else if (targetNation.status.resistance <= 10) {
-        territoriesConqueredByCode.push(code);
+        nationsConqueredCode.push(code);
         colourDefeatedNations(code, "#AA0000");
     }
 }
@@ -2569,29 +2658,24 @@ lowerApprovalBankruptcy = () => {
     }
 }
 
-// add other functions to the below block???
 checkForGameWin = () => {
-    if (territoriesConqueredByRegion.length === 10) {
-        suggestPlayOtherNation();
+
+    if (nationsConqueredRegion.length === 10) {
+        if (playerNation.name === "Russian Federation") {
+            initEndgame(USA.name);
+        } else {
+            initEndgame(Russia.name);
+        }
     }
 }
 
-// Only one of each function needed here outside of 'if' block?
-suggestPlayOtherNation = () => {
 
-    const playerCurrentNation = playerNation.name;
+initEndgame = (nationName) => {
 
-    if (playerCurrentNation === "Russian Federation") {
-        swal("You Did It, Commander!", `You have conqured 10 of the world's nations. 
-    The game will reload, so try playing as the ${USA.name}. `);
-        gameover();
-        setEndTitles();
-    } else {
-        swal("You Did It, Commander!", `You have conqured 10 of the world's nations. 
-    The game will reload, so try playing as the ${Russia.name}. `);
-        gameover();
-        setEndTitles();
-    }
+    let suggestion = swal("You Did It, Commander!", `You have conqured 10 of the world's nations. Try playing as the ${nationName} next game!`);
+    suggestion;
+    gameover();
+    setEndTitles();
 }
 
 // Refresh button
@@ -2604,37 +2688,42 @@ reloadGame = () => {
 }
 
 gameover = () => {
+    inGameTrack.pause();
     gameState.gameStarted = false;
     $(".sidebar button").attr("disabled", true);
     $(".radar").removeClass("slow-reveal");
-    gameState.gameStarted = false;
-    inGameTrack.pause();
 }
 
-// Main game over function - gamestarted = false also prevents sidebar opening
-gameoverDefeated = (playerIsNuked) => {
+gameOverImg = () => {
 
-    gameover();
-
-    gameOverTrack.play();
-    gameOverTrack.loop = true;
-
-    $("#removable-status-content, .game-hud, .status-closebtn").remove();
-    $(".status-overlay").addClass("status-open game-over-transition")
-        .append(`<h2 class="end-header">GAME OVER</h2>`)
-        .append(`<button type="button" class="reload-btn" onclick="reloadGame()">Reload</button>`);
     if (gameState.playerNuked) {
-        $(".status-overlay").append(`<img src="images/nuked-city.png" alt="city destroyed by nuclear blast" class="game-over-img" />`);
+        $(".status-overlay").append(`<img src="images/nuked-city.jpg" alt="city destroyed by nuclear blast" class="game-over-img" />`);
     } else {
         $(".status-overlay").append(`<img src="images/grief.jpg" alt="woman in despair on ground" class="game-over-img" />`);
     }
 }
 
+gameOverScreen = () => {
+
+    $("#removable-status-content, .game-hud, .status-closebtn").remove();
+    $(".status-overlay").addClass("status-open game-over-transition")
+        .append(`<h2 class="end-header">GAME OVER</h2>`)
+        .append(`<button type="button" class="reload-btn" onclick="reloadGame()">Reload</button>`);
+}
+
+// Main game over function - gamestarted = false also prevents sidebar opening
+gameoverDefeated = () => {
+    gameover();
+    gameOverTrack.play();
+    gameOverTrack.loop = true;
+    gameOverScreen();
+    gameOverImg();
+}
+
 // These commands MUST have a desired map target
+// 1st IF: Prevent commands being used on player's own nation
 
 handlePlayerActions = (region, code) => {
-
-    // Prevent commands being used on player's own nation
 
     if (playerNation.name === region) return;
 
@@ -2689,14 +2778,6 @@ handlePlayerActions = (region, code) => {
     }
 }
 
-assignNationNames = () => {
-
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-        for (let j = 0; j < worldNations.length; j++) {
-            allNationsAsObjects[i].name = worldNations[i];
-        }
-    }
-}
 
 /*
 
@@ -2715,11 +2796,13 @@ assignNationNames = () => {
 */
 
 conqueredNation = (region) => {
-    for (let i = 0; i < territoriesConqueredByRegion.length; i++) {
-        if (territoriesConqueredByRegion[i] === region) {
+
+    for (let i = 0; i < nationsConqueredRegion.length; i++) {
+        if (nationsConqueredRegion[i] === region) {
             swal("Nation Conquered / Allied");
             return true;
         }
+
         return false;
     }
 }
@@ -2731,7 +2814,6 @@ showIntel = (region, targetNation) => {
     const noIntelAlert = swal(`No Intel on ${region}`, "Send agents or use satellites to spy.");
 
     playerNation.surveillance.infiltratedNations.forEach(nation => {
-
         if (!playerNation.surveillance.infiltratedNations.length) {
             noIntelAlert;
         } else if (targetNation.name === nation) {
@@ -2745,12 +2827,11 @@ showIntel = (region, targetNation) => {
 
 showNationLabel = (event, label, code) => {
 
-    for (let i = 0; i < allNationsAsObjects.length; i++) {
-        if (allNationsAsObjects[i].name === label[0].innerHTML) {
-            targetNation = allNationsAsObjects[i];
+    for (let i = 0; i < nations.length; i++) {
+        if (nations[i].name === label[0].innerHTML) {
+            targetNation = nations[i];
         }
     }
-
     label[0].innerHTML = label[0].innerHTML +
         `<br> Stance: <span id="stance">${targetNation.status.stance}</span> <br> 
             GDP: ${targetNation.gdp} <br> 
@@ -2763,20 +2844,17 @@ basicMapEvents = (region, code) => {
     showStatusPlayerNation(region);
 }
 
+// First 'if' prevents code running on the player's selected nation
+// If name in object matches region, show it's data in a swal
+// Allows player to perform commands
+
 coreMapEvents = (region, code) => {
 
-    // First 'if' prevents code running on the player's selected nation
     if (region !== playerNation.name) {
-
-        for (let i = 0; i < allNationsAsObjects.length; i++) {
-
-            if (allNationsAsObjects[i].name === region) {
-                targetNation = allNationsAsObjects[i];
-
-                // If name in object matches region, show it's data in a swal
+        for (let i = 0; i < nations.length; i++) {
+            if (nations[i].name === region) {
+                targetNation = nations[i];
                 showIntel(region, targetNation);
-
-                // Allows player to perform commands
                 handlePlayerActions(region, code);
             }
         }
@@ -2790,7 +2868,6 @@ coreMapEvents = (region, code) => {
 initMap = () => {
 
     $('#vmap').vectorMap({
-
         backgroundColor: '#151515',
         borderColor: '#12CEFC',
         borderOpacity: 0.25,
@@ -2803,12 +2880,9 @@ initMap = () => {
             showNationLabel(event, label, code);
         },
         onRegionClick: (element, code, region) => {
-
             if (conqueredNation(region)) return;
-
             basicMapEvents(region, code);
             coreMapEvents(region, code);
-
             gameState.targetNationSelected = false;
         }
     });
@@ -2844,7 +2918,6 @@ gameTickFunctions = () => {
 startGame = () => {
 
     gameState.gameStarted = true;
-
     playinGameTracks(currentTrack);
     gameState.time();
     gameTickFunctions();
@@ -2872,6 +2945,7 @@ startGame = () => {
 // UI
 
 renderNationSelectScreen = () => {
+
     $("html, body").toggleClass("lock-display");
     $("#skip-intro-btn, #story-scroll-text, .main-titles").remove();
     $(".title-overlay").removeClass("displayBlock");
@@ -2883,7 +2957,6 @@ renderNationSelectImages = () => {
 
     $(".title-overlay").addClass("displayBlock");
     $(".title-screen").append("<div id='nation-select'>");
-
     $("#nation-select")
         .append("<img id='usa' class='nation-img-usa' src='images/usa.png'/>")
         .append("<img id='russia' class='nation-img-russia' src='images/russia.png'/>");
@@ -2914,57 +2987,42 @@ setupGameStart = () => {
     }
 }
 
-// Option to select the United States
+setupNation = (text, nation) => {
+
+    if (playerNation !== undefined) return;
+
+    swal(text, "Choose to play as this nation?", {
+        buttons: {
+            cancel: "No",
+            confirm: {
+                value: "confirm",
+            },
+        },
+    }).then((value) => {
+        if (value) {
+            playerNation = nation;
+            defineOilAndBudgets();
+            setupGameStart();
+        }
+    });
+}
+
+// Option to select the United States or the Russian Federation
 
 $(document).on("click", "img#usa", () => {
-
-    if (playerNation !== undefined) return;
-
-    swal("United States of America", "Choose to play as this nation?", {
-        buttons: {
-            cancel: "No",
-            confirm: {
-                value: "confirm",
-            },
-        },
-    }).then((value) => {
-        if (value) {
-            playerNation = USA;
-            defineOilAndBudgets();
-            setupGameStart();
-        }
-    });
+    setupNation("United States of America", USA);
 });
-
-// Option to select the Russian Federation
 
 $(document).on("click", "img#russia", () => {
-
-    if (playerNation !== undefined) return;
-
-    swal("The Russian Federation", "Choose to play as this nation?", {
-        buttons: {
-            cancel: "No",
-            confirm: {
-                value: "confirm",
-            },
-        },
-    }).then((value) => {
-        if (value) {
-            playerNation = Russia;
-            defineOilAndBudgets();
-            setupGameStart();
-        }
-    });
+    setupNation("Russian Federation", Russia);
 });
 
-defineOilAndBudgets = () => {
+/* Keep track of the original value for player's oil production as we need to increment it by itself later on */
+// Ensure the yearly defence budget / GDP allocation remains unchanged for awarding each year
 
-    /* Keep track of the original value for player's oil production as we need to increment it by itself later on */
+defineOilAndBudgets = () => {
     dailyOilProduction = playerNation.resources.oilProduction;
     originalDailyOilProduction = dailyOilProduction;
-
-    // Ensure the yearly defence budget / GDP allocation remains unchanged for awarding each year
     yearlyDefenceBudget = playerNation.resources.defenceBudget;
     yearlyGDP = playerNation.gdp;
 }
@@ -2991,7 +3049,6 @@ nationSelected = (nationId, imageId, element, class1, class2, class3) => {
 
     $(nationId).addClass(class1);
     $(imageId).addClass(class2);
-
     setTimeout(() => {
         $(imageId).remove().addClass(class3);
         $(element).text(playerNation.name);
@@ -3005,7 +3062,6 @@ nationSelected = (nationId, imageId, element, class1, class2, class3) => {
 }
 
 displayNationLogo = () => {
-
     if (playerNation === USA) {
         $("#logo-section").append("<img class='logo-usa' src='images/usa-logo.png'/>");
     } else {
@@ -3015,9 +3071,11 @@ displayNationLogo = () => {
 
 //Once all title and nation select stages have concluded, clear title overlay from DOM
 removeTitleOverlay = () => {
+
     setTimeout(() => {
         $(".title-overlay").removeClass("displayBlock");
     }, 3000);
+
 }
 
 // Remove story text block on overlay once animation has finished, allowing titles to show
@@ -3068,6 +3126,7 @@ controlPanelTutorial = () => {
     setTimeout(() => {
         statusTutorial();
     }, 5000);
+
 }
 
 statusTutorial = () => {
@@ -3076,9 +3135,11 @@ statusTutorial = () => {
 
     setTimeout(() => {
         swal("Status Screen", "Use the Status Screen button to view your nation's overall health. \n\n The Fast Forward button found at the top of the screen will jump forward a whole day each time it is pressed, allowing buildings and other events to finish quicker.");
+
         setTimeout(() => {
             buildQueueFFwdTutorial();
         }, 6000);
+
     }, 1000);
 }
 
@@ -3088,12 +3149,16 @@ buildQueueFFwdTutorial = () => {
 
     setTimeout(() => {
         $(".sidebar").toggleClass("open");
+
         setTimeout(() => {
             swal("Command Menu", "This is where you will make decisions that will change the world. Forever. Use this 'commands' button (or the S key) to give orders. Click on the button, and then click on an area of the world map to execute them.");
+
             setTimeout(() => {
                 endTutorial();
             }, 10000);
+
         }, 1200);
+
     }, 1000);
 }
 
@@ -3109,16 +3174,15 @@ endTutorial = () => {
 
 // Prepare end titles
 
+// main titles: remove after testing - what's mean?
+
 setEndTitles = () => {
 
     gameover();
-
-    // main titles: remove after testing
     $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-hud").remove();
     $("html, body").toggleClass("lock-display");
     $(".title-overlay").addClass("displayBlock");
     $(".options-container").removeClass("displayBlock");
-
     runEndTitles();
 }
 
@@ -3139,9 +3203,11 @@ runEndTitles = () => {
 }
 
 playEndTheme = (endTheme) => {
+
     setTimeout(() => {
         endTheme.play();
     }, 4000);
+
 }
 
 
@@ -3150,20 +3216,24 @@ renderVictoryScreen = () => {
     $(".end-text-1, .end-text-2, .end-text-3").addClass("reveal-flame");
 }
 
+selectImg = (element, imgSrc) => {
+    $(element).remove();
+    $(".victory-img-section").append("<img class='victory-img' src=" + imgSrc + "/>");
+}
+
+// Display the victory img section first
+
 insertVictoryImage = () => {
 
-    // Display the victory img section first
     $(".victory-img-section").addClass("displayBlock");
 
     $(".end-titles-usa, .end-titles-russia").on("animationend", () => {
-
         if (playerNation.name === "Russian Federation") {
-            $(".end-titles-russia").remove();
-            $(".victory-img-section").append("<img class='victory-img' src='images/russia-victory.png'/>");
+            selectImg(".end-titles-russia", 'images/russia-victory.png')
         } else {
-            $(".end-titles-usa").remove();
-            $(".victory-img-section").append("<img class='victory-img' src='images/usa-victory.png'/>");
+            selectImg(".end-titles-usa", 'images/usa-victory.png');
         }
+
         renderVictoryScreen();
     });
 }
@@ -3176,14 +3246,11 @@ completeSetup = () => {
 
         if (typeof playerNation !== "undefined") {
             clearInterval(handleInterval);
-
             displayResearcherInfo();
-
             displayMainStatus();
-
             displayNationNameStatus();
-
             definePlayerStance();
         }
+
     }, 0);
 }

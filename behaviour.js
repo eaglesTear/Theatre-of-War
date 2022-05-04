@@ -8,36 +8,62 @@ BONUS ***********
  
 POST PRODUCTION **********
  
-change nuke game over image
 for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
 put link to github readme in html when finished
-check anything to do with objects and addition / subtraction operators
 check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
 mark all events that cause increase and decrease in approval rating etc
-be careful of double loops - do I want i or j?
-watch p-cannon behaviour closely - especially the button. Does it appear after researching?
-oil consumption
-defence budget not going into negatives: issues was with resourceIncome: truncing empty arrays
-get cost of things in swal header
-how do nations get missile shields??
+satellites to report missile shield or special weapons at all???
+satellites are safe but need high cost to balance???
 
 REFACTOR ***********
 
 does targetnation need to be a param in every function it is used in?
-modulate functions further
-envelop functions into gamestarted control to prevent functions carrying on
 functions & alerts - do they portray right information to the player and what's happening?
-nothing to increase hostility in random events -  alter??
 may be necessary to only use swal for buttons etc - danger they will override each other
 
 DEBUG ***********
 
- 1:57am 19/4/22 All major bugs eliminated
+check awarded bonuses in trade deals - i or j?
+
+disallowNegotitationDeals = (region) => {
+
+    if (diplomacyAttempted.includes(region)) {
+        swal({
+            title: "Diplomacy Disallowed",
+            text: `${region} is not open to negotiation.`,
+            icon: "warning",
+        });
+        return true;
+    }
+    return false;
+}
+
+disallowNegotitationStance = (region, targetNation) => {
+
+    if (targetNation.status.stance === "hostile") {
+        swal({
+            title: "Hostile Nation",
+            text: `Commander, ${region} is hostile and will not negotiate.`,
+            icon: "warning",
+        });
+        return true;
+    }
+    return false;
+}
+
+//// Clear the dropdown from sidebar if no living agents are captive 
+//
+//clearEmptyDropdown = () => {
+//    if (nationsHoldingAgents.length === 0) {
+//        $(".agents-imprisoned").addClass("hidden");
+//    }
+//}
+
+
  
 ADDITIONAL FUNCTIONALITY ***********
- 540
 >> add real world stats and build times to the game
 
 /*

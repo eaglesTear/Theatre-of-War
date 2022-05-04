@@ -8,7 +8,7 @@ $(() => {
 
     // Store the initial nation stances and assign the nation it's actual name
 
-    assignNationNames();
+    setNationNames();
 
     // Set once on game start, then recalled daily to dynamically adapt nation behaviour
 

@@ -2,16 +2,30 @@
 
 *************************************************************************************************
     
-    BUILDING INTERFACE: SETUP ('NEW CONSTRUCTION OPTIONS!')
+    HOW 'THEATRE OF WAR' IS BUILT
  
-    Base facilities and construction are represented as a 'Base' class, which ultimately keeps track of what facilities are built and allows other functions of the game to act on that premise - for instance, if a player has structures, those must be maintained and a cost for their upkeep will be deducted at the end of each month.
+    TOW uses JQVMaps - a JS library that generates a world map with several built-in methods, such as allowing click / hover events on the map nations. However, it does not return any data other than the name of a nation and some other basic object material.
+    
+    This game would not work without a world map, but finding a world map that I could interact with properly in JS for my needs was difficult. Very little documentation covers JQVMaps itself and I almost gave up on its use. TOW required all of the map's nations (182 in total) to somehow come 'alive', having not just a name, but data and stats: military, diplomatic, resources, behaviour - basic facets of real-world nations.
+    
+    The biggest issue is that JQVMaps only identifies a nation by country code, outside of click events. In short, if you click on a nation you can find its common name, but in map object itself, it only stores the country codes.
+    
+    To achieve this, I effectively built my own objects to randomly generate characteristics of all nations in TOW.
+    
+    To start, I created my own array of all 182 nation names identified from regions in JQVMaps. I then initialised a nation class with the various attributes of all nations in the game, including the player's own selected nation. This forms the basis of every country in TOW.
+    
+    Next, iterating through my array of 182 named nations ('worldNations') I create a new instance of my 'Nation' class for each of them, the characteristics and statistics of which are defined by a separate 'RNG' function which essentially randomises each attribute. Only the US and Russia are manually defined in terms of object characteristics. These nation instances are in turn pushed into the 'nations' array: the central array that stores all of the game's nations and data for use in TOW. At this stage, nation names are deliberately undefined.
+    
+    As JQVMaps cannot name nations explicitly outside of click and hover events, a 'setNationNames' function iterates through all the nations, setting the name of every individual nation as the name of each successive name in the 'worldNations' array. Originally using a double for loop to achieve this, refactoring gave me the idea of simply passing the index into the forEach method, applying that to the 'worldNations' array and incrementing the index (and therefore changing the name) on the next iteration. Essentially, each nation object has its name slotted into place using the 'worldNations' array, one at a time. 
+    
+    The nations (as objects) are now complete and ready for war.
 
 *************************************************************************************************
 
 */
 
 
-// Initialise nations as objects 
+// Initialise nation class 
 
 class Nation {
 
@@ -62,23 +76,22 @@ class Nation {
             govtApprovalRating: govtApprovalRating
         };
         this.attackNation = attackNation,
-        this.deployForces = deployForces,
-        this.deployAgents = deployAgents,
-        this.launchHostageRescue = launchHostageRescue,
-        this.beginSpecOps = beginSpecOps,
-        this.undertakeSabotage = undertakeSabotage,
-        this.inciteRebellion = inciteRebellion,
-        this.negotiation = negotiation,
-        this.spySatellite = spySatellite,
-        this.nuclearStrike = nuclearStrike,
-        this.particleCannonStrike = particleCannonStrike,
-        this.requestAllianceReinforcement = requestAllianceReinforcement,
-        this.hackFunds = hackFunds
+            this.deployForces = deployForces,
+            this.deployAgents = deployAgents,
+            this.launchHostageRescue = launchHostageRescue,
+            this.beginSpecOps = beginSpecOps,
+            this.undertakeSabotage = undertakeSabotage,
+            this.inciteRebellion = inciteRebellion,
+            this.negotiation = negotiation,
+            this.spySatellite = spySatellite,
+            this.nuclearStrike = nuclearStrike,
+            this.particleCannonStrike = particleCannonStrike,
+            this.requestAllianceReinforcement = requestAllianceReinforcement,
+            this.hackFunds = hackFunds
     }
 }
 
-// SELECTABLE NATIONS - RUSSIA & THE USA - OBJECT DEFINITIONS
-// All data correct as of 25 July 2021. Various sources inc. Global Firepower.
+// Selectable nations Russia & USA: manually defined according to globalfirepower.com
 
 const USA = new Nation(
     "United States of America", // name
@@ -148,9 +161,10 @@ const Russia = new Nation(
 
 setNationAttributes = () => {
 
-    const worldNationsObjectLength = Object.keys(worldNations).length;
+    // DAT
+    //const worldNationsObjectLength = Object.keys(worldNations).length;
 
-    for (let i = 0; i < worldNationsObjectLength; i++) {
+    worldNations.forEach(nation => {
 
         const allNations = new Nation(
 
@@ -202,8 +216,15 @@ setNationAttributes = () => {
             // Approval rating for a nation's govt: if this becomes low, game over
             RNG(100, 1)
         );
-        allNationsAsObjects.push(allNations);
-    }
+        nations.push(allNations);
+    });
+}
+
+setNationNames = () => {
+    nations.forEach((nation, index) => {
+        nation.name = worldNations[index];
+        index++;
+    });
 }
 
 
@@ -235,4 +256,5 @@ class Base {
 }
 
 // Create new instance of 'Base' class, which effectively becomes the player's base
+
 const playerBase = new Base();

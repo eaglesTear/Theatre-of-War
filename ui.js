@@ -2,9 +2,9 @@
 
 *************************************************************************************************
     
-    UI: BUTTONS. THEY, YOU KNOW...DO STUFF
+    UI: BUTTONS. THEY - YOU KNOW, DO STUFF
  
-    There are a plethora of buttons and commands in Theatre of War. Some access menus such as thestatus of a player's chosen nation, others allow interaction with the tactical map. As a rule, buttons in the 'commands' sidebar menu MUST have a map target following their clicking, with the sole exception of 'conscription' and 'rescue', which will automatically recruit a random number of troops to your military over the course of one month and allow you to attempt a rescue of any agents being held hostage.
+    There are a plethora of buttons and commands in Theatre of War. Some access menus such as the status of a player's chosen nation; others allow interaction with the tactical map. As a rule, buttons in the 'commands' sidebar menu MUST have a map target following their clicking, with the sole exception of 'conscription' and 'rescue', which will automatically recruit a random number of troops to your military over the course of one month and allow you to attempt a rescue of any agents being held hostage, respectively.
 
 *************************************************************************************************
 
@@ -274,5 +274,5 @@ $(() => {
         if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
         processUnitTraining(parseInt($("#shield").val()), 38000000, playerNation.specialWeapons, "missileShield");
     });
-    
+        
 });

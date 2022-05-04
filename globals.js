@@ -66,11 +66,11 @@ let previousNationStances = [];
 
 // 'territoriesConqueredByRegion' uses 'let' declaration as it will be subject to ES6 filter
 
-const dailyInfantryRecruits = [];
+const infantryRecruits = [];
 const rebellionAttempted = [];
-const territoriesConqueredByCode = [];
-let territoriesConqueredByRegion = [];
-const allNationsAsObjects = [];
+const nationsConqueredCode = [];
+let nationsConqueredRegion = [];
+const nations = [];
 const defeatedNationGDP = [];
 const defeatedNationOil = [];
 let nationsHoldingAgents = [];
