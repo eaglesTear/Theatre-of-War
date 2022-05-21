@@ -8,31 +8,39 @@
 
 *************************************************************************************************
 
-*/
+*/ 
 
 
 $(() => {
 
-    // Play btn fx
-    $("button").click(() => {
-        menuSelect.play();
-    });
-
-    // Disallow tutorial and jump to nation selection immediately 
-    $("#skip-intro-btn").click(() => {
-        gameState.skipIntro = true;
-    });
-
-    // Button ui and bind events for fast-forwarding time and sending forces
-    $("#fast-fwd-btn").click(fastForward);
-
-    // Reset all previous commands clicked and allow latest button option to always be active
+    // Reset all previous commands clicked and allow latest button option to remain active
 
     $("#attack-btn, #deploy-btn, #intel-btn, #sabotage-btn, #incite-btn, #diplomacy-btn, #spying-btn, #nuclear-btn, #p-cannon-btn, #reinforcement-btn, #hack-btn").click(() => {
         clearPrevious();
     });
 
-    // Player's chosen nation attacks another nation upon mouse click
+    // Play btn click fx
+
+    $("button").click(() => {
+        menuSelect.play();
+    });
+
+    // Disallow tutorial and jump to nation selection immediately
+
+    $("#skip-intro-btn").click(() => {
+        gameState.skipIntro = true;
+    });
+    
+
+    /*
+        ACTION COMMANDS (SIDEBAR MENU)
+        
+        These buttons allow interaction in various ways with the nations on the map in TOW.
+        
+        Each one triggers a bool that stores that specific option as 'active' until either another command is clicked (see above), or the click event on a nation is over.
+    */
+    
+    
     $("#attack-btn").click(() => {
         commands.attack = true;
     });
@@ -84,9 +92,14 @@ $(() => {
     $("#hack-btn").click(() => {
         commands.hacking = true;
     });
+    
 
-    // Rescue is a unique command - does NOT require selection of nation to activate
-    // So, will not be found in commands object nor playeractions function etc
+    /* 
+        BUTTONS INVOKING SPECIFIC FUNCTIONS
+        
+        'launchHostageRescue' is a unique command (function) in that it does NOT require the selection of any nation to activate. Hence, it will not be found in the 'commands' object nor 'playerActions' functions etc. See 'functions.js' for what these functions do.
+    */ 
+    
 
     $("#rescue-btn").click(launchHostageRescue);
     $("#ransom-btn").click(payRansom);
@@ -94,8 +107,10 @@ $(() => {
     $("#sell-weapons").click(sellWeapons);
     $("#make-small-arms").click(manufactureWeapons);
     $("#assign").click(beginResearch);
+    $("#fast-fwd-btn").click(fastForward);
 
-    // Game status overlay
+    // Game status overlay adds or removes CSS class that triggers status screen
+    
     $("#status-overlay-btn").click(() => {
         $(".status-overlay").addClass("status-open");
     });
@@ -103,15 +118,21 @@ $(() => {
         $(".status-overlay").removeClass("status-open");
     });
 
-    // Activate sidebar UI with click or 's' keyboard keypress, by toggling a css class on or off
+    // Activate sidebar UI with click or 's' keyboard keypress, through toggling a CSS class
 
-    // Button click sidebar toggle activation
     $("#sidebar-btn, .sidebar-close-btn").click(() => {
         $(".sidebar").toggleClass("open");
     });
-
-    // Keypress sidebar toggle activation ('s' must be pressed on the keyboard; caps is OK!)
-    // Deactivated during intro (or until game start function is ran, changing bool to true)
+    
+    
+    /*
+        KEYBOARD EVENT: COMMAND SIDEBAR
+        
+        Keypress sidebar toggle activation whereby 'S' can be pressed to activate the 'Commands' menu (as an alternative to clicking the 'Commands' button). It captures the press event, checks whether it is a capital (keycode 83) or lowercase (keycode 115) before also validating that the game is in progress before adding the appropriate CSS class and playing an activation sound.
+        
+        These conditionals prevent the player becoming frustrated as to why the 'S' key isn't working if they fail to realise their CAPSLOCK key is on (as I did!), and also prevents access to the menu if the game is over or intro is playing.
+    */
+    
 
     $(document).on("keypress", (e) => {
         if (e.keyCode === 115 && gameState.gameStarted ||
@@ -122,6 +143,7 @@ $(() => {
     });
 
     // Load nation select screen when skip intro or start game button is pressed
+    
     $("#skip-intro-btn, #start-game-btn").click(() => {
         $(".bg-intro-img").remove();
         introTrack.pause();
@@ -130,16 +152,33 @@ $(() => {
         nationSelectTrack.play();
         renderNationSelectScreen();
     });
+    
+    // Pause all ending music on game over and allow game reload
 
     $("#reload-btn").click(() => {
         ruAnthem.pause();
         usAnthemInstrumental.pause();
         reloadGame();
     });
+    
 
-    // UPGRADES & RESEARCH: All research requires research personnel, and amount affects speed
-
-    // Four upgrades are instant, provided money is no object and researchers are present
+    /*
+        INSTANT UPGRADES: OPTIONS TO IMMEDIATELY BOLSTER YOUR CHANCES IN THEATRE OF WAR
+        
+        TOW allows the player to instantly buff a specific branch of its conventional armed forces. 
+        
+        Before any upgrades are implemented, certain conditions must be met. Firstly, one control flow / function checks whether the player has sufficient currency. Secondly, a player MUST have built a research facility in order to qualify for any instant upgrade.
+        
+        The 'upgradeUnits' function then runs, deducting the cost of the upgrade, checking the type of upgrade and then awarding the bonus (see 'functions.js' for details).
+        
+        In a nutshell:
+        
+        AIRCRAFT: Ceramic armour increases tech level and durability by 5.
+        NAVY: The introduction of aircraft carriers increases tech level and durability by 5.
+        INFANTRY: Advanced chemicals injected into soldiers boosts fighting power and skill by 5.
+        ARMOUR: Depleted uranium shells increase cannon fire by 5.
+    */
+    
 
     $("#upgrade-aircraft").click(() => {
         if (checkFunds(10000000)) return;
@@ -169,6 +208,18 @@ $(() => {
         $("#upgrade-armour").text("Purchased").attr("disabled", "true");
     });
     
+    
+    /*
+        BUILDING & FACILITY OPTIONS
+        
+        Effectively the buttons used to build your 'base' in TOW.
+        
+        A couple of conditional control flows check that a certain structure does not already exist, and that enough money remains in the defence budget to fund construction. 
+        
+        'constructionManager' handles the process by determining the type of building ordered, its build time (set as current day + amount of additional days), and its cost. See 'functions.js'.
+    */
+    
+
     $("#airbase").click(() => {
         if (playerBase.airbase) return;
         if (checkFunds(280000000)) return;
@@ -217,18 +268,15 @@ $(() => {
         constructionManager(playerBase.missileSilo, "missileSilo", day + 2, 120000000);
     });
 
-
-/*
-
-*************************************************************************************************
     
-    UNIT TRAINING INTERFACE: WHEN RELEVANT FACILITIES ARE CONSTRUCTED
-     
-  
-*************************************************************************************************
+    /*
+        UNIT TRAINING INTERFACE (ACTIVE WHEN RELEVANT FACILITIES ARE CONSTRUCTED)
+        
+        Control flows determine whether the relevant building is constructed, i.e. a barracks is required for infantry training.
+        
+        'processUnitTraining' then takes the input value of the amount of units ordered, the cost per unit and the type of unit ordered to then handle the process. See 'functions.js'. 
+    */
 
-*/
-    
 
     $("#train-agents").click(() => {
         if (!playerHasBuilding("intelOps", "Intel Ops")) return;
@@ -274,5 +322,5 @@ $(() => {
         if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
         processUnitTraining(parseInt($("#shield").val()), 38000000, playerNation.specialWeapons, "missileShield");
     });
-        
+
 });

@@ -1,8 +1,9 @@
 /*
-    jQuery is essential to run the game. I decided to inform the user of this because occasionally jQuery can fail to load even with the correct scripts available. I inform them that they should try again to prevent them from thinking the game is broken and giving up. 
+    jQuery is essential to run the game. I decided to inform the user of this because occasionally jQuery can fail to load even with the correct scripts available. 
 
-    SweetAlert.js should not be used here: in the event that the client's internet is not connected, that won't run and so neither will the sweet alert and therefore the function.
+    SweetAlert.js should not be used here: in the event that the client's internet is not connected, that won't run and so neither will the sweetAlert and therefore the function.
 */
+
 
 window.onload = () => {
     if (!window.jQuery) {
@@ -10,36 +11,9 @@ window.onload = () => {
     }
 }
 
-// **** NATION CONSTRUCTION FUNCTIONS ****
-
-
-// Random Number Generator: set range for use when defining all nation objects (data & stats)
+// Random Number Generator: set range for use when defining all nation objects (stats) etc.
 
 const RNG = (min, max) => Math.floor(Math.random() * (max - min) + min);
-
-/* 
-    Clear previous commands so that latest button clicked can run. Difference between use when clicking the button is that the game will not ask the user if it wants to run the function again, unless the corresponding button is again clicked.
-    The 'conscription' command must be exempt - otherwise, clicking on an alternate command button whilst conscription is active will cancel the conscription function - which relies on the its command method being truthy in order to run.
-*/
-
-clearPrevious = () => {
-
-    for (const command in commands) {
-        if (command === "conscription") {
-            continue;
-        }
-        commands[command] = false;
-    }
-}
-
-/*
-    This function handles the darkening of the screen via an overlay with diminishing opacity. The overlay is displayed and a css class handles the animation / effect. Following this, the story text will scroll and the intro track will play.
-*/
-
-intro = () => {
-    $(".title-overlay").addClass("displayBlock");
-    introTrack.play();
-}
 
 // Function Probability - return a random number between a specified input range
 
@@ -49,29 +23,36 @@ probability = (n => Math.random() < n);
 
 sum = (array => array.reduce((total, currentValue) => total + currentValue, 0));
 
-// Execute monthly actions here, ie expenditures
-monthlyActions = () => {
-    militaryMaintenance();
-    resourceIncome();
-    agriculturalBonus();
-    oilBonus();
-    intelBonus();
-    lowerApprovalHostages();
-    baseExpenditure();
-    expenditureReport();
-}
-// Execute daily actions here, ie expenditures
-dailyActions = () => {
-    militaryOilExpenditure();
-    generalResourceExpenditure();
-}
-// Execute yearly action. Only one, which resetns defence budget
-yearlyActions = () => {
-    defenceBudgetGDP();
+
+/* 
+    Clear previous commands so that latest button clicked can run. Difference between use when clicking the button is that the game will not ask the user if it wants to run the function again, unless the corresponding button is again clicked.
+    The 'conscription' command must be exempt - otherwise, clicking on an alternate command button whilst conscription is active will cancel the conscription function - which relies on the its command method being truthy in order to run.
+*/
+
+
+clearPrevious = () => {
+
+    for (const command in commands) {
+        if (command === "conscription") continue;
+        commands[command] = false;
+    }
 }
 
+
 /*
-    Time in this game passes similarly to real life, with periods measured in daily, weekly, monthly and yearly intervals. To make sure that the measurement of an individual calendar month is as accurate as possible, the day count is initiated as a float (see globals). This is so that I can bolt on an additional 30.41 onto the day count when checking if a month has elapsed.
+    The 'intro' function handles the darkening of the screen via an overlay with diminishing opacity. The overlay is displayed and a CSS class handles the animation / effect. Following this, the story text will scroll and the intro track will play.
+*/
+
+
+intro = () => {
+    $(".title-overlay").addClass("displayBlock");
+    introTrack.play();
+}
+
+
+/*
+    Time in this game passes with some similarly to real life, with periods measured in daily, weekly, monthly and yearly intervals. To make sure that the measurement of an individual calendar month is as accurate as possible, the day count is initiated as a float (see globals). This is so that I can bolt on an additional 30.41 onto the day count when checking if a month has elapsed.
+    
     If we divide the number of days in a year (365) by the number of months in a year (12), the number is 30.41 - the average length of a month. Hence, after 30 days, the player will be subject to a monthly report, with their unit maintainance and other upkeeps requiring expenditure.
 
     The user agent can see what day, week, month or year it is. All of them are set as variables, all of which initially require rounding up (not down) with Math.ceil. If not rounded up, the functions use this code for carrying out other operations will produce bugs. Division is used to accurately measure how long each period is (ie, 7 days in a week = day / 7). I then use jQuery to insert the periods into the DOM.
@@ -82,7 +63,7 @@ yearlyActions = () => {
 */
 
 
-// Main time functionality, disabled if no jQuery or game start, preventing repeated errors to console.
+// jQuery inserts the vars of day, week and month into the DOM for visual display
 
 addTimeDOM = (week, month) => {
     $("#day").text("DAY: " + parseInt(day++));
@@ -90,21 +71,7 @@ addTimeDOM = (week, month) => {
     $("#month").text("MONTH: " + month);
 }
 
-// setInterval detects a week before month up but includes failsafe to stop repeat
-
-trackDueExpenditure = (monthlyInterval) => {
-
-    const handleInterval = setInterval(() => {
-
-        if (day >= monthlyInterval - 7 && day <= monthlyInterval - 6) {
-            expenditureAlert();
-            clearInterval(handleInterval);
-        }
-
-    }, 200);
-}
-
-// Also resets intervals
+// Check when the monthly or yearly points have been reached, increment year and run actions
 
 milestones = (monthlyInterval, yearlyInterval, currentYear) => {
 
@@ -116,6 +83,8 @@ milestones = (monthlyInterval, yearlyInterval, currentYear) => {
         yearlyActions();
     }
 }
+
+// Main time object: disabled if no jQuery or game start, preventing repeated errors 
 
 runGameTime = () => {
 
@@ -131,7 +100,6 @@ runGameTime = () => {
         let month = Math.ceil(week / 4);
         dailyActions();
         addTimeDOM(week, month);
-        //trackDueExpenditure(monthlyInterval);
         checkConscription(monthlyInterval);
         milestones(monthlyInterval, yearlyInterval, currentYear);
 
@@ -144,15 +112,48 @@ runGameTime = () => {
     }, 2000);
 }
 
+// If player has activated conscription, and run conscription daily for one month 
+
 checkConscription = (monthlyInterval) => {
-    if (commands.conscription) conscriptTroops(monthlyInterval);
+    if (commands.conscription) conscriptTroops();
 }
 
-// Skip forward in time via ui click (1 day per click)
+// Skip forward in time via btn click (1 day per click). Monitor for any conscription
+
 fastForward = (monthlyInterval) => {
     $("#day").text("DAY: " + parseInt(day++));
     $("#week").text("WEEK: " + Math.ceil(day / 7));
     checkConscription(monthlyInterval);
+}
+
+
+/*
+    MILESTONE FUNCTIONS
+    
+    Each day, month and year in TOW sees certain events happening, such as a player gaining benefits for any treaties they have signed and any resources acquired from defeated nations.
+    
+    However, there may be drawbacks to the milestone events - if any hostages are held by other nations, a player's approval rating will drop further.
+*/
+
+
+monthlyActions = () => {
+    militaryMaintenance();
+    resourceIncome();
+    agriculturalBonus();
+    oilBonus();
+    intelBonus();
+    lowerApprovalHostages();
+    baseExpenditure();
+    expenditureReport();
+}
+
+dailyActions = () => {
+    militaryOilExpenditure();
+    generalResourceExpenditure();
+}
+
+yearlyActions = () => {
+    defenceBudgetGDP();
 }
 
 
@@ -169,10 +170,23 @@ fastForward = (monthlyInterval) => {
 */
 
 
-// Adds the building to the new 'Buildings' instance derived from the 'Base' class
-// Base object then tracks what has been constructed and ultimately what can be built
+/*
+   'constructionManager' effectively adds any constructed building to the new 'Buildings' instance derived from the 'Base' class. This Base object then tracks what has been constructed and ultimately what can be built.
+   
+   This function, in tandem with its other internal functions, takes 5 parameters:
+   
+   'structureKey' is the key in the Base class.
+   'structureValue' is the value in the Base class.
+   'daysToBuild' is the time (current day + additional days) to build the structure.
+   'cost' is how much a building needs to complete.
+   
+   When a building is clicked on to be built, those values are passed in. Firstly, the structure type (structureValue) is used along with its cost and build time to display what building the player has clicked on to confirm their choice. Secondly, if the player confirms, 'confirmPurchase' takes the structure type and disables the respective button to prevent it from being used again. The cost of the building is then deducted from the player's defence budget.
+   
+   Finally, a setInterval tracks the build time by checking the current day against the day it is to be completed. Once they match, construction must complete. 'confirmConstruction' then sets the stuctureKey as the structureValue, before adding it into the object value slot - it is then defined as 'airbase' or 'silo', and thus it is constructed. 
+*/
 
-confirmConstruction = (structureKey, structureValue, cost) => {
+
+confirmConstruction = (structureKey, structureValue) => {
 
     swal({
         title: `Construction Complete: ${structureValue}`,
@@ -182,10 +196,9 @@ confirmConstruction = (structureKey, structureValue, cost) => {
     constructionComplete.play();
     structureKey = structureValue;
     playerBase[structureKey] = structureKey;
-    playerNation.resources.defenceBudget -= cost;
 }
 
-constructionManager = (structureKey, structureValue, daysToBuild, cost, value) => {
+constructionManager = (structureKey, structureValue, daysToBuild, cost) => {
 
     const structureCost = cost;
     const buildTime = daysToBuild;
@@ -194,17 +207,19 @@ constructionManager = (structureKey, structureValue, daysToBuild, cost, value) =
         Cost: $${cost}`, {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
+
         if (value) {
+            playerNation.resources.defenceBudget -= cost;
             confirmPurchase(structureValue);
             swal("Building");
-
             const handleInterval = setInterval(() => {
                 if (day === buildTime) {
                     clearInterval(handleInterval);
-                    confirmConstruction(structureKey, structureValue, cost);
+                    confirmConstruction(structureKey, structureValue);
                 }
             }, 0);
         }
+
     });
 }
 
@@ -249,6 +264,8 @@ confirmPurchase = (structureValue) => {
     }
 }
 
+// If a player tries to build or train a unit requiring a building they don't have, alert them
+
 playerHasBuilding = (building, text) => {
 
     if (!playerBase[building]) {
@@ -262,14 +279,15 @@ playerHasBuilding = (building, text) => {
     return true;
 }
 
+// Alert player to insufficient funds while showing how much they need for a certain unit 
+
 checkFunds = (unitCost) => {
 
     if (playerNation.resources.defenceBudget < unitCost) {
-
         swal({
             title: "Insufficient Funds",
             text: `Funds available: $${playerNation.resources.defenceBudget}. 
-                Funds required: $${unitCost}.`,
+            Funds required: $${unitCost}.`,
             icon: "error"
         });
         return true;
@@ -277,6 +295,8 @@ checkFunds = (unitCost) => {
 
     return false;
 }
+
+// Do not allow a player to pass in 0 as an amount of units to be built / trained
 
 disallowZeroUnits = (quantity) => {
 
@@ -291,18 +311,26 @@ disallowZeroUnits = (quantity) => {
     return false;
 }
 
+// Show "Building" alert if unit is a structure, "Training" if a unit
+
 alertUnitBuilding = (unitType) => {
 
-    if (unitType === "nuclearWeapons" || unitType === "satellites") {
+    if (unitType === "nuclearWeapons" ||
+        unitType === "satellites" ||
+        unitType === "missileShield") {
         swal("Building");
     } else {
         swal("Training");
     }
 }
 
+// Play different sound depending on whether unit is a structure or unit
+
 alertUnitReady = (unitType, numberOfUnits) => {
 
-    if (unitType === "nuclearWeapons" || unitType === "satellites") {
+    if (unitType === "nuclearWeapons" ||
+        unitType === "satellites" ||
+        unitType === "missileShield") {
         constructionComplete.play();
     } else {
         unitReady.play();
@@ -315,9 +343,31 @@ alertUnitReady = (unitType, numberOfUnits) => {
     });
 }
 
+
+/*
+    UNIT TRAINING / BUILDING
+    
+    Similar to the 'constructionManager' above that deals with base building, 'processUnitTraining' has one key difference: the amount of time required for a unit to be ready is directly proportionate to how many units are ordered.
+    
+    In TOW, units must be delivered as a batch. If you order 100 soldiers, for instance, you must wait until all 100 are trained until they are delivered.
+    
+    As a rough scale, 10 infantry would take 10 days to build, while 1000 infantry would take 100 days to build. However, a control flow increases the time factor to 0.5 for both nuclear weapons and the missile shield - this means the player needs to consider them as an option well in advance, as these take longer to build. Thus, 10 nukes will take around 100 days to complete.
+    
+    'disableSatellites' ensures that only one satellite can ever be constructed, as the only satellite can be used multiple times. However, there is both a cost to its use each time and a monthly upkeep, so it does not come cheap.
+    
+    Finally, once all checks are complete, 'addUnits' increments the respective nation stats by the amount the player originally ordered, and subsequently deducting their cost per item.
+*/
+
+
 addUnits = (playerUnits, unitType, numberOfUnits, unitCost) => {
     playerUnits[unitType] += numberOfUnits;
     playerNation.resources.defenceBudget -= unitCost;
+}
+
+disableSatellites = (unitType) => {
+    if (unitType === "satellites") {
+        $("#launch-satellite").text("Satellite Orbiting").attr("disabled", "true");
+    }
 }
 
 // Are units affordable? Is there more than zero selected for building / training?
@@ -326,29 +376,37 @@ processUnitTraining = (quantity, cost, playerUnits, unitType) => {
 
     const numberOfUnits = quantity;
     const unitCost = numberOfUnits * cost;
-
     if (checkFunds(unitCost)) return;
     if (disallowZeroUnits(quantity)) return;
+    
+    let timeFactor;
+    
+    if (unitType === "nuclearWeapons" || unitType === "missileShield") {
+        timeFactor = 10;
+    } else {
+        timeFactor = 0.10;
+    }
 
-    const timeFactor = 0.10;
     const unitCompletionTime = Math.trunc(day + (timeFactor * quantity));
 
     swal(`${quantity} ${unitType}: $${unitCost}?`,
         `ETA: Day ${unitCompletionTime}`, {
             buttons: ["Cancel", "Confirm"]
         }).then((value) => {
+
         if (value) {
             alertUnitBuilding(unitType);
-
             const handleInterval = setInterval(() => {
                 if (day >= unitCompletionTime) {
                     clearInterval(handleInterval);
                     alertUnitReady(unitType, numberOfUnits);
+                    disableSatellites(unitType);
                     addUnits(playerUnits, unitType, numberOfUnits, unitCost);
                     if (unitType === "researchers") displayResearcherInfo();
                 }
             }, 0);
         }
+
     });
 }
 
@@ -359,44 +417,55 @@ processUnitTraining = (quantity, cost, playerUnits, unitType) => {
     
     UPKEEP & EXPENDITURE: MAINTENANCE COSTS FOR PLAYER ASSETS 
  
+    In TOW, a player incurs expenditures on items such as their military units and oil consumption. These are deducted on either a daily or monthly basis.
 
 *************************************************************************************************
 
 */
 
 
-// DAILY EXPENDITURE
+// DAILY EXPENDITURE - functions run daily in 'dailyActions' function
 
-// Player oil supply is how much oil player actually has
-// Oil: production minus consumption, daily
+
+/*
+   'dailyOilProduction' tracks the original starting oil of the player's nation. This is in turn stored as 'originalDailyOilProduction' to track its starting value, minus the oil consumption rate of the nation.
+   
+   The actual amount of oil that a player has ('oilProduction'), therefore, is equal to original totals minus daily consumption. 
+*/
 
 generalResourceExpenditure = () => {
     dailyOilProduction += originalDailyOilProduction - playerNation.resources.oilConsumption;
     playerNation.resources.oilProduction = dailyOilProduction;
 }
 
-// Oil used by military units each day
-// Assets covered by the defence budget
-// If units are deployed, they use 20% more oil
+
+/*
+   Military units except for infantry consume oil on a daily basis, and per unit. However, if units are on a campaign (deployed), then this increases by 20%. Oil production (current supply) is then reduced by the the sum of oil the oil being consumed, calculated by the 'sum' function, which is array.reduce.
+*/
+
 
 militaryOilExpenditure = () => {
 
-    const militaryUnitsOilExpenditure = [
+    const oilExpenditure = [
     playerNation.militaryUnits.air * 1000,
     playerNation.militaryUnits.naval * 1500,
     playerNation.militaryUnits.tanks * 2000
 ];
 
     if (gameState.unitsOnCampaign) {
-        militaryUnitsOilExpenditure.forEach((unit) => {
+        oilExpenditure.forEach((unit) => {
             unit += (20 / 100) * unit;
         });
     }
 
-    playerNation.resources.oilProduction -= Math.trunc(sum(militaryUnitsOilExpenditure));
+    playerNation.resources.oilProduction -= Math.trunc(sum(oilExpenditure));
 }
 
 // MONTHLY EXPENDITURE
+
+/*
+    Military unit upkeep is entered into an array where each unit is multiplied by a cost. 'nuclearExpenditure' tracks whether a player has a nuclear programme (has any nuclear weapons). If so, an additional cost is pushed into the 'unitsToMaintain' array for totalling up, before an alert lets the player know what that monthly cost is.
+*/
 
 militaryMaintenance = () => {
 
@@ -417,7 +486,7 @@ militaryMaintenance = () => {
 }
 
 /*
-    Iterate through the player's base and structure maintenance object, deducting costs for any buildings that exist (if base buidings are not undefined, take respective cost for that building for that month).
+    Iterate through the player's base and structure maintenance object, deducting costs for any buildings that exist (if base buidings are not undefined, deduct the respective cost for that building for that month).
 */
 
 baseExpenditure = () => {
@@ -435,6 +504,8 @@ baseExpenditure = () => {
     alert(`Monthly Base Maintenance Report: - $${sum(baseMaintenanceTotals)}`);
 }
 
+// Alert the player to current GDP and defence budgets each month
+
 expenditureReport = () => {
 
     swal({
@@ -442,15 +513,6 @@ expenditureReport = () => {
         text: `Current GDP: $${playerNation.gdp},
         Current Defence Budget: $${playerNation.resources.defenceBudget}`,
         icon: "info"
-    });
-}
-
-// Alert player to incoming monthly expenditures (embedded in 'runGameTime' fn)
-
-expenditureAlert = () => {
-    swal({
-        title: "Expenditures Due: 1 Week",
-        icon: "warning"
     });
 }
 
@@ -463,17 +525,20 @@ nuclearExpenditure = (unitsToMaintain) => {
 
 /*
 
-*************************************************************************************************
+***************************************************************************************************
     
-    INCOME: SOURCES OF REVENUE FOR PLAYER'S NATION
+    INCOME: SOURCES OF REVENUE 
  
-
-*************************************************************************************************
+    Each year, a player receives their GDP and defence budget allocation according to the average GDP of that nation each year. In short, they receive what they started with again, effectively replenishing the nation's coffers. Isn't that nice?
+    
+    Perhaps if the player wasn't at risk of becoming annihilated in a nuclear firestorm, it would be. However, there are also multiple sources of additional revenue in TOW for those players who may not survive the year.
+    
+    Each nation conquered in TOW provides monthly revenue due to the player occupying that territory. Furthermore, the player can also sell excess oil for cash, and even enter the lucrative arms trade, building small arms and selling them off to the global marketplace. Guns really can put food on the table.
+    
+***************************************************************************************************
 
 */
 
-
-// MONTHLY REVENUES
 
 // Tally up the arrays holding player's resources from other nations & award monthly
 
@@ -482,7 +547,7 @@ resourceIncome = () => {
     playerNation.resources.oilProduction += Math.trunc(sum(defeatedNationOil));
 }
 
-// Yearly revenue
+// Reassign original defence budgets and GDP at the end of the year
 
 defenceBudgetGDP = () => {
     playerNation.resources.defenceBudget += yearlyDefenceBudget;
@@ -492,16 +557,10 @@ defenceBudgetGDP = () => {
     Defence Budget: $${playerNation.resources.defenceBudget}`);
 }
 
-/*
 
-*************************************************************************************************
-    
-    TRADE: OIL & WEAPONS
- 
+// OIL & WEAPON SALES
 
-*************************************************************************************************
-
-*/
+// Check player has sufficient oil to sell
 
 checkOilBarrels = (numberOfBarrels) => {
 
@@ -517,6 +576,8 @@ checkOilBarrels = (numberOfBarrels) => {
     return true;
 }
 
+// Confirm oil sale, deducting the amount of oil and adding the selling price to defence budget
+
 confirmOilSale = (numberOfBarrels, oilSalePrice) => {
 
     sale.play();
@@ -529,6 +590,10 @@ confirmOilSale = (numberOfBarrels, oilSalePrice) => {
         icon: "success"
     });
 }
+
+/*
+    First, we grab the value of the input which is how much the player wishes to sell and store the value of each barrel. If there is sufficient oil to sell, the player can choose whether to make the sale or cancel it. If confirmed, ''confirmOilSale' will be called and the transaction completed.
+*/
 
 sellOil = () => {
 
@@ -545,6 +610,8 @@ sellOil = () => {
     });
 }
 
+// Ensure that the player has sufficient weapons to sell
+
 checkWeaponCount = (numberOfWeapons) => {
 
     if (playerNation.resources.weaponStocks < numberOfWeapons ||
@@ -560,6 +627,8 @@ checkWeaponCount = (numberOfWeapons) => {
     return true;
 }
 
+// Deduct the amount of weapons to sell from stocks and add their value to the defence budget
+
 confirmWeaponSale = (numberOfWeapons, weaponSalePrice) => {
 
     sale.play();
@@ -572,6 +641,10 @@ confirmWeaponSale = (numberOfWeapons, weaponSalePrice) => {
         icon: "success"
     });
 }
+
+/*
+    As in the oil sale function, we store the number of weapons the player wants to sell from the input element. The price per unit is also stored. If the player has enough weapons to make the sale, they are then given an option to confirm or cancel, with 'confirm' finalising the sale.
+*/
 
 sellWeapons = () => {
 
@@ -588,6 +661,11 @@ sellWeapons = () => {
     });
 }
 
+
+// WEAPON MANUFACTURING
+
+// Increase the amount of weapons in stock by the amount manufactured
+
 addWeapons = (numberOfWeapons) => {
 
     constructionComplete.play();
@@ -599,6 +677,16 @@ addWeapons = (numberOfWeapons) => {
         icon: "success"
     });
 }
+
+/*
+    This function handles the building of weapons by first storing the input value of how many to build, the cost per unit and even the time required for their manufacture.
+    
+    Manufacture time calculation: CURRENT DAY + (NUMBER OF WEAPONS / 100) * 5
+    
+    This adds a time factor of 5% and as an example, 5 days is required for 100 weapons ordered. So, if we are on day 5 and 100 weapons are confirmed, the player will receive them on day 10 (current day + 5 days).
+    
+    On confirm, a setInterval monitors when that day is reached before adding the weapons to the stocks. 
+*/ 
 
 manufactureWeapons = () => {
 
@@ -625,17 +713,48 @@ manufactureWeapons = () => {
 
 /*
 
-*************************************************************************************************
+***************************************************************************************************
     
     UPGRADES & RESEARCH: All research requires research personnel, and amount affects speed
  
-
-*************************************************************************************************
+    All research in TOW is handled by multiple callbacks. There are 5 research projects available and all of them have benefits to the player's military.
+    
+    Research requires funds, a research center and a sufficient number of researchers to commence. The amount of time taken for research to complete depends on the amount of researchers assigned. Multiple researchers can be assigned to multiple projects simultaneously.
+    
+    HYPERSONIC MISSILES: Missiles fired at Mach 5. Increases air tech by 5.
+    CYRE ASSAULT RIFLE: High-capacity, high-velocity assault rifles. Increases infantry skill by 5.
+    RAILGUNS: Aluminium slugs propelled a light-speed. Naval tech increased by 5.
+    KINETIC ARMOUR: State-of-the-art armour that deflects rounds. Armour tech increased by 5.
+    PARTICLE CANNON: Precision orbital kinetic-strike weapon. Allows cannon use in sidebar.
+    
+***************************************************************************************************
 
 */
 
 
-// Time factor to be in increments of 1000s, ie 6000 for 60 days if 100 researchers
+// Return an array with the value of research costs and time to complete 
+
+setResearchAndCostFactor = (costOfResearch, timeFactor) => {
+    return [costOfResearch, timeFactor];
+}
+
+
+/*
+    First, we capture the value of the input element that determines the amount of researchers to assign to a project, as well as the value (name) of the project from the select dropdown.
+    
+    If the player has enough researchers available that are not assigned to various other projects, and the appropriate amount of researchers that have been hired, the project can commence.
+    
+    It is then time to set the cost of the project and the length of time required to complete it.
+    Utilising the value of the research project, a control flow uses the values of the 'setResearchAndCostFactor' and applies them to the returned array of the 'costOfResearch' and 'timeFactor', and thus they are set.
+    
+    The time to complete the project is calculated as follows:
+    
+    TIME TO COMPLETE PROJECT = (DAY + (TIMEFACTOR / RESEARCHER ALLOCATION))
+    
+    Effectively, the current day is added to to make a future day when the project is completed.
+    In short, the amount of researchers allocated to a project directly affects the speed of its completion. Another callback is then invoked to allocate the researchers and track its completion.
+*/
+
 
 beginResearch = () => {
 
@@ -662,11 +781,12 @@ beginResearch = () => {
         [costOfResearch, timeFactor] = setResearchAndCostFactor(2000, 10000);
     }
 
-    // Divide timefactor by researchers, then add day - otherwise get strange results
     let timeToCompleteProject = Math.trunc(day + (timeFactor / researcherAllocation));
 
     researchProjectStart(researcherAllocation, researchProject, costOfResearch, timeToCompleteProject);
 }
+
+// Ensure research facility is built before any research is allowed
 
 researchFacilityAvailability = () => {
 
@@ -682,7 +802,13 @@ researchFacilityAvailability = () => {
     return true;
 }
 
-// Upgrade military units: aircraft, infantry, navy and armour
+/*
+   UPGRADING UNITS
+   
+   This is handled by first checking that there is enough money and a research facility is available. See UI script for specific details.
+   
+   It contains 4 parameters - the upgrade cost, the unit to upgrade, the rating that must be increased and the value of the increase, which is an integer. Once a button is clicked the appropriate arguments are fed in, and the cost of the upgrade is deducted whilst the respective rating is increased.
+*/
 
 upgradeUnits = (costOfUpgrade, unitToUpgrade, ratingToIncrease, upgradeValue) => {
 
@@ -701,7 +827,7 @@ upgradeUnits = (costOfUpgrade, unitToUpgrade, ratingToIncrease, upgradeValue) =>
     playerNation.unitTechAndSkillRating[ratingToIncrease] += upgradeValue;
 }
 
-// Next 2 functions check that there are researchers hired, and whether any are available
+// These functions check that there are researchers hired, and whether any are available
 
 checkResearchCapacity = (researcherAllocation) => {
 
@@ -739,14 +865,22 @@ checkResearchersAvailable = (researcherAllocation, researchersAvailable) => {
     return false;
 }
 
-setResearchAndCostFactor = (costOfResearch, timeFactor) => {
-    return [costOfResearch, timeFactor];
-}
+// Check what researchers are not assigned to projects by checking the total of 'assigned' array
 
 getResearchersAvailable = () => {
     researchersAvailable = playerNation.researchers - Math.trunc(sum(researchersAssigned));
     $("#researchers-available").text(" " + researchersAvailable);
 }
+
+
+/*
+    When the project is confirmed, we need to keep track of several important factors: the amount of researchers the player has allocated, the name of the project, its cost and the scheduled completion time.
+    
+    If the player confirms a project, the amount of researchers they assigned via the input element is recorded and pushed to an array. The amount of researchers allocated is then deducted and refreshed in the DOM for the player to see who is tied up and who is free. Researchers, once assigned to a project, are unavailable for the entire duration of the research length, and this must be tracked and tied with the project that they are working on.
+    
+    The 'assigned' object literal (see globals.js) stores the value of the researchers assigned to a given project. The cost is deducted and 'researchProjectCompletion' begins the process of research to its completion. See below.
+*/
+
 
 researchProjectStart = (researcherAllocation, researchProject, costOfResearch, timeToCompleteProject) => {
 
@@ -765,6 +899,8 @@ researchProjectStart = (researcherAllocation, researchProject, costOfResearch, t
     });
 }
 
+// Produce an audio / visual alert of the project completion
+
 alertProjectComplete = (researchProject) => {
 
     swal({
@@ -779,7 +915,18 @@ alertProjectComplete = (researchProject) => {
     }
 }
 
-// effects of research, assigning researchers
+
+/*
+    This function handles the outcome of research and the researcher assignment. It tracks the time to complete, the project name, the project to be unassigned (which is the SAME value as the project name when passed in as an argument), and how many researchers were assigned to the project who must now be returned to 'available' status.
+    
+    Once the current day matches the completion day, 'removeAssignedResearchers' works to return the assigned researchers back to the player's use, but 'getResearchersAvailable' is invoked first to refresh the current amount of researchers. This is critical to stop bugs with the amount of researchers being shown to the player in the DOM, also.
+    
+    The global 'researchersAvailable' tracks the total amount of researchers available to the player that have been hired but are not on projects currently. This value is incremented by the amount of researchers stored on a project: now that it is over, they are 'returned' to the player via the incrementation of this value by the amount that was originally deducted (assigned). The value then stored in the 'assigned' object literal is then deleted as it is unnecessary at this stage.
+    
+    'researchImpact' is responsible for handling the rating increases that a given project provides.
+*/
+
+
 researchProjectCompletion = (timeToCompleteProject, researchProject, projectToUnassign, researcherAllocation) => {
 
     const handle = setInterval(() => {
@@ -795,7 +942,11 @@ researchProjectCompletion = (timeToCompleteProject, researchProject, projectToUn
     }, 0);
 }
 
-// 'removeAssignedResearchers' MUST BE REDECLARED TO CHECK CURRENT AMOUNT OF RESEARCHERS!!!
+
+/*
+    Researchers are unassigned (returned) by matching the allocated value with one in the 'assigned' array. Once a match is found via a for loop, we grab the index of that value and remove it via the splice method. Once completed, the loop must be exited to prevent other values that also match being taken off (essentially, where the player may assign the same amount of researchers on two different projects).
+*/ 
+
 
 removeAssignedResearchers = (researcherAllocation) => {
 
@@ -808,6 +959,8 @@ removeAssignedResearchers = (researcherAllocation) => {
         }
     }
 }
+
+// Check the research project completed and add the corresponding benefits to the nation object
 
 researchImpact = (researchProject) => {
 
@@ -843,7 +996,7 @@ researchImpact = (researchProject) => {
     }
 }
 
-// Set the max value of researchers available in html as player's total researcher number
+// Set the max value of researchers available in DOM as player's total researcher number
 
 displayResearcherInfo = () => {
     $("#researcher-allocation").attr("max", playerNation.researchers);
@@ -856,14 +1009,18 @@ displayResearcherInfo = () => {
 
 *************************************************************************************************
     
-    MONTHLY REPORT DISPLAY: Show useful info to player, such as unit info and budget etc.
+    STATUS REPORT DISPLAY: Showing what matters in TOW
  
+    It is useful from a design / UI perspective to show the player the most useful information regarding the status and health of their nation's condition. The functions below must be updated constantly to ensure it keeps up with all the dynamic events in TOW.
     
+    The information displayed can be accessed by clicking the 'Status' button at the top of the game page, and all information is added as a list via jQuery chaining.
 
 *************************************************************************************************
 
 */
 
+
+// The list is removed first each time the function is called to prevent multiple DOM prints
 
 outputMainStats = () => {
 
@@ -876,22 +1033,19 @@ outputMainStats = () => {
         .append(`<li>Agents Imprisoned: ${nationsHoldingAgents.length}</li>`);
 }
 
+// Iterate through each value in the info array EXCEPT defence budget, as it is appended above
 
 outputAuxStats = (info) => {
 
     info.forEach(item => {
         for (const value in item) {
-            if (value === "defenceBudget") {
-                continue;
-            }
+            if (value === "defenceBudget") continue;
             $("#overview").append(`<li>${value}: ${item[value]}</li>`);
         }
     });
 }
 
-// Main status: overview of all the main stats in the game
-
-// Print resources to DOM with jQuery chaining
+// Store all relevant stats in the 'info' array. Functions then iterate through and add to DOM
 
 displayMainStatus = () => {
 
@@ -914,7 +1068,9 @@ displayMainStatus = () => {
     
     WARFARE: CONVENTIONAL OR NUCLEAR - WHATEVER FLOATS YOUR BOAT
  
-    There are many ways to deal with other pesky nations in TOW. They need not all be overt, neither, but this section is dedicated to the forceful removal of those who stand in your way. As such, any diplomats among you should look away now.
+    There are many ways to deal with other pesky nations in TOW. They need not all be overt, but this section is dedicated to the forceful removal of those who stand in your way. As such, the diplomats among you should look away now.
+    
+    In order to attack a nation, the player must deploy its units there first. This state is known as on 'campaign', and in this state a military will use 20% more oil per day.
 
 *************************************************************************************************
 
@@ -926,19 +1082,24 @@ displayMainStatus = () => {
 
     Instead of a 'tech' rating, infantry possess a 'skill' attribute that helps them to sway the course of a battle. The formula ensures that both infantry skill and numbers contribute to the course of a battle, and all being equal, a difference in any of these factors will play a deciding factor in the outcome. If numbers are even, the skill of a nation's infantry will be decisive, and vice versa. If all factors are equal, control flow can decide a course of action for the player.
 
-    Player infantry strength: (players infantry skill / 100) * player infantry numbers
-    Enemy infantry strength: (enemy infantry skill / 100) * enemy infantry numbers
+    PLAYER INFANTRY STRENGTH: (PLAYERS INFANTRY SKILL / 100) * PLAYER INFANTRY NUMBERS
+    ENEMY INFANTRY STRENGTH: (ENEMY INFANTRY SKILL / 100) * ENEMY INFANTRY NUMBERS
 
     After calculating the player infantry strength and the enemy infantry strength using the above, they are subtracted from each other for each opposing nation to determine remaining infantry numbers on both sides - and therefore the course of the battle:
 
-    Troops remaing for player: player infantry strength - enemy infantry strength
-    Troops remaining for the enemy: enemy infantry strength - player infantry strength
+    TROOPS REMAING FOR PLAYER: PLAYER INFANTRY STRENGTH - ENEMY INFANTRY STRENGTH
+    TROOPS REMAINING FOR THE ENEMY: ENEMY INFANTRY STRENGTH - PLAYER INFANTRY STRENGTH
+    
+    To win a battle in TOW, all 4 player military wings MUST have more units remaining than those on the enemy side. For instance, a player's army must have more infantry remaining than those of the enemy, and so on. If ANY military arm loses, the player is held (defeated).
 */
 
 
 /* 
-    Attacking a region is undertaken via this function. Region is defined as a parameter because 'region' does not yet exist until user clicks on the map object. It also notifies the player as to what territory they are attacking. 
+    Attacking a region: 'region' is defined as a parameter because 'region' does not yet exist until user clicks on the map object (as mandated by the JQVMap object). It also notifies the player as to what territory they are attacking. 
+    
+    On confirming the attack, a control flow checks that the player has deployed to the correct region first. If so, attack commences and the player's aggression level rises. If no 'value' is present, the player is aborting the mission using the 'cancel' button (the else if condition).
 */
+
 
 attackNation = (region, code, targetNation) => {
 
@@ -971,13 +1132,13 @@ attackNation = (region, code, targetNation) => {
     PLAYER DAMAGE = PLAYER SKILL OR TECH / 100 * NUMBER OF PLAYER MILITARY UNITS
     ENEMY DAMAGE = ENEMY SKILL OR TECH / 100 * NUMBER OF ENEMY MILITARY UNITS
     
-    This scales more gradually when tech or skill levels are increased and thus still allow a weaker nation to damage a nation with vastly superior military.
+    This scales more gradually when tech or skill levels are increased and thus still allow a weaker nation to deal some damage to a nation with vastly superior military.
 */
 
 /* 
-    Initiate unit battles - parameter for war is required for randomAttack function.
+    Initiate unit battles. The 'targetNation' parameter is essential for the randomAttack function, where the AI attacks the player after a target nation is selected. 'war' calls the 'battle' function on each military arm so they all face each other. 
     
-    'war' calls the 'battle' function on each military arm so they face each other
+    'battle' is the function that is called inside to determine the outcome of the fight. The control flow checks whether a particular target nation military branch has lost all of its forces. If so, the 'armiesDefeated' var is incremented. If that var subsequently reaches 4 after all 4 fights, the win condition is detected and met.
 */
 
 war = (targetNation) => {
@@ -1003,8 +1164,11 @@ battle = (playerStrength, enemyStrength, playerUnits, enemyUnits, targetNation) 
     if (targetNation.militaryUnits[enemyUnits] <= 0) armiesDefeated++;
 }
 
-// Control what happens when a battle is concluded - 'armiesDefeated' MUST BE RESET!!!
-// If even one army is not defeated, player is deemed to lose or draw
+
+/*
+    When recording who has been defeated, the region and code parameters must be set from JQVMaps to track this. The targetNation must also be passed as the stats of that nation will be affected. The code and region are stored in arrays if the win condition is met. Functions dealing with the loss are ran otherwise, but either way, the military campaign stage is over and declared back to false.
+*/
+
 
 trackDefeatedNations = (region, code, targetNation) => {
 
@@ -1019,12 +1183,22 @@ trackDefeatedNations = (region, code, targetNation) => {
     gameState.unitsOnCampaign = false;
 }
 
+// Functions governing win & lose conditions
+
 winWar = (region, targetNation) => {
     militaryVictory(targetNation);
     awardResources();
     militaryUnitsGainXP(2);
     releaseHostagesWar(targetNation);
 }
+
+loseWar = () => {
+    militaryDefeat();
+    militaryUnitsGainXP(0.5);
+    playerNation.status.govtApprovalRating -= 5;
+}
+
+// Alert player to military victory and bonuses awarded
 
 militaryVictory = (targetNation) => {
 
@@ -1046,6 +1220,8 @@ militaryVictory = (targetNation) => {
     });
 }
 
+// Alert player to military defeat and the impact of such
+
 militaryDefeat = () => {
 
     swal("Defeat",
@@ -1063,13 +1239,7 @@ militaryDefeat = () => {
     });
 }
 
-loseWar = () => {
-    militaryDefeat();
-    militaryUnitsGainXP(0.5);
-    playerNation.status.govtApprovalRating -= 5;
-}
-
-// Exp is awarded for military participants, so we don't want to award exp to the agents here
+// Exp is awarded for military participants, but we don't want to award exp to the agents here
 
 militaryUnitsGainXP = (XP) => {
 
@@ -1093,16 +1263,20 @@ unitRatingCap = () => {
 
 /*
 
-*************************************************************************************************
+***************************************************************************************************
 
     NUCLEAR WARFARE
+    
+    Launching a nuclear strike in TOW is a swift way to remove a nation from the map. However, it requires many resources, including a launch silo, money and - if you want to survive the year - missile defence shields. What? You don't think the enemy won't retaliate if it is able to, do you?
 
-    If a nation suffers nuclear annihilation, colour is same as bg and is wiped and unable to be acquired for resources. If the target has nuclear defense, and they defend, they may launch against you if hostility or stance says so. Add new strategic element to object. Remember, nukes needed to validate function.
-
-*************************************************************************************************
+    If a nation suffers nuclear annihilation, it turns white and is unable to be acquired for resources. If the target has nuclear defense, they WILL defend, they WILL launch against you in response. It is prudent to check whether a nation has defences before nuking it, or at least ensure you do before you take a chance. 
+    
+***************************************************************************************************
 
 */
 
+
+// Deduct the warhead from player stocks and increase its aggression level
 
 missileFired = () => {
 
@@ -1117,6 +1291,8 @@ missileFired = () => {
     });
 }
 
+// Alert player that they have no nukes
+
 alertNoNukes = () => {
     swal({
         title: "Nuclear Capability Offline",
@@ -1124,6 +1300,12 @@ alertNoNukes = () => {
         icon: "error"
     });
 }
+
+
+/*
+    The region and code parameters are tracked to monitor the outcome. Two 'let' vars store who is hit later in the program. If the player has nuclear weapons, they can confirm or abort the strike. Otherwise, they are alerted that they have none (see above).
+*/
+
 
 nuclearStrike = (region, code) => {
 
@@ -1144,10 +1326,14 @@ nuclearStrike = (region, code) => {
     } else alertNoNukes();
 }
 
+// Alert player to their own missile being intercepted
+
 intercepted = () => {
     weaponDestroyed.play();
     swal("Missile Intercept", `${playerNation.name}'s missile destroyed`);
 }
+
+// Alert player to their nuclear attack being successful
 
 hit = () => {
     targetDestroyed.play();
@@ -1167,7 +1353,7 @@ nuclearOutcomePlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation)
             setTimeout(() => {
                 enemyNuclearRetaliation(enemyIsNuked, playerIsNuked, code, region, targetNation);
             }, 3000);
-
+            
             return;
         } else {
             hit();
@@ -1181,6 +1367,12 @@ nuclearOutcomePlayer = (enemyIsNuked, playerIsNuked, code, region, targetNation)
         }
     }, 4000);
 }
+
+/*
+    The following determines what happens if an enemy nation strikes at the player, and the function take 4 parameters, tracking who is hit, as well as the region and code attributes.
+    
+    If the player has a missile shield, the enemy missile is shot down and the player has a shield deducted. Otherwise, 2 seconds after the enemy launches, the player's nation is hit and the 'aftermath' function doles out the dire consequences. The 'gamestate.playerNuked' bool records the strike, which is passed to the 'gameOver' function to render a different game-over image, should the strike end the game.
+*/
 
 nuclearOutcomeEnemy = (enemyIsNuked, playerIsNuked, code, region) => {
 
@@ -1209,12 +1401,15 @@ nuclearOutcomeEnemy = (enemyIsNuked, playerIsNuked, code, region) => {
     }, 4000);
 }
 
-// Elevate the targeted nation to max aggression
+// Targeting a nation will elevate the their aggression level to max
+
 nuclearTargetStance = (region, targetNation) => {
     targetNation.status.aggressionLevel = 100;
     defineNationStance();
     swal("Target Nation Aggression Maxed", `${region} is fully hostile.`);
 }
+
+// If targeted nation has nukes and are hostile, they will strike back
 
 enemyNuclearRetaliation = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
@@ -1225,6 +1420,8 @@ enemyNuclearRetaliation = (enemyIsNuked, playerIsNuked, code, region, targetNati
         nuclearOutcomeEnemy(enemyIsNuked, playerIsNuked, code, region);
     }
 }
+
+// Render the consequences of the player or enemy being hit
 
 nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
 
@@ -1247,7 +1444,10 @@ nuclearAftermath = (enemyIsNuked, playerIsNuked, code, region) => {
 }
 
 
-// Nations defeated (either militarily or by turning inward via rebellion or civil war) turn red
+/*
+   Nations defeated militarily, or by turning inward via rebellion, turn red. I wrote this small function to directly interact with JQVMaps to take both a colour value and the code of the nation being dealt with to change its colour, reflecting its status. 
+*/ 
+
 
 colourDefeatedNations = (code, colour) => {
     for (let i = 0; i < nationsConqueredCode.length; i++) {
@@ -1258,6 +1458,8 @@ colourDefeatedNations = (code, colour) => {
         }
     }
 }
+
+// Implement the effects of the particle cannon strike on a target nation 
 
 cannonDamage = (region, targetNation) => {
 
@@ -1273,12 +1475,16 @@ cannonDamage = (region, targetNation) => {
     );
 }
 
-// 8 hours until weapon above target
+/*
+   The Particle Cannon Strike must be researched before use, and it will appear inside the 'Commands' sidebar once it has done so.
+   
+   It takes 8 hours to arrive in a target orbit above the unsuspecting nation. Once confirmed, and the weapon is above, it fires, causing a devastating morale drop that may well see the nation capitulate to you immediately.
+*/ 
 
 particleCannonStrike = (region, code) => {
 
     clearPrevious();
-    const timeToTargetOrbit = day / 3;
+    const targetOrbitTime = day / 3;
 
     swal("Particle Cannon Strike",
         `Confirm Particle Deployment Above ${region}?`, {
@@ -1286,7 +1492,7 @@ particleCannonStrike = (region, code) => {
         }).then((value) => {
         if (value) {
             const handle = setInterval(() => {
-                if (value && day >= timeToTargetOrbit) {
+                if (value && day >= targetOrbitTime) {
                     clearInterval(handle);
                     cannonDamage(region, targetNation);
                     monitorNationResistance(region, code);
@@ -1296,15 +1502,108 @@ particleCannonStrike = (region, code) => {
     });
 }
 
-/* 
-    Determine when the player's forces arrive at a global destination. A new variable sets the time of arrival to be in a week's time, using whatever day the game is currently on and then tacking on + 7 days. A function is then run constantly, checking whether this new 'military arrival day' matches with the current day. In short, if the current day is equal to the future day, the troops are determined to arrive. The player is then able to attack now that the troops are in theatre.
-    This script determines the travel time to all destinations for various forces. It takes 4 parameters: 
+
+/*
+
+***************************************************************************************************
+    
+    DEPLOYMENTS: AGENTS & ARMIES
+    
+    Both field agents and armies must be deployed to a global destination for them to do their stuff.
+ 
+    A new variable sets the time of arrival to be after a week, using whatever day the game is currently on and then tacking on + 7 days. A function is then run constantly, checking whether this new 'military arrival day' matches with the current day. In short, if the current day is equal to the future day, the troops are determined to arrive. The player is then able to attack now that the troops are in theatre.
+    
+    This script determines the travel time to all destinations for various forces. It takes 4 parameters passed between the various functions: 
 
     'region' determines the destination country of the sent units, which is itself defined via JQVMaps objects. 
     'unit' takes a string argument which indicates the type of unit that is being sent and is arriving. This stored info is used in messages to the player.
     'time' sets how many days must pass from the current day before the units can arrive. This future arrival date is determined by adding the current day (the day units are sent) to the arrival day (the day the units will get there).
-    'orders' takes a callback function that determines what the units do when they get to where they are sent. Each unit will arrive in a country to do something specific. Agents, for example, will arrive to sabotage a nation's operations whilst military units arriving will pressure a nation or attack them.
+    'orders' takes a callback function that determines what the units do when they get to where they are sent. Each unit will arrive in a country to do something specific. Agents, for example, will arrive to sabotage a nation's operations whilst military units arriving can attack them.
+
+***************************************************************************************************
+
 */
+
+
+/* 
+    Military forces that are already deployed in a specific theatre need to be alerted to the player. Following this, if deployment is confirmed then the unit arrival time is set at two days but as they are only deployed no orders are given, so the last argument is the 'unitArrivalTime' function is missing (orders), and caught in a try-catch to prevent an error being thrown.
+    
+    Finally, the region they are now ordered to is stored as the region method of JQVMaps.
+*/
+
+deployForces = (region) => {
+
+    if (deployedToRegion === region) {
+        swal("Military already deployed to " + region)
+        return;
+    }
+
+    clearPrevious();
+
+    swal("Military Deployment",
+        `Confirm Deployment to ${region}?`, {
+            buttons: ["Cancel", "Confirm"]
+        }).then((value) => {
+        if (value) {
+            unitArrivalTime(region, "military", 2);
+            deployedToRegion = region;
+        }
+    });
+}
+
+
+/*
+    Similar to the military deployment above, agents are sent to a region but once they get there, they automatically try to acquire intel there. 
+    
+    If agents are already held by the nation they are trying to enter again, they will not be allowed until they are rescued or bartered for. A player also needs to have an agent in his service.
+    
+    Agents run the risk of capture: see 'gatherIntel' later in the script.
+    
+    The intel aqcuistion time is 3 days, to accomodate 1 day to arrive and 2 days to acquire it.
+*/ 
+
+
+deployAgents = (region) => {
+
+    clearPrevious();
+    if (preventIntel(region)) return;
+    if (!checkAgents()) return;
+    const timeToAcquireIntel = day + 4;
+
+    swal("Agent Deployment",
+        `Confirm Agent Deployment to ${region}?`, {
+            buttons: ["Cancel", "Confirm"]
+        }).then((value) => {
+        if (value) {
+            swal("Agents Deployed", `Agents on the way to ${region}`);
+            unitArrivalTime(region, "agents", 1);
+            const handle = setInterval(() => {
+                if (day === timeToAcquireIntel) {
+                    clearInterval(handle);
+                    gatherIntel(region);
+                }
+            }, 0);
+        }
+    });
+}
+
+// Ensure player has at least one agent to utilise
+
+checkAgents = () => {
+
+    if (playerNation.surveillance.fieldAgents <= 0) {
+        swal({
+            title: "No Agents In Service",
+            text: "No more agents to spare. Train some at an Intel-Ops Centre.",
+            icon: "warning",
+        });
+        return false;
+    }
+
+    return true;
+}
+
+// If units deployed are military, change the campaign bool to true so more oil is used 
 
 unitCampaign = (units, region) => {
 
@@ -1316,11 +1615,16 @@ unitCampaign = (units, region) => {
     }
 }
 
-// The try-catch here stops an error being thrown if no orders are given to units (missing param)
+
+/*
+   The try-catch here stops an error being thrown if no orders are given to units to carry out automatically on arrival (the last argument when the function is invoked). Here, the time of arrival is set as the current day + time (time = integer). Once the current day is equal to the arrival time, units arrive and either await further orders (armies) or attempt to syphon intel (agents).
+*/ 
+
 
 unitArrivalTime = (region, units, time, orders) => {
 
     const arrivalDay = day + time;
+    
     const handleInterval = setInterval(() => {
 
         if (day >= arrivalDay) {
@@ -1332,19 +1636,43 @@ unitArrivalTime = (region, units, time, orders) => {
                 console.log(`No orders given for units after arriving in ${region}.`);
             }
         }
-
+        
     }, 0);
 }
 
-// Nations attacking player: pseudo-random hostile nation attacks
-// prevent running if game ended - REMOVE IF GAME SUCCESSFULLY WRAPPED IN IF
-// Go through all nations and see if any are hostile...
-// If hostile nation has not been conquered
-// If any hostile nation is not defeated or already engaged, that is the target
-// Insert current chosen target nation into array to prevent same nation attack
-// If no conditions match first nation (ie not hostile), find the next one nation
 
-function attackPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation) {
+/*
+
+***************************************************************************************************
+    
+    AI AGGRESSION: SHALL WE PLAY A GAME?
+ 
+    Out of the 182 nations operating in TOW, it would be rather a shame not to have some of them pull off some antics from time to time.
+    
+    AI aggression reminds the player that this is a dynamic and dangerous world and they are not alone. AI aggression takes the form of pseudo-random attacks, the type of which is itself  determined via probability (using the 'probabilty' function declared above).
+    
+***************************************************************************************************
+
+*/
+
+
+/*
+    ATTACKING THE PLAYER
+    
+    Random attacks need to be prevented if the game ends, which is the first control flow order. After passing, we loop through the nations array and select a nation to attack. The nation selected must meet several conditions simultaneously:
+    
+    1. Their stance MUST be hostile.
+    2. They can not have attacked the player before (previous attacks are stored in an array).
+    3. The nation must not have already been conquered / defeated.
+    4. It cannont be currently selected with the mouse (another player command acting on it).
+    
+    Only when these conditions are met will the nation be pushed into a 'previousAttackers' array as it is then that they will attack and be recorded doing so. The target nation (enemy) is then set as the nation in the 'nations' array that matches those conditions as the country that will attack, before the loop is broken. Finally, the attack type is determined by a corresponding function.
+    
+    If any conditions are not met, (the else statement), continue and skip over that nation and check until one is found. I have not set a condition as to what happens if no matches are found due to the extreme unlikelihood of that happening!
+*/
+
+
+attackPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
     if (!gameState.gameStarted) return;
 
@@ -1361,28 +1689,45 @@ function attackPlayer(enemyIsNuked, playerIsNuked, code, region, targetNation) {
     }
 }
 
-// Certain probability of either military, cyber or nuclear attack (40, 50, 10 respectively)
 
 /* 
+    AI ATTACK TYPES
+    
+    There is a set probability of either a military, cyber or nuclear attack (40%, 50% & 10% respectively).
+    
     All 5 params are ESSENTIAL for nuclear function to run as they are passed between multiple functions to achieve the desired result.
     Currently set to:
         40% chance of military attack
         50% chance of cyber attack
         10% chance of nuclear attack
+        
+    After war is declared, a control flow needs to alert the player to the nation that has attacked the player.
+    
+    The 'warOutcome' function deals with any incoming attacking.
+    
+    In case of the nuclear strike, this works by simply by calling the nuclear retaliation function that usually fires when the player strikes a target nation with a nuke, and so is repeated here to avoid repetition.
 */
+
+
+warOutcome = (targetNation) => {
+    
+    if (armiesDefeated >= 4) {
+            swal(`${playerNation.name} has fought off ${targetNation.name}`);
+        } else {
+            swal(`${playerNation.name}'s armies defeated by ${targetNation.name},
+            "Public Approval: -5"`);
+            playerNation.status.govtApprovalRating -= 5;
+            gameoverDefeated();
+        }
+        armiesDefeated = 0;
+}
 
 setAttackTypeCPU = (enemyIsNuked, playerIsNuked, code, region, targetNation) => {
 
     if (probability(0.40)) {
         swal(`${targetNation.name} Attacking`, "Your armies are engaging in combat");
         war(targetNation);
-        if (armiesDefeated >= 4) {
-            swal(`${playerNation.name} has fought off ${targetNation.name}`);
-        } else {
-            swal(`${playerNation.name}'s armies defeated by ${targetNation.name}`, "Game Over");
-            gameoverDefeated();
-        }
-        armiesDefeated = 0;
+        warOutcome(targetNation);
     } else if (probability(0.50)) {
         cyberAttack(targetNation);
     } else {
@@ -1565,69 +1910,6 @@ displayNationNameStatus = () => {
     $("#nation-name").text(playerNation.name);
 }
 
-/* 
-    Need to only allow country targeted to be auto attacked as soon as amount of waiting days are over. save country region as global var to then run inside a new deployment attack fn. once this new fn runs, can consider switching attack disallowed bool back to false.
-*/
-
-deployForces = (region) => {
-
-    if (deployedToRegion === region) {
-        swal("Military already deployed to " + region)
-        return;
-    }
-
-    clearPrevious();
-
-    swal("Military Deployment",
-        `Confirm Deployment to ${region}?`, {
-            buttons: ["Cancel", "Confirm"]
-        }).then((value) => {
-        if (value) {
-            unitArrivalTime(region, "military", 2);
-            gameState.unitsOnCampaign = true;
-            deployedToRegion = region;
-        }
-    });
-}
-
-// Set intel aqcuistion date to be +4, so that arrival after two and intel 2 days after that
-deployAgents = (region) => {
-
-    clearPrevious();
-    if (preventIntel(region)) return;
-    if (!checkAgents()) return;
-    const timeToAcquireIntel = day + 4;
-
-    swal("Agent Deployment",
-        `Confirm Agent Deployment to ${region}?`, {
-            buttons: ["Cancel", "Confirm"]
-        }).then((value) => {
-        if (value) {
-            swal("Agents Deployed", `Agents on the way to ${region}`);
-            unitArrivalTime(region, "agents", 2);
-            const handle = setInterval(() => {
-                if (day === timeToAcquireIntel) {
-                    clearInterval(handle);
-                    gatherIntel(region);
-                }
-            }, 0);
-        }
-    });
-}
-
-checkAgents = () => {
-
-    if (playerNation.surveillance.fieldAgents <= 0) {
-        swal({
-            title: "No Agents In Service",
-            text: "No more agents to spare. Train some at an Intel-Ops Centre.",
-            icon: "warning",
-        });
-        return false;
-    }
-
-    return true;
-}
 
 /*
     This function uses several control flows to determine the outcome of any attempted espionage. Firstly, if the player's nation has an infiltation rating higher than the target nation, they have a 75% chance of gaining access to a nation's data. If the player's nation has a lower infiltration rating than the nation they have chosen to spy on, the chance to successfully obtain any data drops to 30%. This mirrors the unpredictable and cut-throat world of espionage!
@@ -2461,28 +2743,34 @@ removeAlliedColours = (nation) => {
     }
 }
 
+confirmSatelliteUse = (region) => {
+
+    playerNation.resources.defenceBudget -= 10000000;
+
+    swal({
+        title: `Military Capability: ${region}`,
+        text: `Military Forces: ${JSON.stringify(targetNation.militaryUnits, null, 4)}`,
+        icon: "info"
+    });
+}
+
 // Ensure a satellite exists
 
 spySatellite = (region, code) => {
 
     clearPrevious();
+    if (checkFunds(10000000)) return;
 
-    if (!playerNation.surveillance.satellites) {      
+    if (!playerNation.surveillance.satellites) {
         swal({
             title: "Satellite Unavailable",
             text: "You do not yet have a satellite in orbit, commander.",
             icon: "warning"
         });
-
         return;
-    }
-    
-    swal({
-        title: `Military Capability: ${region}`,
-        text: `Military Forces: ${JSON.stringify(targetNation.militaryUnits, null, 4)}
-        Special Weapons: ${JSON.stringify(targetNation.specialWeapons, null, 4)}`,
-        icon: "info"
-    });
+
+    } else confirmSatelliteUse(region);
+
 }
 
 // Probability of hack
@@ -2734,7 +3022,7 @@ handlePlayerActions = (region, code) => {
             break;
 
         case commands.deploy:
-            playerNation.deployForces(region, code);
+            playerNation.deployForces(region);
             break;
 
         case commands.recon:

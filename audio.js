@@ -41,6 +41,7 @@ const enemyEliminated = new Audio("sound/ai-voice/EnemyEliminated.ogg");
 const unitReady = new Audio("sound/ai-voice/UnitReady.ogg");
 const upgradeComplete = new Audio("sound/ai-voice/UpgradeComplete.ogg");
 
+
 /* 
     Vars & code necessary for a self-repeating in-game tracklist.
     
@@ -48,6 +49,7 @@ const upgradeComplete = new Audio("sound/ai-voice/UpgradeComplete.ogg");
     
     The 'inGameTracklist' array contains all the game's playing stage music. It can be added to anytime, or reduced, without needing to change any other code in this script.
 */
+
 
 const inGameTrack = new Audio();
 let currentTrack = 0;
@@ -65,11 +67,13 @@ const inGameTracklist = [
     "sound/music/tensions.mp3"
 ];
 
+
 /* 
     Get the length of the tracklist above and store in a const.
     
     Afterwards, a function is defined that takes one index parameter which denotes the position of the current playing track. The 'inGameTrack' new Audio object then has its source set to the song array and index, initially at inGameTracklist[0] - or the first track. That (first) track is then played. 
 */
+
 
 const inGameTracklistLength = inGameTracklist.length;
 
@@ -77,6 +81,7 @@ playinGameTracks = (index) => {
     inGameTrack.src = inGameTracklist[index];
     inGameTrack.play();
 }
+
 
 /* 
     To achieve a continuous tracklist, an event listener is added to the in-game tracks. When a track has ended, the index of that track is incremeted by one.
@@ -86,6 +91,7 @@ playinGameTracks = (index) => {
     
     Generally, if the current track being played is the last one, the track number is reset to 0 and the tracklist will loop in it's entirety from the beginning of the tracklist array.
 */
+
 
 inGameTrack.addEventListener("ended", () => {
     

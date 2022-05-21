@@ -161,9 +161,6 @@ const Russia = new Nation(
 
 setNationAttributes = () => {
 
-    // DAT
-    //const worldNationsObjectLength = Object.keys(worldNations).length;
-
     worldNations.forEach(nation => {
 
         const allNations = new Nation(

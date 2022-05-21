@@ -8,24 +8,20 @@ BONUS ***********
  
 POST PRODUCTION **********
  
-for readme: still unknown occasional bug on congo when selecting commands like nuke or diplomacy
 put link to github readme in html when finished
-check all numbers in objects etc and see if they need rounding
 change p cannon orbiting time when final time object completed
 make sure all comments are in right place and make sense
-mark all events that cause increase and decrease in approval rating etc
-satellites to report missile shield or special weapons at all???
-satellites are safe but need high cost to balance???
+determin swal styling
+>> add real world stats and build times to the game
 
 REFACTOR ***********
-
+just remove or disable btns to prevent further use and reenable if needed
 does targetnation need to be a param in every function it is used in?
 functions & alerts - do they portray right information to the player and what's happening?
 may be necessary to only use swal for buttons etc - danger they will override each other
 
 DEBUG ***********
 
-check awarded bonuses in trade deals - i or j?
 
 disallowNegotitationDeals = (region) => {
 
@@ -64,7 +60,7 @@ disallowNegotitationStance = (region, targetNation) => {
 
  
 ADDITIONAL FUNCTIONALITY ***********
->> add real world stats and build times to the game
+
 
 /*
 
