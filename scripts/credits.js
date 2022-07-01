@@ -1,4 +1,8 @@
 /*
+*************************************************************************************************
+    CREDITS: PEOPLE WHO GO UNSEEN FAR TOO OFTEN
+*************************************************************************************************
+
     The game's ending victory credits remain the same, despite what nation the player wins with. I made the decision to enclose them inside a JS function as an alternative to many lines of duplicate HTML markup, adhering to the DRY concept of programming.
     
     The authours of the game's music can be found in the links below, and they are named explicitly in the ending victory credits via the 'credits' function that runs inside the HTML. For this reason, this script requires listing in the head tag so that the function is pre-defined before the credits roll.
@@ -12,7 +16,6 @@
     https://arterfakproject.com/
     https://opengameart.org/
 */
-
 
 credits = () => {
     $(".credits").append(

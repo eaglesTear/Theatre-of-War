@@ -1,10 +1,9 @@
 /*
-
 *************************************************************************************************
-    
     HOW 'THEATRE OF WAR' IS BUILT
- 
-    TOW uses JQVMaps - a JS library that generates a world map with several built-in methods, such as allowing click / hover events on the map nations. However, it does not return any data other than the name of a nation and some other basic object material.
+*************************************************************************************************
+
+    TOW uses JQVMaps - a JS library that generates a world map with several built-in methods, such as allowing click / hover events on the map nations. However, it does not return any data other than the name of a nation and some other basic object data.
     
     This game would not work without a world map, but finding a world map that I could interact with properly in JS for my needs was difficult. Very little documentation covers JQVMaps itself and I almost gave up on its use. TOW required all of the map's nations (182 in total) to somehow come 'alive', having not just a name, but data and stats: military, diplomatic, resources, behaviour - basic facets of real-world nations.
     
@@ -19,13 +18,16 @@
     As JQVMaps cannot name nations explicitly outside of click and hover events, a 'setNationNames' function iterates through all the nations, setting the name of every individual nation as the name of each successive name in the 'worldNations' array. Originally using a double for loop to achieve this, refactoring gave me the idea of simply passing the index into the forEach method, applying that to the 'worldNations' array and incrementing the index (and therefore changing the name) on the next iteration. Essentially, each nation object has its name slotted into place using the 'worldNations' array, one at a time. 
     
     The nations (as objects) are now complete and ready for war.
-
-*************************************************************************************************
-
 */
 
 
-// Initialise nation class 
+/*
+*************************************************************************************************
+    INITIALISE THE 'NATION' CLASS
+*************************************************************************************************
+
+    The final grouping of constructs in this class refer to functions defined in funtions.js.
+*/ 
 
 class Nation {
 
@@ -41,12 +43,12 @@ class Nation {
             intelCollaborationDeals: []
         };
         this.researchers = researchers,
-            this.resources = {
-                oilProduction: oilProduction,
-                oilConsumption: oilConsumption,
-                defenceBudget: defenceBudget,
-                weaponStocks: weaponStocks
-            };
+        this.resources = {
+            oilProduction: oilProduction,
+            oilConsumption: oilConsumption,
+            defenceBudget: defenceBudget,
+            weaponStocks: weaponStocks
+        };
         this.militaryUnits = {
             air: air,
             tanks: tanks,
@@ -76,22 +78,28 @@ class Nation {
             govtApprovalRating: govtApprovalRating
         };
         this.attackNation = attackNation,
-            this.deployForces = deployForces,
-            this.deployAgents = deployAgents,
-            this.launchHostageRescue = launchHostageRescue,
-            this.beginSpecOps = beginSpecOps,
-            this.undertakeSabotage = undertakeSabotage,
-            this.inciteRebellion = inciteRebellion,
-            this.negotiation = negotiation,
-            this.spySatellite = spySatellite,
-            this.nuclearStrike = nuclearStrike,
-            this.particleCannonStrike = particleCannonStrike,
-            this.requestAllianceReinforcement = requestAllianceReinforcement,
-            this.hackFunds = hackFunds
+        this.deployForces = deployForces,
+        this.deployAgents = deployAgents,
+        this.launchHostageRescue = launchHostageRescue,
+        this.beginSpecOps = beginSpecOps,
+        this.undertakeSabotage = undertakeSabotage,
+        this.inciteRebellion = inciteRebellion,
+        this.negotiation = negotiation,
+        this.spySatellite = spySatellite,
+        this.nuclearStrike = nuclearStrike,
+        this.particleCannonStrike = particleCannonStrike,
+        this.requestAllianceReinforcement = requestAllianceReinforcement,
+        this.hackFunds = hackFunds
     }
 }
 
-// Selectable nations Russia & USA: manually defined according to globalfirepower.com
+/*
+*************************************************************************************************
+    PLAYER NATIONS: RUSSIA & THE UNITED STATES
+*************************************************************************************************
+
+    The player may choose between the titular nations. The selectable nations are manually defined from the class above here according to globalfirepower.com, but should be adjusted as one sees fit. Once again, I don't have the time right now to adjust much game balance.
+*/ 
 
 const USA = new Nation(
     "United States of America", // name
@@ -159,6 +167,12 @@ const Russia = new Nation(
     20 // Approval rating
 );
 
+/*
+*************************************************************************************************
+    CREATING THE OTHER 180 WORLD NATIONS    
+*************************************************************************************************
+*/
+
 setNationAttributes = () => {
 
     worldNations.forEach(nation => {
@@ -224,19 +238,13 @@ setNationNames = () => {
     });
 }
 
-
 /*
-
-*************************************************************************************************
-    
+************************************************************************************************* 
     BUILDING INTERFACE: SETUP ('NEW CONSTRUCTION OPTIONS!')
- 
-    Base facilities and construction are represented as a 'Base' class, which ultimately keeps track of what facilities are built and allows other functions of the game to act on that premise - for instance, if a player has structures, those must be maintained and a cost for their upkeep will be deducted at the end of each month.
-
 *************************************************************************************************
 
+    Base facilities and construction are represented as a 'Base' class, which ultimately keeps track of what facilities are built and allows other functions of the game to act on that premise - for instance, if a player has structures, those must be maintained and a cost for their upkeep will be deducted at the end of each month.
 */
-
 
 class Base {
 

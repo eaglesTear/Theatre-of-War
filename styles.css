@@ -1,3 +1,5 @@
+/* Import the game's unique font */
+
 @font-face {
     font-family: "Wargate Normal";
     src: url("fonts/Wargate-Normal.ttf");
@@ -612,6 +614,7 @@ input[type=number] {
 /* Ending titles: Not shown at start due to intro sequence running instead */
 
 @keyframes end-scroll-text {
+    
     from {
         transform: translateY(100%);
     }
@@ -729,6 +732,7 @@ input[type=number] {
 /* Animation that plays when radio slider is checked (clicked) */
 
 @keyframes check {
+    
     50% {
         box-shadow: 0 0 0 12px #333, 0 0 0 36px rgba(51, 51, 51, 0.2);
         outline-color: #333;

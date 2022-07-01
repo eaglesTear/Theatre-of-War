@@ -1,15 +1,10 @@
 /*
-
 *************************************************************************************************
-    
-    UI: BUTTONS. THEY - YOU KNOW, DO STUFF
- 
+    UI: BUTTONS. THEY...YOU KNOW, DO STUFF
+*************************************************************************************************
+
     There are a plethora of buttons and commands in Theatre of War. Some access menus such as the status of a player's chosen nation; others allow interaction with the tactical map. As a rule, buttons in the 'commands' sidebar menu MUST have a map target following their clicking, with the sole exception of 'conscription' and 'rescue', which will automatically recruit a random number of troops to your military over the course of one month and allow you to attempt a rescue of any agents being held hostage, respectively.
-
-*************************************************************************************************
-
 */ 
-
 
 $(() => {
 
@@ -31,15 +26,15 @@ $(() => {
         gameState.skipIntro = true;
     });
     
-
-    /*
-        ACTION COMMANDS (SIDEBAR MENU)
+/*
+*************************************************************************************************
+    ACTION COMMANDS (SIDEBAR MENU)
+*************************************************************************************************
         
-        These buttons allow interaction in various ways with the nations on the map in TOW.
+    These buttons allow interaction in various ways with the nations on the map in TOW.
         
-        Each one triggers a bool that stores that specific option as 'active' until either another command is clicked (see above), or the click event on a nation is over.
-    */
-    
+    Each one triggers a bool that stores that specific option as 'active' until either another command is clicked (see above), or the click event on a nation is over.
+*/
     
     $("#attack-btn").click(() => {
         commands.attack = true;
@@ -93,14 +88,14 @@ $(() => {
         commands.hacking = true;
     });
     
-
-    /* 
-        BUTTONS INVOKING SPECIFIC FUNCTIONS
+/* 
+*************************************************************************************************
+    BUTTONS INVOKING SPECIFIC FUNCTIONS
+*************************************************************************************************
         
-        'launchHostageRescue' is a unique command (function) in that it does NOT require the selection of any nation to activate. Hence, it will not be found in the 'commands' object nor 'playerActions' functions etc. See 'functions.js' for what these functions do.
-    */ 
+    'launchHostageRescue' is a unique command (function) in that it does NOT require the selection of any nation to activate. Hence, it will not be found in the 'commands' object nor 'playerActions' functions etc. See 'functions.js' for what these functions do.
+*/ 
     
-
     $("#rescue-btn").click(launchHostageRescue);
     $("#ransom-btn").click(payRansom);
     $("#sell-oil").click(sellOil);
@@ -124,24 +119,6 @@ $(() => {
         $(".sidebar").toggleClass("open");
     });
     
-    
-    /*
-        KEYBOARD EVENT: COMMAND SIDEBAR
-        
-        Keypress sidebar toggle activation whereby 'S' can be pressed to activate the 'Commands' menu (as an alternative to clicking the 'Commands' button). It captures the press event, checks whether it is a capital (keycode 83) or lowercase (keycode 115) before also validating that the game is in progress before adding the appropriate CSS class and playing an activation sound.
-        
-        These conditionals prevent the player becoming frustrated as to why the 'S' key isn't working if they fail to realise their CAPSLOCK key is on (as I did!), and also prevents access to the menu if the game is over or intro is playing.
-    */
-    
-
-    $(document).on("keypress", (e) => {
-        if (e.keyCode === 115 && gameState.gameStarted ||
-            e.keyCode === 83 && gameState.gameStarted) {
-            $(".sidebar").toggleClass("open");
-            menuSelect.play();
-        }
-    });
-
     // Load nation select screen when skip intro or start game button is pressed
     
     $("#skip-intro-btn, #start-game-btn").click(() => {
@@ -161,25 +138,43 @@ $(() => {
         reloadGame();
     });
     
-
-    /*
-        INSTANT UPGRADES: OPTIONS TO IMMEDIATELY BOLSTER YOUR CHANCES IN THEATRE OF WAR
+/*
+*************************************************************************************************
+    KEYBOARD EVENT: COMMAND SIDEBAR
+*************************************************************************************************
         
-        TOW allows the player to instantly buff a specific branch of its conventional armed forces. 
+    Keypress sidebar toggle activation whereby 'S' can be pressed to activate the 'Commands' menu (as an alternative to clicking the 'Commands' button). It captures the press event, checks whether it is a capital (keycode 83) or lowercase (keycode 115) before also validating that the game is in progress before adding the appropriate CSS class and playing an activation sound.
         
-        Before any upgrades are implemented, certain conditions must be met. Firstly, one control flow / function checks whether the player has sufficient currency. Secondly, a player MUST have built a research facility in order to qualify for any instant upgrade.
-        
-        The 'upgradeUnits' function then runs, deducting the cost of the upgrade, checking the type of upgrade and then awarding the bonus (see 'functions.js' for details).
-        
-        In a nutshell:
-        
-        AIRCRAFT: Ceramic armour increases tech level and durability by 5.
-        NAVY: The introduction of aircraft carriers increases tech level and durability by 5.
-        INFANTRY: Advanced chemicals injected into soldiers boosts fighting power and skill by 5.
-        ARMOUR: Depleted uranium shells increase cannon fire by 5.
-    */
+    These conditionals prevent the player becoming frustrated as to why the 'S' key isn't working if they fail to realise their CAPSLOCK key is on (as I did!), and also prevents access to the menu if the game is over or intro is playing.
+*/
     
-
+    $(document).on("keypress", (e) => {
+        if (e.keyCode === 115 && gameState.gameStarted ||
+            e.keyCode === 83 && gameState.gameStarted) {
+            $(".sidebar").toggleClass("open");
+            menuSelect.play();
+        }
+    });
+    
+/*
+*************************************************************************************************
+    INSTANT UPGRADES: IMMEDIATELY BOLSTER YOUR CHANCES IN THEATRE OF WAR
+*************************************************************************************************
+    
+    TOW allows the player to instantly buff a specific branch of its conventional armed forces. 
+    
+    Before any upgrades are implemented, certain conditions must be met. Firstly, one control flow / function checks whether the player has sufficient currency. Secondly, a player MUST have built a research facility in order to qualify for any instant upgrade.
+    
+    The 'upgradeUnits' function then runs, deducting the cost of the upgrade, checking the type of upgrade and then awarding the bonus (see 'functions.js' for details).
+    
+    In a nutshell:
+    
+    AIRCRAFT: Ceramic armour increases tech level and durability by 5.
+    NAVY: The introduction of aircraft carriers increases tech level and durability by 5.
+    INFANTRY: Advanced chemicals injected into soldiers boosts fighting power and skill by 5.
+    ARMOUR: Depleted uranium shells increase cannon fire by 5.
+*/
+    
     $("#upgrade-aircraft").click(() => {
         if (checkFunds(10000000)) return;
         if (!researchFacilityAvailability()) return;
@@ -208,17 +203,17 @@ $(() => {
         $("#upgrade-armour").text("Purchased").attr("disabled", "true");
     });
     
+/*
+*************************************************************************************************
+    BUILDING & FACILITY OPTIONS
+*************************************************************************************************
     
-    /*
-        BUILDING & FACILITY OPTIONS
-        
-        Effectively the buttons used to build your 'base' in TOW.
-        
-        A couple of conditional control flows check that a certain structure does not already exist, and that enough money remains in the defence budget to fund construction. 
-        
-        'constructionManager' handles the process by determining the type of building ordered, its build time (set as current day + amount of additional days), and its cost. See 'functions.js'.
-    */
+    Effectively the buttons used to build your 'base' in TOW.
     
+    A couple of conditional control flows check that a certain structure does not already exist, and that enough money remains in the defence budget to fund construction. 
+    
+    'constructionManager' handles the process by determining the type of building ordered, its build time (set as current day + amount of additional days), and its cost. See 'functions.js'.
+*/
 
     $("#airbase").click(() => {
         if (playerBase.airbase) return;
@@ -268,15 +263,15 @@ $(() => {
         constructionManager(playerBase.missileSilo, "missileSilo", day + 2, 120000000);
     });
 
+/*
+*************************************************************************************************
+    UNIT TRAINING INTERFACE (ACTIVE WHEN RELEVANT FACILITIES ARE CONSTRUCTED)
+*************************************************************************************************
     
-    /*
-        UNIT TRAINING INTERFACE (ACTIVE WHEN RELEVANT FACILITIES ARE CONSTRUCTED)
-        
-        Control flows determine whether the relevant building is constructed, i.e. a barracks is required for infantry training.
-        
-        'processUnitTraining' then takes the input value of the amount of units ordered, the cost per unit and the type of unit ordered to then handle the process. See 'functions.js'. 
-    */
-
+    Control flows determine whether the relevant building is constructed, i.e. a barracks is required for infantry training.
+    
+    'processUnitTraining' then takes the input value of the amount of units ordered, the cost per unit and the type of unit ordered to then handle the process. See 'functions.js'. 
+*/
 
     $("#train-agents").click(() => {
         if (!playerHasBuilding("intelOps", "Intel Ops")) return;
@@ -322,5 +317,5 @@ $(() => {
         if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
         processUnitTraining(parseInt($("#shield").val()), 38000000, playerNation.specialWeapons, "missileShield");
     });
-
+    
 });
