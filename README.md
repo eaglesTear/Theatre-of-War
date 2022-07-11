@@ -6,7 +6,7 @@ Hi fellow programmers,
 I'm trying to design a working strategy game in the browser and I'd love your help making this into something special. 
 I've built a basic working game to get started with.
 
-Get in touch and fork the code to try any ideas.
+Get in touch and fork the code to try any ideas and I'd welcome your feedback.
 
 FULL DOCUMENTATION COMING SOON - IDEAS AND DEVELOPEMENTS FROM OTHERS WELCOME!!!
 
