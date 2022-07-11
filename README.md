@@ -1,5 +1,14 @@
-# strategy-game-beta
-Backup for my strategy game code. Game at around 95% completion.
+# Theatre of War: strategy-game-beta
+Game at around 95% completion (currently designed to work on larger screens (my own is 17').
+
+Hi fellow programmers,
+
+I'm trying to design a working strategy game in the browser and I'd love your help making this into something special. 
+I've built a basic working game to get started with.
+
+Get in touch and fork the code to try any ideas.
+
+FULL DOCUMENTATION COMING SOON - IDEAS AND DEVELOPEMENTS FROM OTHERS WELCOME!!!
 
 WELCOME TO THE THEATRE OF WAR!
 
