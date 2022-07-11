@@ -1422,7 +1422,11 @@ colourDefeatedNations = (code, colour) => {
 
     The Particle Cannon Strike must be researched before use, and it will appear inside the 'Commands' sidebar once it has done so.
    
-   It takes 8 hours to arrive in a target orbit above the unsuspecting nation. Once confirmed, and the weapon is above, it fires, causing a devastating morale drop that may well see the nation capitulate to you immediately.
+   It takes 8 hours to arrive in a target orbit above the unsuspecting nation, calculated as follows:
+   
+   CURRENT DAY / 3 (8 hours is one-third of a 24-hour day)
+   
+   Once confirmed, and the weapon is above, it fires, causing a devastating morale drop that may well see the nation capitulate to you immediately.
 */
 
 // Implement the effects of the particle cannon strike on a target nation 
@@ -3786,7 +3790,7 @@ endTutorial = () => {
 setEndTitles = () => {
     
     gameover();
-    $("#story-scroll-text, #skip-intro-btn, .main-titles, .game-hud").remove();
+    $("#story-scroll-text, #skip-intro-btn, .options-container, .main-titles, .game-hud").remove();
     $("html, body").toggleClass("lock-display");
     $(".title-overlay").addClass("displayBlock");
     $(".options-container").removeClass("displayBlock");

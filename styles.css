@@ -214,14 +214,18 @@ footer {
 .status-overlay-content,
 .nation-select-title,
 #start-game-btn,
+.authour-credit,
 .options-container,
 input[type=number],
 select,
 footer,
-button,
+button {
+    color: #99CCFF;
+}
+
 a:hover,
 a:focus {
-    color: #99CCFF;
+    color: #00D7C3;
 }
 
 select {
@@ -666,7 +670,7 @@ input[type=number] {
 
 .end-titles-usa,
 .end-titles-russia {
-    animation: end-scroll-text 5s linear forwards 5s;
+    animation: end-scroll-text 50s linear forwards 5s;
 }
 
 .title-overlay-text,

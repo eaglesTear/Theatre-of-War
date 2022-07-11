@@ -19,6 +19,6 @@
 
 credits = () => {
     $(".credits").append(
-        '<h2>Music</h2><p><i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and<i>Conflict</i> byAlexandr Zhelanov</p><p><i>Dark</i> by Pheonton</p><p><i>Laments Of The War</i> by Cethiel</p><p><i>Snow-Covered-Banner</i> by İlker Yalçıner 2018</p><p><i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021</p><p><i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia)</p><p><i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020</p><p>Licensed under CC BY 3.0 Creative Commons</p><h2>Fonts</h2><p><i>Wargate</i> by Arterfak Project</p><p>Hosted on Open Game Art</p><p>full credits also found on the readme here: link</p>'
+        '<h2>Credits</h2><h2>Music</h2><p><i>Electronic War,</i><i> Act Of War,</i><i> Enemy Spotted,</i> and<i>Conflict</i> byAlexandr Zhelanov</p><p><i>Dark</i> by Pheonton</p><p><i>Laments Of The War</i> by Cethiel</p><p><i>Snow-Covered-Banner</i> by İlker Yalçıner 2018</p><p><i>Forward Operating Base</i> and <i>Ceasefire</i> by TAD 2021</p><p><i>Tensions</i> and <i>War Song</i> by Johan Brodd 2013 (jobromedia)</p><p><i>Secret Devastates</i> and <i>Digital Rock Theme</i> by SOUND AIRYLUVS by ISAo 2020</p><p>Licensed under CC BY 3.0 Creative Commons</p><h2>Fonts</h2><p><i>Wargate</i> by Arterfak Project</p><p>Hosted on Open Game Art</p><p>Full credits also found within the credits.js file.</p>'
     );
 }

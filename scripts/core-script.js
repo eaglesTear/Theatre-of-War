@@ -34,7 +34,4 @@ $(() => {
     
     completeSetup();
     
-    // DAT
-    //startGame();
-
 });
