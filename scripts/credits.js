@@ -1,6 +1,6 @@
 /*
 *************************************************************************************************
-    CREDITS: PEOPLE WHO GO UNSEEN FAR TOO OFTEN
+    CREDITS: THOSE PEOPLE WHO GO UNSEEN FAR TOO OFTEN
 *************************************************************************************************
 
     The game's ending victory credits remain the same, despite what nation the player wins with. I made the decision to enclose them inside a JS function as an alternative to many lines of duplicate HTML markup, adhering to the DRY concept of programming.

@@ -20,7 +20,7 @@
 
 $(() => {
 
-    //intro();
+    intro();
 
     setNationAttributes();
     
@@ -35,6 +35,6 @@ $(() => {
     completeSetup();
     
     // DAT
-    startGame();
+    //startGame();
 
 });

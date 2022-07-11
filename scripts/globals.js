@@ -6,7 +6,7 @@
 
 // Player's selection will decide the value of this variable - undefine when ready to deploy
 
-let playerNation = USA;
+let playerNation;
 
 // Becomes whichever nation object is interacted with (clicked on)
 

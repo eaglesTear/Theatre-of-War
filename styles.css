@@ -18,7 +18,7 @@ body,
 }
 
 .lock-display {
-    /* overflow: hidden;  */
+     overflow: hidden;  
 }
 
 /* Universal styles, including fonts */
@@ -52,10 +52,22 @@ select {
     letter-spacing: 1.5px;
 }
 
-.wargate {
-    color: #000;
-    font-family: "Wargate Normal", sans-serif;
+.wargate,
+.swal-title,
+.swal-text,
+.swal-button {
     letter-spacing: .1em;
+}
+
+.wargate, 
+.swal-title,
+.swal-button {
+    color: #000;
+}
+
+.wargate,
+.swal-title {
+    font-family: "Wargate Normal", sans-serif;
 }
 
 .main-titles .wargate {
@@ -109,9 +121,8 @@ select {
 
 /* Map object */
 
-#vmap,
-.bg-intro-img {
-    height: 100vh;
+#vmap {
+    height: 90vh;
 }
 
 /* ONLY NEED TO LIST PROPERTIES TO OVERRIDE: CHECK AT END: JQVMaps tooltip hover styling */
@@ -201,6 +212,8 @@ footer {
 #year,
 .end-header,
 .status-overlay-content,
+.nation-select-title,
+#start-game-btn,
 .options-container,
 input[type=number],
 select,
@@ -235,6 +248,10 @@ input[type=number] {
 .cp-image-rifle {
     height: 90px;
     width: 170px;
+}
+
+.military-units .cp-image {
+    height: 120px;
 }
 
 .options-container,
@@ -338,6 +355,10 @@ input[type=number] {
     width: 100vw;
 }
 
+.bg-intro-img {
+    height: 100vh;
+}
+
 /* Nation flags for country select and top right corner */
 
 .logo-usa,
@@ -368,10 +389,6 @@ button,
 
 .img-fade-out {
     transition: 3s;
-}
-
-.nation-select-title {
-    color: #A80000;
 }
 
 @keyframes darken-overlay {
@@ -603,13 +620,36 @@ input[type=number] {
 .reload-btn:hover,
 .sidebar button:hover,
 .game-hud button:hover,
-.options-container button:hover {
+.options-container button:hover,
+.swal-overlay--show-modal .swal-modal:hover {
     box-shadow: 0 0 10px 0 #00D7C3 inset, 0 0 20px 2px #00D7C3;
 }
 
-/* Sweetalert.js button styling for in-game alerts */
+/* Additional sweetalert.js styling for in-game alerts - here I'm jazzing it up even more! */
 
-.swal-button {}
+.swal-overlay--show-modal .swal-modal {
+    background: #000;
+    border: 1px solid #00D7C3;
+    border-radius: 15px;
+}
+
+.swal-button:not(.swal-button--cancel) {
+    background: #005FC5;
+}
+
+.swal-button:not(.swal-button--cancel),
+.swal-title, 
+.swal-text {
+    color: #FFF;
+}
+
+.swal-button:hover:not(.swal-button--cancel) {
+    background: #1E90FF;
+}
+
+.swal-icon .swal-icon--success {
+    background: #fff;
+}
 
 /* Ending titles: Not shown at start due to intro sequence running instead */
 

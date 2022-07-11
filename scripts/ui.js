@@ -317,5 +317,5 @@ $(() => {
         if (!playerHasBuilding("missileSilo", "Missile Silo")) return;
         processUnitTraining(parseInt($("#shield").val()), 38000000, playerNation.specialWeapons, "missileShield");
     });
-    
+        
 });
