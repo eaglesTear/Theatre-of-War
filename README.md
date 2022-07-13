@@ -1,6 +1,8 @@
 # Theatre of War: strategy-game-beta
 Game at around 95% completion (currently designed to work on larger screens (my own is 17').
 
+** Allow audio permissions in your browser before starting the game - there should be music right from the start during the intro. ** 
+
 Hi fellow programmers,
 
 I'm trying to design a working strategy game in the browser and I'd love your help making this into something special. 
