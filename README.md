@@ -10,7 +10,7 @@ I've built a basic working game to get started with.
 
 Get in touch and fork the code to try any ideas and I'd welcome your feedback.
 
-FULL DOCUMENTATION COMING SOON - IDEAS AND DEVELOPEMENTS FROM OTHERS WELCOME!!!
+FULL DOCUMENTATION COMING SOON...
 
 WELCOME TO THE THEATRE OF WAR!
 
