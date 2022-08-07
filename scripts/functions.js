@@ -3,7 +3,7 @@
     jQUERY: ERROR FUNCTION   
 *************************************************************************************************
 
-    jQuery is essential to run thIS game. I decided to inform the user of this because occasionally jQuery can fail to load even with the correct scripts available. 
+    jQuery is essential to run this game. I decided to inform the user of this because occasionally jQuery can fail to load even with the correct scripts available. 
 
     SweetAlert.js (swal) should not be used as an alert here: in the event that the client's internet is not connected, swal won't run either and therefore the function will fail to alert.
 */
