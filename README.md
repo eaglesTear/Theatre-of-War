@@ -1,5 +1,5 @@
-# Theatre of War: strategy-game-beta
-Game at around 95% completion (currently designed to work on larger screens (my own is 17').
+# Theatre of War: Global Strategy Game
+Currently designed to work on larger screens (my own is 17').
 
 ** Allow audio permissions in your browser before starting the game - there should be music right from the start during the intro. ** 
 
